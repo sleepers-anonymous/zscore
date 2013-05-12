@@ -6,3 +6,6 @@ class Sleep(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     comments = models.TextField()
+
+    def __unicode__(self):
+        return "%s slept from %s to %s" % (self.user,self.start_time,self.end_time)
