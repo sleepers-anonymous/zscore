@@ -127,6 +127,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'zscore.sleep',
 )
 
 # A sample logging configuration. The only tangible logging
