@@ -1,0 +1,14 @@
+import os
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zscore',
+        'OPTIONS': {
+            'read_default_file' : os.path.expanduser('~/.my.cnf'),
+        },
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'USER': 'root',
+        'PASSWORD': '',                  # set me!
+    }
+}
