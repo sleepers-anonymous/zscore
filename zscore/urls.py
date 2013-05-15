@@ -18,5 +18,5 @@ urlpatterns = patterns('',
     # Pages
     url(r'^leaderboard/', 'sleep.views.leaderboard'),
     url(r'^mysleep/', 'sleep.views.mysleep'),
-    url(r'^/', 'sleep.views.home'),
+    url(r'^', 'sleep.views.home'),
 )
