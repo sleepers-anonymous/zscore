@@ -12,3 +12,8 @@ DATABASES = {
         'PASSWORD': '',                  # set me!
     }
 }
+
+TEMPLATE_DIRS = (
+    # Put template directories here.
+    # These should be absolute paths.
+)

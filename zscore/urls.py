@@ -14,4 +14,9 @@ urlpatterns = patterns('',
 
     # Admin panel:
     url(r'^admin/', include(admin.site.urls)),
+
+    # Pages
+    url(r'^leaderboard$', 'zscore.sleep.views.leaderboard'),
+    url(r'^mysleep$', 'zscore.sleep.views.mysleep'),
+    url(r'^$', 'zscore.sleep.views.home'),
 )
