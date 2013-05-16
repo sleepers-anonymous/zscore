@@ -8,7 +8,7 @@ function dateToArray(dateObj)
     // 4 -- Minutes
     // 5 -- Seconds
     return [dateObj.getFullYear(),
-	    dateObj.getMonth(),
+	    dateObj.getMonth()+1,
 	    dateObj.getDate(),
 	    dateObj.getHours(),
 	    dateObj.getMinutes(),
