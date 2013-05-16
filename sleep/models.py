@@ -33,7 +33,7 @@ class Sleeper(User):
         sleepPerDay = [sum([(s['end_time']-s['start_time']).seconds for s in filter(lambda x: x['date']==d,sleeps)]) for d in dateRange]
         avgSleep = sum(sleepPerDay)/n
         stDevSleep = math.sqrt(sum(map(lambda x: (x-avgSleep)**2, sleepPerDay))/n)
-        return avgSleep - stDevSleep
+        return datetime.timedelta(0,avgSleep - stDevSleep)
 
 
 
