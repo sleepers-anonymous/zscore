@@ -1,0 +1,57 @@
+<script type="text/javascript">
+  $(document).ready(function(){
+    // Handle auto-setting the day
+    $(".sleep-entry .start").datetimepicker().datepicker("option", "onClose", function(dateText, inst) {
+      var start = $(this).datepicker("getDate");
+      var end = $(".sleep-entry .end").datepicker("getDate");
+      if (start && end) {
+        $(".sleep-entry .center").datepicker("setDate", new Date((start.valueOf() + end.valueOf())/2));
+      }
+    });
+    $(".sleep-entry .end").datetimepicker().datepicker("option", "onClose", function(dateText, inst) {
+      var end = $(this).datepicker("getDate");
+      var start = $(".sleep-entry .start").datepicker("getDate");
+      if (start && end) {
+        $(".sleep-entry .center").datepicker("setDate", new Date((start.valueOf() + end.valueOf())/2));
+      }
+    });
+    $(".sleep-entry .center").datepicker();
+
+    // Handle submission to make the AJAX request
+    $(".sleep-entry .submit").click(function() {
+      // Grab the dates
+      var start = $(".sleep-entry .start").datepicker("getDate");
+      var end = $(".sleep-entry .end").datepicker("getDate");
+      var center = $(".sleep-entry .center").datepicker("getDate");
+
+      // Make the AJAX request
+      $.post("/submit_sleep/", {
+        "start[]": dateToArray(start),
+        "end[]": dateToArray(end),
+        "center[]": dateToArray(center)
+      });
+    });
+  });
+</script>
+
+<div class="sleep-entry" style="1px solid black">
+  <b>Enter your sleep:</b>
+  <br/><br/>
+  <table>
+    <tr>
+      <td>Start</td>
+      <td><input class="start" type="text"/></td>
+    </tr>
+    <tr>
+      <td>End</td>
+      <td><input class="end" type="text"/></td>
+    </tr>
+    <tr>
+      <td>Day</td>
+      <td><input class="center" type="text"/></td>
+    </tr>
+    <tr>
+      <td></td><td><input class="submit" type="button" value="Submit"/></td>
+    </tr>
+  </table>
+</div>

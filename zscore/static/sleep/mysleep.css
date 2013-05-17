@@ -1,0 +1,16 @@
+.sleep-entry-view
+{
+    float: left;
+    width: 30%;
+}
+.stats-view
+{
+    float: left;
+    width: 30%;
+    clear: left;
+}
+.sleep-list-view
+{
+    float:right;
+    width: 30%;
+}
