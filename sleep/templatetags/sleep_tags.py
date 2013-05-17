@@ -7,7 +7,7 @@ def statsView():
     # Return an empty context for now
     return {}
 @register.inclusion_tag('inclusion/sleep_list.html')
-def sleepListView():
+def sleepListView(user):
     # Return an empty context for now
     return {}
 @register.inclusion_tag('inclusion/sleep_entry.html')
