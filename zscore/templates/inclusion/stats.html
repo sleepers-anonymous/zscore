@@ -1,9 +1,11 @@
+{% load datetime_utils %}
+
 <div style="border: 1px solid black">
     <h3> My Stats </h3>
     <table>
         <tr> <td> period </td> <td> zScore </td> <td> average </td> <td> stDev </td> </tr>
-        <tr> <td> all time </td> <td> {{global.zScore}} </td> <td> {{global.avg}} </td> <td> {{global.stDev}} </td> </tr>
-        <tr> <td> past week </td> <td> {{weekly.zScore}} </td> <td> {{weekly.avg}} </td> <td> {{weekly.stDev}} </td> </tr>
+        <tr> <td> all time </td> <td> {{global.zScore|printHHMM}} </td> <td> {{global.avg|printHHMM}} </td> <td> {{global.stDev|printHHMM}} </td> </tr>
+        <tr> <td> past week </td> <td> {{weekly.zScore|printHHMM}} </td> <td> {{weekly.avg|printHHMM}} </td> <td> {{weekly.stDev|printHHMM}} </td> </tr>
     </table>
 
     

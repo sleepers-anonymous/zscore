@@ -1,6 +1,7 @@
 {% extends "frame.html" %}
 
 {% block content %}
+{% load datetime_utils %}
 <h1> Leaderboard </h1>
 
 <table>
@@ -8,9 +9,9 @@
   {% for s in top %}
   <tr>
     <td> {{s.user.username}} </td>
-    <td> {{s.zScore}} </td>
-    <td> {{s.avg}} </td>
-    <td> {{s.stDev}} </td>
+    <td> {{s.zScore|printHHMM}} </td>
+    <td> {{s.avg|printHHMM}} </td>
+    <td> {{s.stDev|printHHMM}} </td>
   </tr>
   {% endfor %}
 </table>

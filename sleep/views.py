@@ -16,9 +16,6 @@ def mysleep(request):
 
 def leaderboard(request):
     top = Sleeper.objects.sorted_sleepers()
-    for i in range(len(top)):
-        for j in ['zScore','avg','stDev']:
-            top[i][j] = ':'.join(str(top[i][j]).split(':')[:2])
     context = { 'top' : top }
     return HttpResponse(render_to_string('leaderboard.html',context))
 
