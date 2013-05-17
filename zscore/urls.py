@@ -15,6 +15,15 @@ urlpatterns = patterns('',
     # Admin panel:
     url(r'^admin/', include(admin.site.urls)),
 
+    # Login
+    url(r'^accounts/login/submit/$', 'django.contrib.auth.views.login'),
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login', {
+            'template_name': 'login.html'
+    }),
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {
+            'template_name': 'logout.html'
+    }),
+
     # Pages
     url(r'^leaderboard/', 'sleep.views.leaderboard'),
     url(r'^mysleep/', 'sleep.views.mysleep'),
