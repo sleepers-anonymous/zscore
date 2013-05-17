@@ -12,7 +12,7 @@ class Sleep(models.Model):
     date = models.DateField()
 
     def __unicode__(self):
-        return "%s slept on %s from %s to %s" % (self.user,self.date,self.start_time,self.end_time)
+        return "Sleep from %s to %s" % (self.user,self.date,self.start_time,self.end_time)
 
 class SleeperManager(models.Manager):
     def sorted_sleepers(self):
