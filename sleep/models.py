@@ -19,8 +19,10 @@ class SleeperManager(models.Manager):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
         scored=[]
         for sleeper in sleepers:
-            scored.append((sleeper,sleeper.zScore()))
-        scored.sort(key=lambda x: -x[1])
+            d=sleeper.sleepStats()
+            d['user']=sleeper
+            scored.append(d)
+        scored.sort(key=lambda x: -x['zScore'])
         return scored
         
 
