@@ -1,5 +1,18 @@
 {% extends "frame.html" %}
 
 {% block content %}
-Leaderboard -- Hello, world.
+<h1> Leaderboard </h1>
+
+<table>
+  <tr><td>Username</td><td>zScore</td><td>average</td><td>stDev</td></tr>
+  {% for s in top %}
+  <tr>
+    <td> {{s.user.username}} </td>
+    <td> {{s.zScore}} </td>
+    <td> {{s.avg}} </td>
+    <td> {{s.stDev}} </td>
+  </tr>
+  {% endfor %}
+</table>
+
 {% endblock %}

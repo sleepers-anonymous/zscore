@@ -2,7 +2,7 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
-from sleep.models import Sleep
+from sleep.models import Sleep, Sleeper
 
 import datetime
 
@@ -14,7 +14,12 @@ def mysleep(request):
     return HttpResponse(render_to_string('mysleep.html'))
 
 def leaderboard(request):
-    return HttpResponse(render_to_string('leaderboard.html'))
+    top = Sleeper.objects.sorted_sleepers()
+    for i in range(len(top)):
+        for j in ['zScore','avg','stDev']:
+            top[i][j] = ':'.join(str(top[i][j]).split(':')[:2])
+    context = { 'top' : top }
+    return HttpResponse(render_to_string('leaderboard.html',context))
 
 @login_required
 def submitSleep(request):
