@@ -1,3 +1,4 @@
+from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -11,7 +12,7 @@ def home(request):
 
 @login_required
 def mysleep(request):
-    return HttpResponse(render_to_string('mysleep.html'))
+    return HttpResponse(render_to_string('mysleep.html',{},context_instance=RequestContext(request)))
 
 def leaderboard(request):
     top = Sleeper.objects.sorted_sleepers()
