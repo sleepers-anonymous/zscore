@@ -23,17 +23,34 @@ class Sleeper(User):
         sleeps = self.sleep_set.filter(date=d)
         return sum([s.end_time-s.start_time for s in sleeps],datetime.timedelta(0))
 
-    def zScore(self,start=datetime.date.min,end=datetime.date.max):
+    def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end).values('date','start_time','end_time')
         dates=map(lambda x: x['date'], sleeps)
         first = min(dates)
         last = max(dates)
         n = (last-first).days + 1
         dateRange = [first + datetime.timedelta(i) for i in range(0,n)]
-        sleepPerDay = [sum([(s['end_time']-s['start_time']).total_seconds() for s in filter(lambda x: x['date']==d,sleeps)]) for d in dateRange]
-        avgSleep = sum(sleepPerDay)/n
-        stDevSleep = math.sqrt(sum(map(lambda x: (x-avgSleep)**2, sleepPerDay))/n)
-        return datetime.timedelta(0,avgSleep - stDevSleep)
+        return [sum([(s['end_time']-s['start_time']).total_seconds() for s in filter(lambda x: x['date']==d,sleeps)]) for d in dateRange]
+
+    def sleepStats(self,start=datetime.date.min,end=datetime.date.max):
+        sleep = self.sleepPerDay(start,end)
+        avg = sum(sleep)/len(sleep)
+        stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/len(sleep))
+        d = {
+                'avg' : datetime.timedelta(0,avg),
+                'stDev' : datetime.timedelta(0,stDev),
+                'zScore' : datetime.timedelta(0,avg-stDev),
+                }
+        return d
+
+    def avgSleep(self,start=datetime.date.min,end=datetime.date.max):
+        return self.sleepStats(start,end)['avg']
+
+    def stDevSleep(self,start=datetime.date.min,end=datetime.date.max):
+        return self.sleepStats(start,end)['stDev']
+
+    def zScore(self,start=datetime.date.min,end=datetime.date.max):
+        return self.sleepStats(start,end)['zScore']
 
 
 
