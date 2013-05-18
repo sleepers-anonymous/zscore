@@ -1,6 +1,6 @@
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.http import HttpResponse
+from django.http import *
 from django.contrib.auth.decorators import login_required
 
 from sleep.models import Sleep, Sleeper
@@ -29,3 +29,18 @@ def submitSleep(request):
     # Create the Sleep instance
     Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments="", date=center)
     return HttpResponse('')
+
+@login_required
+def deleteSleep(request):
+    print "deleteSleep"
+    if 'id' in request.POST:
+        i = request.POST['id']
+        s = Sleep.objects.filter(pk=i)
+        if len(s) == 0:
+            return HttpResponseNotFound('')
+        s = s[0]
+        if s.user != request.user:
+            return HttpResponseForbidden('')
+        s.delete()
+        return HttpResponse('')
+    return HttpResponseBadRequest('')

@@ -1,3 +1,24 @@
-<div style="border: 1px solid black">
-Sleep list!
+<script type="text/javascript">
+function deleteSleep(id) {
+  $.post("/sleep/delete/", {
+    "id": id
+  }, function() {
+    // Reload the page to show the updated list
+    // TODO: If we AJAX-ify things, this should become
+    // just a javascript update
+    location.reload();
+  });
+};
+</script>
+
+<div class="sleep-list" style="border: 1px solid black">
+  <h3>My Sleeps</h3>
+  <table>
+    {% for sleep in sleeps %}
+    <tr id="sleep-entry-id-{{sleep.id}}">
+      <td><a href="javascript:null;" class="sleep-delete-button" onclick="deleteSleep({{sleep.id}});">x</a></td>
+      <td>{{sleep.start_time}} to {{sleep.end_time}}</td>
+    </tr>
+    {% endfor %}
+  </table>
 </div>

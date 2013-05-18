@@ -25,17 +25,21 @@
       var center = $(".sleep-entry .center").datepicker("getDate");
 
       // Make the AJAX request
-      $.post("/submit_sleep/", {
+      $.post("/sleep/submit/", {
         "start[]": dateToArray(start),
         "end[]": dateToArray(end),
         "center[]": dateToArray(center)
+      }, function() {
+        // Hack to refresh page on submit for now
+        // TODO: Ajax-ify all the views
+        location.reload();
       });
     });
   });
 </script>
 
-<div class="sleep-entry" style="1px solid black">
-  <b>Enter your sleep:</b>
+<div class="sleep-entry" style="border: 1px solid black; padding: 10px">
+  <h3>Enter your sleep</h3>
   <br/><br/>
   <table>
     <tr>

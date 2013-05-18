@@ -2,15 +2,18 @@
 {
     float: left;
     width: 30%;
+    margin: 20px;
 }
 .stats-view
 {
     float: left;
     width: 30%;
     clear: left;
+    margin: 20px;
 }
 .sleep-list-view
 {
     float:right;
     width: 30%;
+    margin: 20px;
 }
