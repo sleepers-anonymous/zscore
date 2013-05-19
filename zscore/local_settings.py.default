@@ -12,3 +12,7 @@ DATABASES = {
         'PASSWORD': '',                  # set me!
     }
 }
+
+LOCAL_INSTALLED_APPS = (
+    'django_extensions',
+)
