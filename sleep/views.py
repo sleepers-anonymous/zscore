@@ -2,13 +2,14 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import *
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 from sleep.models import Sleep, Sleeper
 
 import datetime
 
 def home(request):
-    return HttpResponse(render_to_string('index.html'))
+    return render(request, 'index.html')
 
 @login_required
 def mysleep(request):

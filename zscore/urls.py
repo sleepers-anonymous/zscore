@@ -23,6 +23,8 @@ urlpatterns = patterns('',
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {
             'template_name': 'logout.html'
     }),
+    url(r'^accounts/create/$', 'users.views.create'),
+    url(r'^accounts/profile/$', 'users.views.profile'),
 
     # Pages
     url(r'^leaderboard/$', 'sleep.views.leaderboard'),
