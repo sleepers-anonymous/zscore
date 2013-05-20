@@ -23,6 +23,8 @@ class SleeperManager(models.Manager):
             d['user']=sleeper
             scored.append(d)
         scored.sort(key=lambda x: -x['zScore'])
+        for i in xrange(len(scored)):
+            scored[i]['rank']=i+1
         return scored
         
 

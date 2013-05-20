@@ -5,9 +5,10 @@
 <h1> Leaderboard </h1>
 
 <table>
-  <tr><td>Username</td><td>zScore</td><td>average</td><td>stDev</td></tr>
+  <tr><td>Rank</td><td>Username</td><td>zScore</td><td>average</td><td>stDev</td></tr>
   {% for s in top %}
   <tr>
+    <td> {{s.rank}} </td>
     <td> {{s.user.username}} </td>
     <td> {{s.zScore|printHHMM}} </td>
     <td> {{s.avg|printHHMM}} </td>

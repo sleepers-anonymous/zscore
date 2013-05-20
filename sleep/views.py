@@ -16,7 +16,8 @@ def mysleep(request):
     return HttpResponse(render_to_string('mysleep.html',{},context_instance=RequestContext(request)))
 
 def leaderboard(request):
-    top = Sleeper.objects.sorted_sleepers()[:10]
+    ss = Sleeper.objects.sorted_sleepers()
+    top = [ s for s in ss if s['rank']<=1 or s['user'].pk==request.user.pk ]
     context = { 'top' : top }
     return HttpResponse(render_to_string('leaderboard.html',context))
 
