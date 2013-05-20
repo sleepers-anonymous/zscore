@@ -58,27 +58,33 @@ class Sleeper(User):
         if sleep:
             avg = sum(sleep)/len(sleep)
             stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/len(sleep))
+            avgSqrt = sum(map(lambda x: math.sqrt(3600*8*x),sleep))/len(sleep)
             d = {
                     'avg' : datetime.timedelta(0,avg),
                     'stDev' : datetime.timedelta(0,stDev),
                     'zScore' : datetime.timedelta(0,avg-stDev),
+                    'avgSqrt' : datetime.timedelta(0,avgSqrt),
                     }
         else:
             d = {
                     'avg' : datetime.timedelta(0),
                     'stDev' : datetime.timedelta(0),
                     'zScore' : datetime.timedelta(0),
+                    'avgSqrt' : datetime.timedelta(0),
                     }
         return d
 
-    def avgSleep(self,start=datetime.date.min,end=datetime.date.max):
-        return self.sleepStats(start,end)['avg']
+    def avgSleep(self,*args,**kwargs):
+        return self.sleepStats(*args,**kwargs)['avg']
 
-    def stDevSleep(self,start=datetime.date.min,end=datetime.date.max):
-        return self.sleepStats(start,end)['stDev']
+    def stDevSleep(self,*args,**kwargs):
+        return self.sleepStats(*args,**kwargs)['stDev']
 
-    def zScore(self,start=datetime.date.min,end=datetime.date.max):
-        return self.sleepStats(start,end)['zScore']
+    def zScore(self,*args,**kwargs):
+        return self.sleepStats(*args,**kwargs)['zScore']
+
+    def avgSqrt(self,*args,**kwargs):
+        return self.sleepStats(*args,**kwargs)['avgSqrt']
 
 
 
