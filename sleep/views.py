@@ -17,7 +17,7 @@ def mysleep(request):
 
 def leaderboard(request):
     ss = Sleeper.objects.sorted_sleepers()
-    top = [ s for s in ss if s['rank']<=10 or request.user and s['user'].pk==request.user.pk ]
+    top = [ s for s in ss if s['rank']<=10 or not request.user.is_anonymous() and s['user'].pk==request.user.pk ]
     context = { 'top' : top }
     return HttpResponse(render_to_string('leaderboard.html',context))
 
