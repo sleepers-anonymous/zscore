@@ -41,7 +41,7 @@ class Sleeper(User):
         sleeps = self.sleep_set.filter(date=d)
         return sum([s.end_time-s.start_time for s in sleeps],datetime.timedelta(0))
 
-    def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max):
+    def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end).values('date','start_time','end_time')
         if sleeps:
             dates=map(lambda x: x['date'], sleeps)
@@ -49,7 +49,13 @@ class Sleeper(User):
             last = max(dates)
             n = (last-first).days + 1
             dateRange = [first + datetime.timedelta(i) for i in range(0,n)]
-            return [sum([(s['end_time']-s['start_time']).total_seconds() for s in filter(lambda x: x['date']==d,sleeps)]) for d in dateRange]
+            byDays = [sum([(s['end_time']-s['start_time']).total_seconds() for s in filter(lambda x: x['date']==d,sleeps)]) for d in dateRange]
+            if hours:
+                byDays = map(lambda x: x/3600,byDays)
+            if packDates:
+                return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i]} for i in range(0,n)]
+            else:
+                return byDays
         else:
             return []
 
