@@ -4,12 +4,6 @@ import os
 # Get the absolute path of the settings.py file's directory
 PWD = os.path.dirname(os.path.realpath(__file__ ))
 
-# Import local settings
-try:
-    from local_settings import *
-except ImportError:
-    pass
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
