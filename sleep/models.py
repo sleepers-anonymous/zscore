@@ -4,7 +4,14 @@ from django.contrib.auth.models import User
 import datetime
 import math
 
+class SleepManager(models.Manager):
+    def totalSleep(self):
+        sleeps =  Sleep.objects.all()
+        return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
+
 class Sleep(models.Model):
+    objects = SleepManager()
+
     user = models.ForeignKey(User)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
