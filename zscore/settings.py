@@ -141,11 +141,6 @@ INSTALLED_APPS = (
     'sleep',
     'south',
 )
-# Merge in locally installed apps
-try:
-    INSTALLED_APPS += LOCAL_INSTALLED_APPS
-except:
-    pass
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -180,3 +175,9 @@ try:
     from local_settings import *
 except ImportError:
     pass
+# Merge in locally installed apps
+try:
+    INSTALLED_APPS += LOCAL_INSTALLED_APPS
+except:
+    pass
+
