@@ -19,7 +19,7 @@ class SleeperManager(models.Manager):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
         scored=[]
         for sleeper in sleepers:
-            d=sleeper.sleepStats()
+            d=sleeper.movingStats()
             d['user']=sleeper
             scored.append(d)
         scored.sort(key=lambda x: -x['zScore'])
@@ -53,7 +53,7 @@ class Sleeper(User):
         else:
             return []
 
-    def sleepStats(self,start=datetime.date.min,end=datetime.date.max):
+    def movingStats(self,start=datetime.date.min,end=datetime.date.max):
         sleep = self.sleepPerDay(start,end)
         if sleep:
             avg = sum(sleep)/len(sleep)
@@ -74,17 +74,32 @@ class Sleeper(User):
                     }
         return d
 
-    def avgSleep(self,*args,**kwargs):
-        return self.sleepStats(*args,**kwargs)['avg']
+    def decaying(self,data,hl):
+        s = 0
+        w = 0
+        for i in range(len(data)):
+            s+=2**(-hl*i)*data[-i-1]
+            w+=2**(-hl*i)
+        return s/w
 
-    def stDevSleep(self,*args,**kwargs):
-        return self.sleepStats(*args,**kwargs)['stDev']
-
-    def zScore(self,*args,**kwargs):
-        return self.sleepStats(*args,**kwargs)['zScore']
-
-    def avgSqrt(self,*args,**kwargs):
-        return self.sleepStats(*args,**kwargs)['avgSqrt']
-
-
+    def decayStats(self,end=datetime.date.max,hl=3):
+        sleep = self.sleepPerDay(datetime.date.min,end)
+        if sleep:
+            avg = self.decaying(sleep,hl)
+            stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl))
+            avgSqrt = self.decaying(map(lambda x: math.sqrt(3600*8*x),sleep),hl)
+            d = {
+                    'avg' : datetime.timedelta(0,avg),
+                    'stDev' : datetime.timedelta(0,stDev),
+                    'zScore' : datetime.timedelta(0,avg-stDev),
+                    'avgSqrt' : datetime.timedelta(0,avgSqrt),
+                    }
+        else:
+            d = {
+                    'avg' : datetime.timedelta(0),
+                    'stDev' : datetime.timedelta(0),
+                    'zScore' : datetime.timedelta(0),
+                    'avgSqrt' : datetime.timedelta(0),
+                    }
+        return d
 

@@ -8,8 +8,9 @@ register = template.Library()
 def statsView(context):
     user = context['request'].user
     sleeper = Sleeper.objects.get(pk=user.pk)
-    context['global']=sleeper.sleepStats()
-    context['weekly']=sleeper.sleepStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
+    context['global']=sleeper.movingStats()
+    context['weekly']=sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
+    context['decaying']=sleeper.decayStats()
     return context
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)
 def sleepListView(context):
