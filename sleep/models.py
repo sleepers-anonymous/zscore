@@ -91,8 +91,8 @@ class Sleeper(User):
         s = 0
         w = 0
         for i in range(len(data)):
-            s+=2**(-hl*i)*data[-i-1]
-            w+=2**(-hl*i)
+            s+=2**(-i/float(hl))*data[-i-1]
+            w+=2**(-i/float(hl))
         return s/w
 
     def decayStats(self,end=datetime.date.max,hl=3):
