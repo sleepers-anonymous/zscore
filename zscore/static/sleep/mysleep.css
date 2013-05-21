@@ -1,19 +1,19 @@
 .sleep-entry-view
 {
     float: left;
-    width: 30%;
-    margin: 20px;
+    width: 45%;
+    margin: 2%;
 }
 .stats-view
 {
     float: left;
-    width: 30%;
+    width: 45%;
     clear: left;
-    margin: 20px;
+    margin: 2%;
 }
 .sleep-list-view
 {
     float:right;
-    width: 30%;
-    margin: 20px;
+    width: 45%;
+    margin: 2%;
 }
