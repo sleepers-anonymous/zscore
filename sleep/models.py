@@ -21,6 +21,22 @@ class Sleep(models.Model):
     def __unicode__(self):
         return "Sleep from %s to %s" % (self.start_time,self.end_time)
 
+class SleeperProfile(models.Model):
+    user = models.OneToOneField(User)
+    # all other fields should have a default
+    PRIVACY_HIDDEN=-100
+    PRIVACY_ANONYMOUS=-50
+    PRIVACY_NORMAL=0
+    PRIVACY_PUBLIC=100
+    PRIVACY_CHOICES = (
+            (PRIVACY_HIDDEN, 'Hidden'),
+            (PRIVACY_ANONYMOUS, 'Anonymous'),
+            (PRIVACY_NORMAL, 'Normal'),
+            (PRIVACY_PUBLIC, 'Fully Public'),
+            )
+    privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL)
+    use12HourTime = models.BooleanField(default=False)
+
 class SleeperManager(models.Manager):
     def sorted_sleepers(self):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
@@ -43,6 +59,9 @@ class Sleeper(User):
         proxy = True
 
     objects = SleeperManager()
+
+    def getOrCreateProfile(self):
+        return SleeperProfile.objects.get_or_create(user=self)[0]
 
     def timeSlept(self,start=datetime.date.min,end=datetime.datetime.max):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
