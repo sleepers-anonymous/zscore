@@ -37,14 +37,23 @@ class SleeperProfile(models.Model):
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL)
     use12HourTime = models.BooleanField(default=False)
 
+    def __unicode__(self):
+        return "SleeperProfile for user %s" % self.user
+
 class SleeperManager(models.Manager):
     def sorted_sleepers(self):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
         scored=[]
         for sleeper in sleepers:
-            d=sleeper.movingStats()
-            d['user']=sleeper
-            scored.append(d)
+            p = sleeper.getOrCreateProfile()
+            if p.privacy<=p.PRIVACY_ANONYMOUS:
+                sleeper.displayName="anonymous"
+            else:
+                sleeper.displayName=sleeper.username
+            if p.privacy>p.PRIVACY_HIDDEN:
+                d=sleeper.movingStats()
+                d['user']=sleeper
+                scored.append(d)
         scored.sort(key=lambda x: -x['zScore'])
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
