@@ -15,7 +15,7 @@ class UserEmailCreationForm(UserCreationForm):
     email = Email(label="Email", max_length=64)
 
     def save(self, commit=True):
-        user = super(UserEmailForm, self).save(commit=False)
+        user = super(UserEmailCreationForm, self).save(commit=False)
         user.email = self.cleaned_data["email"]
         if commit:
             user.save()

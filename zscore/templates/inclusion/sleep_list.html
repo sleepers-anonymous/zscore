@@ -16,7 +16,7 @@ function deleteSleep(id) {
   <table>
     {% for sleep in sleeps %}
     <tr id="sleep-entry-id-{{sleep.id}}">
-      <td><a href="javascript:null;" class="sleep-delete-button" onclick="deleteSleep({{sleep.id}});">x</a></td>
+      <td><a href="javascript:void(0);" class="sleep-delete-button" onclick="deleteSleep({{sleep.id}});">x</a></td>
       <td>{{sleep.start_time}} to {{sleep.end_time}}</td>
     </tr>
     {% endfor %}
