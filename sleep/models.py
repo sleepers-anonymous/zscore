@@ -24,13 +24,13 @@ class Sleep(models.Model):
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default
-    PRIVACY_HIDDEN=-100
-    PRIVACY_ANONYMOUS=-50
-    PRIVACY_NORMAL=0
-    PRIVACY_PUBLIC=100
+    PRIVACY_HIDDEN = -100
+    PRIVACY_REDACTED = -50
+    PRIVACY_NORMAL = 0
+    PRIVACY_PUBLIC = 100
     PRIVACY_CHOICES = (
             (PRIVACY_HIDDEN, 'Hidden'),
-            (PRIVACY_ANONYMOUS, 'Anonymous'),
+            (PRIVACY_REDACTED, 'Redacted'),
             (PRIVACY_NORMAL, 'Normal'),
             (PRIVACY_PUBLIC, 'Fully Public'),
             )
@@ -46,8 +46,8 @@ class SleeperManager(models.Manager):
         scored=[]
         for sleeper in sleepers:
             p = sleeper.getOrCreateProfile()
-            if p.privacy<=p.PRIVACY_ANONYMOUS:
-                sleeper.displayName="anonymous"
+            if p.privacy<=p.PRIVACY_REDACTED:
+                sleeper.displayName="[redacted]"
             else:
                 sleeper.displayName=sleeper.username
             if p.privacy>p.PRIVACY_HIDDEN:
