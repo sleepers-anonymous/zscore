@@ -68,23 +68,25 @@ class Sleeper(User):
 
     def movingStats(self,start=datetime.date.min,end=datetime.date.max):
         sleep = self.sleepPerDay(start,end)
-        if sleep:
+        d = {}
+        try:
             avg = sum(sleep)/len(sleep)
+            d['avg']=avg
             stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/len(sleep))
+            d['stDev']=stDev
+            d['zScore']=avg-stDev
+        except:
+            pass
+        try:
             avgSqrt = sum(map(lambda x: math.sqrt(3600*8*x),sleep))/len(sleep)
-            d = {
-                    'avg' : datetime.timedelta(0,avg),
-                    'stDev' : datetime.timedelta(0,stDev),
-                    'zScore' : datetime.timedelta(0,avg-stDev),
-                    'avgSqrt' : datetime.timedelta(0,avgSqrt),
-                    }
-        else:
-            d = {
-                    'avg' : datetime.timedelta(0),
-                    'stDev' : datetime.timedelta(0),
-                    'zScore' : datetime.timedelta(0),
-                    'avgSqrt' : datetime.timedelta(0),
-                    }
+            d['avgSqrt']=avgSqrt
+        except:
+            pass
+        for k in ['avg','stDev','zScore','avgSqrt']:
+            if k not in d:
+                d[k]=datetime.timedelta(0)
+            else:
+                d[k]=datetime.timedelta(0,d[k])
         return d
 
     def decaying(self,data,hl):
@@ -97,22 +99,24 @@ class Sleeper(User):
 
     def decayStats(self,end=datetime.date.max,hl=3):
         sleep = self.sleepPerDay(datetime.date.min,end)
-        if sleep:
+        d = {}
+        try:
             avg = self.decaying(sleep,hl)
+            d['avg']=avg
             stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl))
+            d['stDev']=stDev
+            d['zScore']=avg-stDev
+        except:
+            pass
+        try:
             avgSqrt = self.decaying(map(lambda x: math.sqrt(3600*8*x),sleep),hl)
-            d = {
-                    'avg' : datetime.timedelta(0,avg),
-                    'stDev' : datetime.timedelta(0,stDev),
-                    'zScore' : datetime.timedelta(0,avg-stDev),
-                    'avgSqrt' : datetime.timedelta(0,avgSqrt),
-                    }
-        else:
-            d = {
-                    'avg' : datetime.timedelta(0),
-                    'stDev' : datetime.timedelta(0),
-                    'zScore' : datetime.timedelta(0),
-                    'avgSqrt' : datetime.timedelta(0),
-                    }
+            d['avgSqrt']=avgSqrt
+        except:
+            pass
+        for k in ['avg','stDev','zScore','avgSqrt']:
+            if k not in d:
+                d[k]=datetime.timedelta(0)
+            else:
+                d[k]=datetime.timedelta(0,d[k])
         return d
 
