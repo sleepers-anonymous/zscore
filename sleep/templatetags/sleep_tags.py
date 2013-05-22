@@ -11,6 +11,7 @@ def statsView(context):
     context['global']=sleeper.movingStats()
     context['weekly']=sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
     context['decaying']=sleeper.decayStats()
+    context['total']=sleeper.timeSlept()
     context['graphData']=sleeper.sleepPerDay(packDates=True,hours=True)
     return context
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)

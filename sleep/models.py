@@ -44,8 +44,8 @@ class Sleeper(User):
 
     objects = SleeperManager()
 
-    def timeSlept(self,d):
-        sleeps = self.sleep_set.filter(date=d)
+    def timeSlept(self,start=datetime.date.min,end=datetime.datetime.max):
+        sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
         return sum([s.end_time-s.start_time for s in sleeps],datetime.timedelta(0))
 
     def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False):
