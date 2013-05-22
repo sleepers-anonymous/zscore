@@ -78,7 +78,7 @@ class Sleeper(User):
         except:
             pass
         try:
-            avgSqrt = sum(map(lambda x: math.sqrt(3600*8*x),sleep))/len(sleep)
+            avgSqrt = (sum(map(lambda x: math.sqrt(x),sleep))/len(sleep))**2
             d['avgSqrt']=avgSqrt
         except:
             pass
@@ -109,7 +109,7 @@ class Sleeper(User):
         except:
             pass
         try:
-            avgSqrt = self.decaying(map(lambda x: math.sqrt(3600*8*x),sleep),hl)
+            avgSqrt = self.decaying(map(lambda x: math.sqrt(x),sleep),hl)**2
             d['avgSqrt']=avgSqrt
         except:
             pass
