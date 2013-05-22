@@ -20,7 +20,8 @@ def leaderboard(request):
     top = [ s for s in ss if s['rank']<=10 or not request.user.is_anonymous() and s['user'].pk==request.user.pk ]
     context = {
             'top' : top,
-            'total' : Sleep.objects.totalSleep()
+            'total' : Sleep.objects.totalSleep(),
+            'number' : Sleep.objects.all().values_list('user').distinct().count(),
             }
     return HttpResponse(render_to_string('leaderboard.html',context,context_instance=RequestContext(request)))
 
