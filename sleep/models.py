@@ -41,7 +41,7 @@ class SleeperProfile(models.Model):
         return "SleeperProfile for user %s" % self.user
 
 class SleeperManager(models.Manager):
-    def sorted_sleepers(self):
+    def sorted_sleepers(self,sortBy='zScore'):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
         scored=[]
         for sleeper in sleepers:
@@ -54,7 +54,7 @@ class SleeperManager(models.Manager):
                 d=sleeper.movingStats()
                 d['user']=sleeper
                 scored.append(d)
-        scored.sort(key=lambda x: -x['zScore'])
+        scored.sort(key=lambda x: -x[sortBy])
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
         return scored

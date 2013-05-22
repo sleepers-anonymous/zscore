@@ -15,8 +15,10 @@ def home(request):
 def mysleep(request):
     return HttpResponse(render_to_string('mysleep.html',{},context_instance=RequestContext(request)))
 
-def leaderboard(request):
-    ss = Sleeper.objects.sorted_sleepers()
+def leaderboard(request,sortBy='zScore'):
+    if sortBy not in ['zScore','avg','avgSqrt']:
+        sortBy='zScore'
+    ss = Sleeper.objects.sorted_sleepers(sortBy)
     top = [ s for s in ss if s['rank']<=10 or not request.user.is_anonymous() and s['user'].pk==request.user.pk ]
     context = {
             'top' : top,
