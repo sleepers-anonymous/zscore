@@ -28,7 +28,7 @@ def leaderboard(request,sortBy='zScore'):
         if p.privacy<=p.PRIVACY_REDACTED:
             s.displayName="[redacted]"
         else:
-            s.displayName=sleeper.username
+            s.displayName=s.username
         d['user']=s
         ss.append(d)
     top = [ s for s in ss if s['rank']<=10 or not request.user.is_anonymous() and s['user'].pk==request.user.pk ]

@@ -55,7 +55,7 @@ class SleeperManager(models.Manager):
                 if p.privacy<=p.PRIVACY_REDACTED:
                     sleeper.displayName="[redacted]"
                 else:
-                    sleeper.displayName=s.username
+                    sleeper.displayName=sleeper.username
                 if p.privacy>p.PRIVACY_HIDDEN:
                     d=sleeper.movingStats()
                     d['user']=sleeper
