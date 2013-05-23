@@ -50,7 +50,7 @@ class SleeperManager(models.Manager):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
         scored=[]
         for sleeper in sleepers:
-            if sleeper.sleep_set.count()>2:
+            if len(sleeper.sleepPerDay())>2:
                 p = sleeper.getOrCreateProfile()
                 if p.privacy<=p.PRIVACY_REDACTED:
                     sleeper.displayName="[redacted]"
