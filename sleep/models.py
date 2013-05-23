@@ -105,9 +105,10 @@ class Sleeper(User):
         try:
             avg = sum(sleep)/len(sleep)
             d['avg']=avg
-            stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/len(sleep))
-            d['stDev']=stDev
-            d['zScore']=avg-stDev
+            if len(sleep)>2:
+                stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/(len(sleep)-1.5)) #subtracting 1.5 is correct according to wikipedia
+                d['stDev']=stDev
+                d['zScore']=avg-stDev
         except:
             pass
         try:
@@ -122,12 +123,14 @@ class Sleeper(User):
                 d[k]=datetime.timedelta(0,d[k])
         return d
 
-    def decaying(self,data,hl):
+    def decaying(self,data,hl,stDev=False):
         s = 0
         w = 0
         for i in range(len(data)):
             s+=2**(-i/float(hl))*data[-i-1]
             w+=2**(-i/float(hl))
+        if stDev:
+            w = w*(len(data)-1.5)/len(data)
         return s/w
 
     def decayStats(self,end=datetime.date.max,hl=3):
@@ -136,7 +139,7 @@ class Sleeper(User):
         try:
             avg = self.decaying(sleep,hl)
             d['avg']=avg
-            stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl))
+            stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl,True))
             d['stDev']=stDev
             d['zScore']=avg-stDev
         except:
