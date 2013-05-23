@@ -27,6 +27,22 @@ def leaderboard(request,sortBy='zScore'):
             }
     return HttpResponse(render_to_string('leaderboard.html',context,context_instance=RequestContext(request)))
 
+def creep(request,username):
+    try:
+        user=Sleeper.objects.get(username=username)
+        p = user.getOrCreateProfile()
+        if p.privacy<=p.PRIVACY_NORMAL:
+            return HttpResponse(render_to_string('creep_failed.html',{},context_instance=RequestContext(request)))
+    except:
+        return HttpResponse(render_to_string('creep_failed.html',{},context_instance=RequestContext(request)))
+    context = {
+            'user' : user,
+            'global' : user.movingStats(),
+            }
+    if p.privacy>=p.PRIVACY_PUBLIC:
+        context['sleeps']=user.sleep_set.all().order_by('-end_time')
+    return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
+
 @login_required
 def submitSleep(request):
     # TODO: Accept comments

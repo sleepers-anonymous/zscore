@@ -21,18 +21,23 @@ class Sleep(models.Model):
     def __unicode__(self):
         return "Sleep from %s to %s" % (self.start_time,self.end_time)
 
+    def length(self):
+        return self.end_time - self.start_time
+
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default
     PRIVACY_HIDDEN = -100
     PRIVACY_REDACTED = -50
     PRIVACY_NORMAL = 0
+    PRIVACY_STATS = 50
     PRIVACY_PUBLIC = 100
     PRIVACY_CHOICES = (
             (PRIVACY_HIDDEN, 'Hidden'),
             (PRIVACY_REDACTED, 'Redacted'),
             (PRIVACY_NORMAL, 'Normal'),
-            (PRIVACY_PUBLIC, 'Fully Public'),
+            (PRIVACY_STATS, 'Stats Public'),
+            (PRIVACY_PUBLIC, 'Sleep Public'),
             )
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL)
     use12HourTime = models.BooleanField(default=False)

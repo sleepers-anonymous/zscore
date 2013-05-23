@@ -1,0 +1,24 @@
+{% extends "frame.html" %}
+
+{% block content %}
+{% load datetime_utils %}
+
+<h1>Creep on {{user}}</h1>
+
+<h3>Stats</h3>
+<table>
+  <tr><td>zScore</td><td>average</td><td>avgSqrt</td><td>stDev</td></tr>
+  <tr><td>{{global.zScore|printHHMM}}</td><td>{{global.avg|printHHMM}}</td><td>{{global.avgSqrt|printHHMM}}</td><td>{{global.stDev|printHHMM}}</td></tr>
+</table>
+
+{% if sleeps %}
+  <h3>Sleep</h3>
+  <table>
+  {% for sleep in sleeps %}
+  <tr><td>{{sleep.start_time}}</td><td> to</td><td> {{sleep.end_time}}</td><td> ({{sleep.length|printHHMM}})</td></tr>
+  {% endfor %}
+  </table>
+{% endif %}
+
+
+{% endblock %}
