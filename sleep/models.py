@@ -50,15 +50,16 @@ class SleeperManager(models.Manager):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
         scored=[]
         for sleeper in sleepers:
-            p = sleeper.getOrCreateProfile()
-            if p.privacy<=p.PRIVACY_REDACTED:
-                sleeper.displayName="[redacted]"
-            else:
-                sleeper.displayName=sleeper.username
-            if p.privacy>p.PRIVACY_HIDDEN:
-                d=sleeper.movingStats()
-                d['user']=sleeper
-                scored.append(d)
+            if sleeper.sleep_set.count()>2:
+                p = sleeper.getOrCreateProfile()
+                if p.privacy<=p.PRIVACY_REDACTED:
+                    sleeper.displayName="[redacted]"
+                else:
+                    sleeper.displayName=sleeper.username
+                if p.privacy>p.PRIVACY_HIDDEN:
+                    d=sleeper.movingStats()
+                    d['user']=sleeper
+                    scored.append(d)
         scored.sort(key=lambda x: -x[sortBy])
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
