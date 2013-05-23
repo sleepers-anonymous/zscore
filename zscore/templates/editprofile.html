@@ -1,0 +1,18 @@
+{% extends 'frame.html' %}
+{% block content %}
+<form action="/editprofile/" method="post">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <p>
+    {{ form.privacy.errors }}
+    <label for="id_privacy">Privacy:</label>
+    {{ form.privacy }}<br/>
+    <b>About the privacy choices</b><br/>
+    Hidden: you will not be shown in the leaderboard at all<br/>
+    Redacted: you will be shown in the leaderboard (if in the top 10) with username [redacted]<br/>
+    Normal: you will be shown in the leaderboard (if in the top 10)<br/>
+    Stats public: your stats will be shown publicly on your creep page<br/>
+    Sleep public: your stats and all sleep times will be shown publicly on your creep page
+    </p>
+    <p><input type="submit" value="Save" /></p>
+</form>
+{%endblock %}

@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from sleep.models import Sleep, Sleeper
+from sleep.forms import SleeperProfileForm
 
 import datetime
 
@@ -42,6 +43,21 @@ def creep(request,username):
     if p.privacy>=p.PRIVACY_PUBLIC:
         context['sleeps']=user.sleep_set.all().order_by('-end_time')
     return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
+
+@login_required
+def editProfile(request):
+    sleeper = Sleeper.objects.get(pk=request.user.pk)
+    p = sleeper.getOrCreateProfile()
+    if request.method == 'POST':
+        form = SleeperProfileForm(request.POST, instance=p)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/editprofile/')
+    else:
+        form = SleeperProfileForm(instance=p)
+
+    return HttpResponse(render_to_string('editprofile.html', {'form': form},context_instance=RequestContext(request)))
+            
 
 @login_required
 def submitSleep(request):
