@@ -25,6 +25,11 @@ def leaderboard(request,sortBy='zScore'):
         d = s.movingStats()
         d['rank']='n/a'
         d['user']=s
+        p=s.getOrCreateProfile()
+        if p.privacy<=p.PRIVACY_REDACTED:
+            sleeper.displayName="[redacted]"
+        else:
+            sleeper.displayName=sleeper.username
         ss.append(d)
     top = [ s for s in ss if s['rank']<=10 or not request.user.is_anonymous() and s['user'].pk==request.user.pk ]
     context = {
