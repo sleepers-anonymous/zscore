@@ -2,6 +2,7 @@
 
 {% block content %}
 {% load datetime_utils %}
+{% load sleep_tags %}
 <h1> Leaderboard </h1>
 
 {{number}} zScore users have slept a total of {{total|printDHM}}!
@@ -11,7 +12,7 @@
   {% for s in top %}
   <tr>
     <td> {{s.rank}} </td>
-    <td> {{s.user.displayName}} </td>
+    <td> {% displayUser s.user.displayName %} </td>
     <td> {{s.zScore|printHHMM}} </td>
     <td> {{s.avg|printHHMM}} </td>
     <td> {{s.avgSqrt|printHHMM}} </td>
