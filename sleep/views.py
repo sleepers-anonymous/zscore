@@ -30,6 +30,7 @@ def leaderboard(request,sortBy='zScore'):
 
 def creep(request,username=None):
     if not username:
+        total=Sleeper.objects.filter(sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS).count()
         if request.method == 'POST':
             form=CreepSearchForm(request.POST)
             if form.is_valid():
@@ -43,11 +44,17 @@ def creep(request,username=None):
                             'count' : count,
                             'form' : form,
                             'new' : False,
+                            'total' : total,
                             }
                     return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
         else:
             form = CreepSearchForm()
-        return HttpResponse(render_to_string('creepsearch.html',{ 'form' : form , 'new' : True },context_instance=RequestContext(request)))
+        context = {
+                'form' : form,
+                'new' : True,
+                'total' : total,
+                }
+        return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
     else:
         try:
             user=Sleeper.objects.get(username=username)

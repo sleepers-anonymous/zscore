@@ -2,6 +2,7 @@
 
 {% block content %}
 <h1>Creep</h1>
+{{total}} creepable users
 <form action="/creep/" method="post">{% csrf_token %}
     {{ form.as_p }}
     <p><input type="submit" value="Submit" /></p>
