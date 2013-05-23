@@ -4,8 +4,8 @@ from django.http import *
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from sleep.models import Sleep, Sleeper
-from sleep.forms import SleeperProfileForm
+from sleep.models import *
+from sleep.forms import *
 
 import datetime
 
@@ -28,21 +28,41 @@ def leaderboard(request,sortBy='zScore'):
             }
     return HttpResponse(render_to_string('leaderboard.html',context,context_instance=RequestContext(request)))
 
-def creep(request,username):
-    try:
-        user=Sleeper.objects.get(username=username)
-        p = user.getOrCreateProfile()
-        if p.privacy<=p.PRIVACY_NORMAL:
-            return HttpResponse(render_to_string('creep_failed.html',{},context_instance=RequestContext(request)))
-    except:
-        return HttpResponse(render_to_string('creep_failed.html',{},context_instance=RequestContext(request)))
-    context = {
-            'user' : user,
-            'global' : user.movingStats(),
-            }
-    if p.privacy>=p.PRIVACY_PUBLIC:
-        context['sleeps']=user.sleep_set.all().order_by('-end_time')
-    return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
+def creep(request,username=None):
+    if not username:
+        if request.method == 'POST':
+            form=CreepSearchForm(request.POST)
+            if form.is_valid():
+                users = Sleeper.objects.filter(username__icontains=form.cleaned_data['username'],sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS)
+                count = users.count()
+                if count==1:
+                    return HttpResponseRedirect('/creep/%s/' % users[0].username)
+                else: 
+                    context = {
+                            'results' : users,
+                            'count' : count,
+                            'form' : form,
+                            'new' : False,
+                            }
+                    return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
+        else:
+            form = CreepSearchForm()
+        return HttpResponse(render_to_string('creepsearch.html',{ 'form' : form , 'new' : True },context_instance=RequestContext(request)))
+    else:
+        try:
+            user=Sleeper.objects.get(username=username)
+            p = user.getOrCreateProfile()
+            if p.privacy<=p.PRIVACY_NORMAL:
+                return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
+        except:
+            return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
+        context = {
+                'user' : user,
+                'global' : user.movingStats(),
+                }
+        if p.privacy>=p.PRIVACY_PUBLIC:
+            context['sleeps']=user.sleep_set.all().order_by('-end_time')
+        return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
 
 @login_required
 def editProfile(request):

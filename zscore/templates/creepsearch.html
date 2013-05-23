@@ -1,0 +1,20 @@
+{% extends 'frame.html' %}
+
+{% block content %}
+<h1>Creep</h1>
+<form action="/creep/" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <p><input type="submit" value="Submit" /></p>
+</form>
+{% if not new %}
+    {% if count %}
+        Found {{count}} users.<br/>
+        {% for user in results %}
+            <a href="{{user.username}}">{{user.username}}</a><br/>
+        {% endfor %}
+    {% else %}
+        No users found.<br/>
+    {% endif %}
+{% endif %}
+
+{% endblock %}        
