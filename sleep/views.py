@@ -20,6 +20,17 @@ def leaderboard(request,sortBy='zScore'):
     if sortBy not in ['zScore','avg','avgSqrt']:
         sortBy='zScore'
     ss = Sleeper.objects.sorted_sleepers(sortBy)
+    if not request.user.is_anonymous() and request.user.pk not in [ s['user'].pk for s in ss ]:
+        s = Sleeper.objects.get(pk=request.user.pk)
+        d = s.movingStats()
+        d['rank']='n/a'
+        p=s.getOrCreateProfile()
+        if p.privacy<=p.PRIVACY_REDACTED:
+            s.displayName="[redacted]"
+        else:
+            s.displayName=s.username
+        d['user']=s
+        ss.append(d)
     top = [ s for s in ss if s['rank']<=10 or not request.user.is_anonymous() and s['user'].pk==request.user.pk ]
     context = {
             'top' : top,

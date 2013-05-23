@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load sleep_tags %}
 
 <html>
   <head>
@@ -32,9 +33,9 @@
       <a href="/admin/">admin</a>
       {% endif %}
       {% if request.user.is_authenticated %}
-      logged in as {{request.user.username}} (<a href="/editprofile/">edit profile</a> <a href="/accounts/logout">log out</a>)
+      logged in as {% displayUser request.user.username %} (<a href="/editprofile/">edit profile</a> <a href="/accounts/logout">log out</a>)
       {% else %}
-      <a href="/accounts/login">log in</a> <br/>
+      <a href="/accounts/login">log in</a> <a href="/accounts/create">register</a> <br/>
       {% endif %}
     </div>
     {% endblock %}
