@@ -18,7 +18,9 @@ def statsView(context):
 def sleepListView(context):
     user = context['request'].user
     sleeps = Sleep.objects.filter(user=user).order_by('-start_time', '-end_time')[:20]
-    return {'sleeps': sleeps}
+    numdates = Sleep.objects.filter(user=user).values('date').distinct().count()
+    numsleeps = Sleep.objects.filter(user=user).count()
+    return {'sleeps': sleeps, 'numdates': numdates, 'numsleeps': numsleeps}
 @register.inclusion_tag('inclusion/sleep_entry.html')
 def sleepEntryView():
     # No context needed

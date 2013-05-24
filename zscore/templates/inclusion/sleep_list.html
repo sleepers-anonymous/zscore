@@ -12,7 +12,7 @@ function deleteSleep(id) {
 </script>
 
 <div class="sleep-list" style="border: 1px solid black">
-  <h3>My Sleeps</h3>
+    <h3>My Sleeps ({{numsleeps}} on {{numdates}} days)</h3>
   <table>
     {% for sleep in sleeps %}
     <tr id="sleep-entry-id-{{sleep.id}}">
