@@ -4,8 +4,11 @@
     {{ form.non_field_errors }}
     <p>
     {{ form.privacy.errors }}
-    <label for="id_privacy">Privacy:</label>
+    <label for="id_privacy">Privacy to anonymous users:</label>
     {{ form.privacy }}<br/>
+    {{ form.privacyLoggedIn.errors }}
+    <label for="id_privacy">Privacy to logged-in users:</label>
+    {{ form.privacyLoggedIn }}<br/>
     <b>About the privacy choices</b><br/>
     Hidden: you will not be shown in the leaderboard at all<br/>
     Redacted: you will be shown in the leaderboard (if in the top 10) with username [redacted]<br/>
