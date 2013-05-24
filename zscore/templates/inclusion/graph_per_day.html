@@ -1,0 +1,37 @@
+{% if graphData|length > 1 %}
+  <br>
+  <canvas id="sleepChart" width="400" height="400"></canvas>
+  <script>
+    var chartData = {
+      labels : [
+        {% for d in graphData %}
+          "{{d.date}}",
+        {% endfor %}
+      ],
+      datasets : [
+        {
+          fillColor: "rgba(120,120,0,0.5)",
+          strokeColor : "rgba(120,120,0,1)",
+          pointColor : "rgba(120,120,0,1)",
+          pointStrokeColor : "rgba(240,240,120,1)",
+          data : [
+            {% for d in graphData %}
+              {{ d.slept }} + 1.0, // add 1 as a hack because Chart.js is broken if you override the scale
+            {% endfor %}
+          ]
+        }
+      ]
+    }
+
+    var chartOptions = {
+      scaleOverride : true ,
+      scaleSteps : 17,
+      scaleStepWidth : 1,
+      scaleStartValue : 1,
+    }
+
+    var sleepChart = new Chart(document.getElementById("sleepChart").getContext("2d")).Line(chartData,chartOptions);
+  </script>
+{% else %}
+  <i>Enter at least two days of data to see a pretty graph here!</i>
+{% endif %}
