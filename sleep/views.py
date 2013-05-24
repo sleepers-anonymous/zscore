@@ -19,19 +19,8 @@ def mysleep(request):
 def leaderboard(request,sortBy='zScore'):
     if sortBy not in ['zScore','avg','avgSqrt']:
         sortBy='zScore'
-    ss = Sleeper.objects.sorted_sleepers(sortBy)
-    if not request.user.is_anonymous() and request.user.pk not in [ s['user'].pk for s in ss ]:
-        s = Sleeper.objects.get(pk=request.user.pk)
-        d = s.movingStats()
-        d['rank']='n/a'
-        p=s.getOrCreateProfile()
-        if p.privacy<=p.PRIVACY_REDACTED:
-            s.displayName="[redacted]"
-        else:
-            s.displayName=s.username
-        d['user']=s
-        ss.append(d)
-    top = [ s for s in ss if s['rank']<=10 or not request.user.is_anonymous() and s['user'].pk==request.user.pk ]
+    ss = Sleeper.objects.sorted_sleepers(sortBy,request.user)
+    top = [ s for s in ss if s['rank']<=10 or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
     context = {
             'top' : top,
             'total' : Sleep.objects.totalSleep(),
@@ -41,11 +30,15 @@ def leaderboard(request,sortBy='zScore'):
 
 def creep(request,username=None):
     if not username:
-        total=Sleeper.objects.filter(sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS).count()
+        if request.user.is_anonymous():
+            creepable=Sleeper.objects.filter(sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS)
+        else:
+            creepable=Sleeper.objects.filter(sleeperprofile__privacyLoggedIn__gte=SleeperProfile.PRIVACY_STATS)
+        total=creepable.count()
         if request.method == 'POST':
             form=CreepSearchForm(request.POST)
             if form.is_valid():
-                users = Sleeper.objects.filter(username__icontains=form.cleaned_data['username'],sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS)
+                users = creepable.filter(username__icontains=form.cleaned_data['username'])
                 count = users.count()
                 if count==1:
                     return HttpResponseRedirect('/creep/%s/' % users[0].username)
@@ -70,7 +63,11 @@ def creep(request,username=None):
         try:
             user=Sleeper.objects.get(username=username)
             p = user.getOrCreateProfile()
-            if p.privacy<=p.PRIVACY_NORMAL:
+            if user.is_anonymous():
+                priv = p.privacy
+            else:
+                priv = p.privacyLoggedIn
+            if priv<=p.PRIVACY_NORMAL:
                 return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
         except:
             return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
@@ -78,7 +75,7 @@ def creep(request,username=None):
                 'user' : user,
                 'global' : user.movingStats(),
                 }
-        if p.privacy>=p.PRIVACY_PUBLIC:
+        if priv>=p.PRIVACY_PUBLIC:
             context['sleeps']=user.sleep_set.all().order_by('-end_time')
         return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
 

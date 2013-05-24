@@ -59,24 +59,44 @@ class SleeperProfile(models.Model):
         return "SleeperProfile for user %s" % self.user
 
 class SleeperManager(models.Manager):
-    def sorted_sleepers(self,sortBy='zScore'):
+    def sorted_sleepers(self,sortBy='zScore',user=None):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
         scored=[]
+        extra=[]
         for sleeper in sleepers:
             if len(sleeper.sleepPerDay())>2:
                 p = sleeper.getOrCreateProfile()
-                if p.privacy<=p.PRIVACY_REDACTED:
+                if user is None:
+                    priv = p.PRIVACY_HIDDEN
+                elif user is 'all':
+                    priv = p.PRIVACY_PUBLIC
+                elif user.is_anonymous():
+                    priv = p.privacy
+                elif user.pk==sleeper.pk:
+                    priv = p.PRIVACY_PUBLIC
+                else:
+                    priv = p.privacyLoggedIn
+
+                if priv<=p.PRIVACY_REDACTED:
                     sleeper.displayName="[redacted]"
                 else:
                     sleeper.displayName=sleeper.username
-                if p.privacy>p.PRIVACY_HIDDEN:
+
+                if priv>p.PRIVACY_HIDDEN:
                     d=sleeper.movingStats()
                     d['user']=sleeper
                     scored.append(d)
+            else:
+                if 'is_authenticated' in dir(user) and user.is_authenticated() and user.pk == sleeper.pk:
+                    d = sleeper.movingStats()
+                    d['rank']='n/a'
+                    sleeper.displayName=sleeper.username
+                    d['user']=sleeper
+                    extra.append(d)
         scored.sort(key=lambda x: -x[sortBy])
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
-        return scored
+        return scored+extra
 
 class Sleeper(User):
     class Meta:
