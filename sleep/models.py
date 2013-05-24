@@ -50,6 +50,7 @@ class SleeperProfile(models.Model):
             (PRIVACY_PUBLIC, 'Sleep Public'),
             )
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL)
+    privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL)
     use12HourTime = models.BooleanField(default=False)
 
     emailreminders = models.BooleanField(default=False)
