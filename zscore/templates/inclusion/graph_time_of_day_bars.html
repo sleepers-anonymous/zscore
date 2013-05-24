@@ -1,3 +1,4 @@
+{% if hassleep  %}
 {% if sleeps|length > 0 %}
 <canvas id="timeOfDayChart" width="450px" height="{{height}}px"></canvas>
   <script>
@@ -48,4 +49,5 @@
   </script>
 {% else %}
   <i>Enter at least one day of data to see a pretty graph here!</i>
+	{% endif %}
 {% endif %}

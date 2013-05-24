@@ -13,6 +13,7 @@ def graphPerDay(user):
 def graphTimeOfDayBars(user):
     sleeper = Sleeper.objects.get(pk=user.pk)
     sleeps = sleeper.sleep_set.all()
+    if not(sleeps): return {'hassleep': False}
     first = min([localtime(s.start_time) for s in sleeps]).date()
     last = max([localtime(s.end_time) for s in sleeps]).date()
     n = (last-first).days + 1
