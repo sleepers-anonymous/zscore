@@ -10,8 +10,11 @@
         <tr> <td> past week </td> <td> {{weekly.zScore|printHHMM}} </td> <td> {{weekly.avg|printHHMM}} </td> <td> {{weekly.avgSqrt|printHHMM}} </td> <td> {{weekly.stDev|printHHMM}} </td> </tr>
         <tr> <td> exponentially decaying </td> <td> {{decaying.zScore|printHHMM}} </td> <td> {{decaying.avg|printHHMM}} </td> <td> {{decaying.avgSqrt|printHHMM}} </td> <td> {{decaying.stDev|printHHMM}} </td> </tr>
     </table>
-    <br/>
 
+    <br/>
     {% graphPerDay request.user %}
+    <br/>
+    {% graphTimeOfDayBars request.user %}
+    <br/>
     
 </div>

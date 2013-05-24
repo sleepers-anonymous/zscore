@@ -1,0 +1,51 @@
+{% if sleeps|length > 0 %}
+<canvas id="timeOfDayChart" width="450px" height="{{height}}px"></canvas>
+  <script>
+    var canvas = document.getElementById('timeOfDayChart');
+    var context = canvas.getContext('2d');
+
+    context.beginPath();
+    context.rect(80,15,120,{{height}});
+    context.fillStyle = 'darkblue';
+    context.fill()
+    context.beginPath();
+    context.rect(200,15,210,{{height}});
+    context.fillStyle = 'brown';
+    context.fill()
+    context.beginPath();
+    context.rect(410,15,30,{{height}});
+    context.fillStyle = 'darkblue';
+    context.fill()
+
+
+    context.fillStyle = 'black';
+    context.font = '9pt Arial';
+    context.textAlign = 'center';
+    {% for time in times %}
+      context.fillText('{{time}}', 80 + {{time}} * 15, 10);
+      context.beginPath();
+      context.moveTo(80+{{time}}*15,15);
+      context.lineTo(80+{{time}}*15,{{height}});
+      context.lineWidth = 1;
+      context.strokeStyle = '#bbbbbb';
+      context.stroke();
+    {% endfor %}
+
+    context.textAlign = 'end';
+    {% for d in dateRange %}
+      context.fillText('{{d.1}}', 78, 25 + {{d.0}} * 15);
+    {% endfor %}
+
+    
+
+    {% for sleep in sleeps %}
+    context.beginPath();
+    context.rect(80 + {{sleep.0}}, 15 + {{sleep.1}}, {{sleep.2}}, {{sleep.3}})
+    context.fillStyle = 'black';
+    context.fill()
+    {% endfor %}
+
+  </script>
+{% else %}
+  <i>Enter at least one day of data to see a pretty graph here!</i>
+{% endif %}
