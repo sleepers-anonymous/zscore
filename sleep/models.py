@@ -24,6 +24,16 @@ class Sleep(models.Model):
     def length(self):
         return self.end_time - self.start_time
 
+    def overlaps(self, otherSleep):
+        return (min(self.end_time, otherSleep.end_time) - max(self.start_time, otherSleep.start_time) < datetime.timedelta(0))
+
+    def validate_unique(self, exclude=None):
+        #Yes this is derpy and inefficient and really should actually use the exclude field
+        from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+        sleepq = Sleep.objects.filter(user=self.user)
+        for i in sleepq:
+            if not overlaps(self, i): raise ValidationError(u'Error: Overlapping Sleep Detected! You can\' be asleep twice at the same time!')
+
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default
@@ -41,6 +51,8 @@ class SleeperProfile(models.Model):
             )
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL)
     use12HourTime = models.BooleanField(default=False)
+
+    emailreminders = models.BooleanField(default=False)
 
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
@@ -64,10 +76,6 @@ class SleeperManager(models.Manager):
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
         return scored
-        
-
-
-
 
 class Sleeper(User):
     class Meta:
