@@ -26,5 +26,7 @@ def sleepEntryView():
 
 @register.simple_tag
 def displayUser(username):
-    if username != "[redacted]": return '''<a href="/creep/%s/">%s</a>''' % (username , username)
-    else return: username
+    if username != "[redacted]":
+        return '''<a href="/creep/%s/">%s</a>''' % (username , username)
+    else:
+        return username
