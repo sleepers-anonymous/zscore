@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import localtime
 
 import datetime
 import math
@@ -64,7 +65,7 @@ class SleeperManager(models.Manager):
         scored=[]
         extra=[]
         for sleeper in sleepers:
-            if len(sleeper.sleepPerDay())>2:
+            if len(sleeper.sleepPerDay())>2 and sleeper.sleepPerDay(packDates=True)[-1]['date'] >= datetime.date.today()-datetime.timedelta(5):
                 p = sleeper.getOrCreateProfile()
                 if user is None:
                     priv = p.PRIVACY_HIDDEN
