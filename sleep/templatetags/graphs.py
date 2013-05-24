@@ -40,6 +40,7 @@ def graphTimeOfDayBars(user):
             sleepsProcessed.append((startTime.hour * 15 + startTime.minute / 4., (d-first).days * 15, endTime.hour * 15 + endTime.minute / 4. - startTime.hour * 15 - startTime.minute / 4., 15))
 
     context = {
+            'hassleep': True,
             'sleeps' : sleepsProcessed,
             'dateRange' : dateRange,
             'times' : times,
