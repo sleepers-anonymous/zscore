@@ -10,6 +10,27 @@ class SleepManager(models.Manager):
         sleeps =  Sleep.objects.all()
         return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
 
+    def sleepTimes(self,res=1):
+        sleeps = Sleep.objects.all()
+        atTime = [0] * (24 * 60 / res) 
+        for sleep in sleeps:
+            startDate = localtime(sleep.start_time).date()
+            endDate = localtime(sleep.end_time).date()
+            dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
+            for d in dr:
+                if d == startDate:
+                    startTime = localtime(sleep.start_time).time()
+                else:
+                    startTime = datetime.time(0)
+                if d == endDate:
+                    endTime = localtime(sleep.end_time).time()
+                else:
+                    endTime = datetime.time(23,59)
+                for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
+                    atTime[i]+=1
+        return atTime
+
+
 class Sleep(models.Model):
     objects = SleepManager()
 
