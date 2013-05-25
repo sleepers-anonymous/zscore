@@ -82,7 +82,7 @@ class SleeperProfile(models.Model):
 
 class SleeperManager(models.Manager):
     def sorted_sleepers(self,sortBy='zScore',user=None):
-        sleepers = Sleeper.objects.all().prefetch_related('sleep_set')
+        sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile')
         scored=[]
         extra=[]
         for sleeper in sleepers:
