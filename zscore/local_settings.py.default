@@ -22,3 +22,11 @@ EMAIL_HOST_USER = 'zscore.noreply@gmail.com'
 EMAIL_HOST_PASSWORD = '' # set me!
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+ADMINS = (
+    ('gurtej', 'gurtej@mit.edu'),
+    ('benkraft', 'benkraft@mit.edu'),
+    ('zscore-owner', 'zscore-owner@mit.edu'),
+)
+
+MANAGERS = ADMINS

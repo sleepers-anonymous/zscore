@@ -7,12 +7,6 @@ PWD = os.path.dirname(os.path.realpath(__file__ ))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    ('gurtej', 'gurtej@mit.edu'),
-)
-
-MANAGERS = ADMINS
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
