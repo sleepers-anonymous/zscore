@@ -49,3 +49,11 @@ def graphTimeOfDayBars(user):
             }
     return context
     
+@register.inclusion_tag('inclusion/graph_sleep_times.html')
+def graphSleepTimes():
+    res = 10
+    labels = [""] * (24 * 60 / res)
+    for i in range(24):
+        labels[i*60/res]=str(i)+":00"
+    graphData = Sleep.objects.sleepTimes(res=res)
+    return { 'graphData' : graphData, 'labels' : labels }

@@ -3,6 +3,7 @@
 {% block content %}
 {% load datetime_utils %}
 {% load sleep_tags %}
+{% load graphs %}
 <h1> Leaderboard </h1>
 
 {{number}} zScore users have slept a total of {{total|printDHM}}!
@@ -20,8 +21,10 @@
   </tr>
   {% endfor %}
 </table>
-
 <h3>Notes</h3>
 The leaderboard shows users with at least 3 days of sleep, including at least one of the last 5 days.  It ranks by all-time scores.  Hidden users do not count towards rank.  The number of users at the top counts all users with at least 1 day of sleep.
+<h3>Total user sleep<h3>
+{% graphSleepTimes %}
+
 
 {% endblock %}
