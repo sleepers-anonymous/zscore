@@ -10,7 +10,7 @@
 <table>
     <tr><td>Rank</td><td>Username</td><td><a href="/leaderboard/">zScore</a></td><td><a href="/leaderboard/avg/">average</a></td><td><a href="/leaderboard/avgSqrt/">avgSqrt</a></td><td>stDev</td></tr>
   {% for s in top %}
-  <tr>
+  <tr {% if s.opcode == "me" %} style="background-color:#DEF2FF" {% endif %}>
     <td> {{s.rank}} </td>
     <td> {% displayUser s.user.displayName %} </td>
     <td> {{s.zScore|printHHMM}} </td>
