@@ -134,7 +134,10 @@ class Sleeper(User):
         return sum([s.end_time-s.start_time for s in sleeps],datetime.timedelta(0))
 
     def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False):
-        sleeps = self.sleep_set.filter(date__gte=start,date__lte=end).values('date','start_time','end_time')
+        if start==datetime.date.min and end==datetime.date.max:
+            sleeps = self.sleep_set.values('date','start_time','end_time')
+        else:
+            sleeps = self.sleep_set.filter(date__gte=start,date__lte=end).values('date','start_time','end_time')
         if sleeps:
             dates=map(lambda x: x['date'], sleeps)
             first = min(dates)
