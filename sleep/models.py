@@ -103,10 +103,13 @@ class SleeperManager(models.Manager):
                     sleeper.displayName="[redacted]"
                 else:
                     sleeper.displayName=sleeper.username
-
                 if priv>p.PRIVACY_HIDDEN:
                     d=sleeper.movingStats()
                     d['user']=sleeper
+                    if user.pk==sleeper.pk:
+                        d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
+                    else:
+                        d['opcode'] = None
                     scored.append(d)
             else:
                 if 'is_authenticated' in dir(user) and user.is_authenticated() and user.pk == sleeper.pk:
@@ -114,6 +117,7 @@ class SleeperManager(models.Manager):
                     d['rank']='n/a'
                     sleeper.displayName=sleeper.username
                     d['user']=sleeper
+                    d['opcode']='me'
                     extra.append(d)
         scored.sort(key=lambda x: -x[sortBy])
         for i in xrange(len(scored)):
