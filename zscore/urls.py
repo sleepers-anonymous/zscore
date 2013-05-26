@@ -51,4 +51,5 @@ urlpatterns = patterns('',
     url(r'^sleep/submit/$', 'sleep.views.submitSleep'),
     url(r'^sleep/delete/$', 'sleep.views.deleteSleep'),
     url(r'^$', 'sleep.views.home'),
+    url(r'^faq/$', 'sleep.views.faq'),
 )
