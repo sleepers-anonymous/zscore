@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.http import *
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.core import serializers
 
 from sleep.models import *
 from sleep.forms import *
@@ -118,3 +119,10 @@ def deleteSleep(request):
         s.delete()
         return HttpResponse('')
     return HttpResponseBadRequest('')
+
+@login_required
+def getSleepsJSON(request):
+    u = request.user
+    sleeps = Sleep.objects.filter(user=u)
+    data = serializers.serialize('json', sleeps)
+    return HttpResponse(data, mimetype='application/json')

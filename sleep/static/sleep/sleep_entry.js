@@ -4,35 +4,59 @@ HOURS_PER_DAY = 24
 MINUTES_PER_HOUR = 60
 
 
+// Reverse map from the time to the timeblock
+timeblocks = {};
+// Dict of sleeps by pk
+sleeps = {};
+// Global object for tentative sleep
+tentativeSleep = null;
+// A sleep looks like:
+// 'start' -- a Date object representing the start time/date
+// 'end' -- a Date object representing the end time/date
+// 'comment' -- a String; the user's comment on this sleep
+// 'date' -- a Date object, in which we only care about the
+//           actual day; which day to associate the sleep with
+
 // Track the global mouse state
 // 0 = No click
 // 1 = Click, but no drag
 // 2 = Click and drag
 mouseState = 0;
-// Helper variables to track currently selected range (as we drag)
-startTime = null;
-endTime = null;
 
 function mouseDown(time)
 {
+    // Update mouseState
     mouseState = 1;
-    startTime = time;
-    endTime = null;
+
+    // Create a tentative sleep
+    tentativeSleep = {
+	'start': time,
+	'end': null,
+	'comment': null,
+	'date': null
+    };
 }
 function mouseUp(time)
 {
+    // Update mouseState
     mouseState = 0;
-    endTime = time;
+
+    // Update the tentative sleep
+    tentativeSleep.end = time;
+    // Spawn a popup to make final edits, save the tentative
+    // sleep
     spawnPopup();
 }
 function mouseMove(time)
 {
-    if (mouseState == 1)
+    // Only repond to click-and-drag
+    if (mouseState == 1 || mouseState == 2)
     {
+	// Update mouseState
 	mouseState = 2;
-	if (time != endTime)
+	if (time != tentativeSleep.end)
 	{
-	    endTime = time;
+	    tentativeSleep.end = time;
 	    updateTentativeBox();
 	}
     }
@@ -40,15 +64,106 @@ function mouseMove(time)
 
 function spawnPopup()
 {
-    alert('Done creating sleep: ' + String(startTime) + ' to ' + String(endTime));
+    // TODO
+    alert('Done creating sleep: ' + String(tentativeSleep.start) + ' to ' + String(tentativeSleep.end));
 }
 function updateTentativeBox()
 {
-    //TODO
+    drawSleep(tentativeSleep, true);
+}
+// Handle the JSON response from the server
+// containing a list of our sleeps
+function processSleeps(jsonData)
+{
+    // Clear our current dict of sleeps
+    sleeps = {};
+    // Build a new dict based on JSON data
+    for (var i in jsonData)
+    {
+	var sleep = jsonData[i];
+	sleeps[sleep.pk] = {
+	    'start': new Date(sleep.fields.start_time),
+	    'end': new Date(sleep.fields.end_time),
+	    'comments': sleep.fields.comments,
+	    'date': new Date(sleep.fields.date)
+	};
+    }
+    // Now render all our current sleeps
+    renderSleeps();
+}
+// Render all sleeps in the sleeps dict
+function renderSleeps()
+{
+    for (var i in sleeps)
+    {
+	var sleep = sleeps[i];
+	drawSleep(sleep);
+    }
+}
+// Draw a sleep on the grid
+function drawSleep(sleep, tentative)
+{
+    // Tentative is false by default
+    if (typeof(tentative) === 'undefined') { tentative = false; }
+
+    // Duplicate the input Date objects on the sleep
+    var start = new Date(sleep.start);
+    var end = new Date(sleep.end);
+    // Round off the times to the nearest half-hour
+    var startMinutes = start.getMinutes() + MINUTES_PER_HOUR/4;
+    var endMinutes = end.getMinutes() + MINUTES_PER_HOUR/4;
+    start.setMinutes(startMinutes - (startMinutes % (MINUTES_PER_HOUR/2)));
+    start.setSeconds(0);
+    start.setMicroseconds(0);
+    end.setMinutes(endMinutes - (endMinutes % (MINUTES_PER_HOUR/2)));
+    end.setSeconds(0);
+    end.setMicroseconds(0);
+
+    // First clear all of the current sleep blocks
+    $(".sleep-id-" + tentative?"tentative":sleep.pk).css("background-color", "");
+    // Now find the appropriate blocks and fill them in
+    var startblock = timeblocks[start.getTime()];
+    if (typeof(startblock) !== 'undefined')
+    {
+	var $starttd = startblock['start'];
+	if ($starttd != null)
+	{
+	    $starttd.addClass("sleep-id-" + tentative ? "tentative" : sleep.pk);
+	    $starttd.css("background-color", "green");
+	}
+    }
+    start.setMinutes(start.getMinutes() + MINUTES_PER_HOUR/2);
+    while (start.getTime() < end.getTime())
+    {
+	var block = timeblocks[start.getTime()];
+	if (typeof(block) !== 'undefined')
+	{
+	    var $td = block['start'];
+	    if ($td != null)
+	    {
+		$td.addClass("sleep-id-" + tentative ? "tentative" : sleep.pk);
+		$td.css("background-color", "blue");
+	    }
+	}
+	start.setMinutes(start.getMinutes() + MINUTES_PER_HOUR/2);
+    }
+    var endblock = timeblocks[end.getTime()];
+    if (typeof(endblock) !== 'undefined')
+    {
+	var $endtd = endblock['end'];
+	if ($endtd != null)
+	{
+	    $endtd.addClass("sleep-id-" + tentative ? "tentative" : sleep.pk);
+	    $endtd.css("background-color", "red");
+	}
+    }
 }
 
 $(document).ready(function()
 {
+    // Clear the timeblocks reverse map
+    timeblocks = {};
+
     // Get the sleep grid div, create a table
     var $sleep_grid = $(".sleep_grid");
     var $sleep_table = $("<table></table>").addClass("sleep-table");
@@ -95,8 +210,34 @@ $(document).ready(function()
 
 		$tr.append($td_left);
 		$tr.append($td_right);
+
+		// Add the half-blocks to the reverse map
+		var left_time = t_left.getTime();
+		var mid_time = t_mid.getTime();
+		var right_time = t_right.getTime();
+		if (typeof(timeblocks[left_time]) == 'undefined')
+		{
+		    timeblocks[left_time] = {'start': $td_left, 'end': null};
+		}
+		else
+		{
+		    timeblocks[left_time]['start'] = $td_left;
+		}
+		if (typeof(timeblocks[right_time]) == 'undefined')
+		{
+		    timeblocks[right_time] = {'start': null, 'end': $td_right};
+		}
+		else
+		{
+		    timeblocks[right_time]['end'] = $td_right;
+		}
+		timeblocks[mid_time] = {'start': $td_right, 'end': $td_left};
 	    })();
 	}
 	$sleep_table.append($tr);
     } 
+
+
+    // Get the list of current sleeps and display them in the grid
+    $.post("/sleep/getSleeps/", null, processSleeps);
 });
