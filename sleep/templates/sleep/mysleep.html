@@ -2,7 +2,7 @@
 
 {% block stylesheets %}
 {% load staticfiles %}
-<link rel="stylesheet" type="text/css" href="{% static 'mysleep.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'sleep/mysleep.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -15,8 +15,8 @@
 <div class="sleep-entry-view">
   {% sleepEntryView %}
 </div>
-<div class="stats-view">
-  {% statsView %}
+<div class="sleep-stats-view">
+  {% sleepStatsView %}
 </div>
 
 {% endblock %}

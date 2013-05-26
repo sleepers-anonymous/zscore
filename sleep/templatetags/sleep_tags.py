@@ -4,8 +4,8 @@ import datetime
 register = template.Library()
 
 # Inclusion tags
-@register.inclusion_tag('inclusion/stats.html',takes_context=True)
-def statsView(context):
+@register.inclusion_tag('inclusion/sleep_stats.html',takes_context=True)
+def sleepStatsView(context):
     user = context['request'].user
     sleeper = Sleeper.objects.get(pk=user.pk)
     context['global']=sleeper.movingStats()

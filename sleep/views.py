@@ -14,7 +14,7 @@ def home(request):
 
 @login_required
 def mysleep(request):
-    return HttpResponse(render_to_string('mysleep.html',{},context_instance=RequestContext(request)))
+    return HttpResponse(render_to_string('sleep/mysleep.html',{},context_instance=RequestContext(request)))
 
 def leaderboard(request,sortBy='zScore'):
     if sortBy not in ['zScore','avg','avgSqrt']:
