@@ -107,7 +107,6 @@ def submitSleep(request):
 
 @login_required
 def deleteSleep(request):
-    print "deleteSleep"
     if 'id' in request.POST:
         i = request.POST['id']
         s = Sleep.objects.filter(pk=i)
