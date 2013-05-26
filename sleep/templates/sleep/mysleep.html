@@ -1,22 +1,25 @@
 {% extends "frame.html" %}
 
-{% block stylesheets %}
+{% load sleep_tags %}
 {% load staticfiles %}
+
+{% block stylesheets %}
+{{ block.super }}
 <link rel="stylesheet" type="text/css" href="{% static 'sleep/mysleep.css' %}" />
+{% sleepListView 'css' %}
+{% sleepEntryView 'css' %}
+{% sleepStatsView 'css' %}
 {% endblock %}
 
+
 {% block content %}
-
-{% load sleep_tags %}
-
-<div class="sleep-list-view">
-  {% sleepListView %}
-</div>
 <div class="sleep-entry-view">
   {% sleepEntryView %}
 </div>
 <div class="sleep-stats-view">
   {% sleepStatsView %}
 </div>
-
+<div class="sleep-list-view">
+  {% sleepListView %}
+</div>
 {% endblock %}

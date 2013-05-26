@@ -1,3 +1,6 @@
+{% if renderContent == 'css' %}
+
+{% else %}
 <script type="text/javascript">
 function deleteSleep(id) {
   $.post("/sleep/delete/", {
@@ -22,3 +25,4 @@ function deleteSleep(id) {
     {% endfor %}
   </table>
 </div>
+{% endif %}

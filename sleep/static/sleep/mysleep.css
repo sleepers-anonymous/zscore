@@ -1,7 +1,6 @@
 .sleep-entry-view
 {
-    float: left;
-    width: 45%;
+    width: 96%;
     margin: 2%;
 }
 .sleep-stats-view
@@ -13,7 +12,7 @@
 }
 .sleep-list-view
 {
-    float:right;
+    float: right;
     width: 45%;
     margin: 2%;
 }

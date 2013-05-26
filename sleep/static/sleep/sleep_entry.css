@@ -1,0 +1,22 @@
+.sleep-table
+{
+    border-collapse: collapse;
+}
+.sleep-table tr
+{
+    border-top: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+}
+.sleep-table td
+{
+    padding: 10px;
+}
+.sleep-table .left
+{
+    border-left: 1px solid lightgray;
+    border-right: 1px dotted lightgray;
+}
+.sleep-table .right
+{
+    border-right: 1px solid lightgray;
+}
