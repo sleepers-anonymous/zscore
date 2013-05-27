@@ -10,6 +10,31 @@
 <script type="text/javascript" src="/static/sleep/sleep_entry.js"></script>
 
 
-<div class="sleep_grid">
+<div class="sleep-grid">
+</div>
+
+<div id="confirm-sleep-entry" style="display:none" title="Confirm Sleep Entry">
+  <form>
+    <fieldset>
+      <table>
+	<tr>
+	  <td><label for="start">Start time</label></td>
+	  <td><input type="text" name="start" /></td>
+	</tr>
+	<tr>
+	  <td><label for="end">End time</label></td>
+	  <td><input type="text" name="end" /></td>
+	</tr>
+	<tr>
+	  <td><label for="date">Associated date</label></td>
+	  <td><input type="text" name="date" /></td>
+	</tr>
+	<tr>
+	  <td><label for="comments">User comments</label></td>
+	  <td><input type="text" name="comments" /></td>
+	</tr>
+      </table>
+    </fieldset>
+  </form>
 </div>
 {% endif %}

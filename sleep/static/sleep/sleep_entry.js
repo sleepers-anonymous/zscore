@@ -11,6 +11,7 @@ sleeps = {};
 // Global object for tentative sleep
 tentativeSleep = null;
 // A sleep looks like:
+// 'pk' -- the pk of the sleep ("tentative" for the tentative sleep)
 // 'start' -- a Date object representing the start time/date
 // 'end' -- a Date object representing the end time/date
 // 'comment' -- a String; the user's comment on this sleep
@@ -30,6 +31,7 @@ function mouseDown(time)
 
     // Create a tentative sleep
     tentativeSleep = {
+	'pk': "tentative",
 	'start': time,
 	'end': null,
 	'comment': null,
@@ -57,19 +59,23 @@ function mouseMove(time)
 	if (time != tentativeSleep.end)
 	{
 	    tentativeSleep.end = time;
-	    updateTentativeBox();
+	    drawSleep(tentativeSleep, true);
 	}
     }
 }
 
 function spawnPopup()
 {
-    // TODO
-    alert('Done creating sleep: ' + String(tentativeSleep.start) + ' to ' + String(tentativeSleep.end));
+    $("#confirm-sleep-entry [name='start']").datepicker("setDate", tentativeSleep.start);
+    $("#confirm-sleep-entry [name='end']").datepicker("setDate", tentativeSleep.end);
+    $("#confirm-sleep-entry [name='date']").datepicker("setDate", new Date((tentativeSleep.start.valueOf() + tentativeSleep.end.valueOf()) / 2));
+    $("#confirm-sleep-entry").dialog("open");
 }
-function updateTentativeBox()
+function clearSleep(sleep)
 {
-    drawSleep(tentativeSleep, true);
+    // Clear the sleep blocks
+    $(".sleep-id-" + sleep.pk).removeClass("sleep-id-" + sleep.pk)
+	.css("background-color", "");
 }
 // Handle the JSON response from the server
 // containing a list of our sleeps
@@ -82,6 +88,7 @@ function processSleeps(jsonData)
     {
 	var sleep = jsonData[i];
 	sleeps[sleep.pk] = {
+	    'pk': sleep.pk,
 	    'start': new Date(sleep.fields.start_time),
 	    'end': new Date(sleep.fields.end_time),
 	    'comments': sleep.fields.comments,
@@ -101,11 +108,8 @@ function renderSleeps()
     }
 }
 // Draw a sleep on the grid
-function drawSleep(sleep, tentative)
+function drawSleep(sleep)
 {
-    // Tentative is false by default
-    if (typeof(tentative) === 'undefined') { tentative = false; }
-
     // Duplicate the input Date objects on the sleep
     var start = new Date(sleep.start);
     var end = new Date(sleep.end);
@@ -120,7 +124,9 @@ function drawSleep(sleep, tentative)
     end.setMicroseconds(0);
 
     // First clear all of the current sleep blocks
-    $(".sleep-id-" + tentative?"tentative":sleep.pk).css("background-color", "");
+    $(".sleep-id-" + sleep.pk)
+	.css("background-color", "")
+        .removeClass("sleep-id-" + sleep.pk);
     // Now find the appropriate blocks and fill them in
     var startblock = timeblocks[start.getTime()];
     if (typeof(startblock) !== 'undefined')
@@ -128,7 +134,7 @@ function drawSleep(sleep, tentative)
 	var $starttd = startblock['start'];
 	if ($starttd != null)
 	{
-	    $starttd.addClass("sleep-id-" + tentative ? "tentative" : sleep.pk);
+	    $starttd.addClass("sleep-id-" + sleep.pk);
 	    $starttd.css("background-color", "green");
 	}
     }
@@ -141,7 +147,7 @@ function drawSleep(sleep, tentative)
 	    var $td = block['start'];
 	    if ($td != null)
 	    {
-		$td.addClass("sleep-id-" + tentative ? "tentative" : sleep.pk);
+		$td.addClass("sleep-id-" + sleep.pk);
 		$td.css("background-color", "blue");
 	    }
 	}
@@ -153,7 +159,7 @@ function drawSleep(sleep, tentative)
 	var $endtd = endblock['end'];
 	if ($endtd != null)
 	{
-	    $endtd.addClass("sleep-id-" + tentative ? "tentative" : sleep.pk);
+	    $endtd.addClass("sleep-id-" + sleep.pk);
 	    $endtd.css("background-color", "red");
 	}
     }
@@ -165,7 +171,7 @@ $(document).ready(function()
     timeblocks = {};
 
     // Get the sleep grid div, create a table
-    var $sleep_grid = $(".sleep_grid");
+    var $sleep_grid = $(".sleep-grid");
     var $sleep_table = $("<table></table>").addClass("sleep-table");
     $sleep_table.prop("cellspacing", 0).prop("cellpadding", 0);
     $sleep_grid.append($sleep_table);
@@ -240,4 +246,43 @@ $(document).ready(function()
 
     // Get the list of current sleeps and display them in the grid
     $.post("/sleep/getSleeps/", null, processSleeps);
+
+
+    // Set the fields of the confirm sleep dialog to be datetimepicker objects
+    $("#confirm-sleep-entry [name='start']").datetimepicker();
+    $("#confirm-sleep-entry [name='end']").datetimepicker();
+    $("#confirm-sleep-entry [name='date']").datepicker();
+    // Set up the confirm sleep dialog
+    $("#confirm-sleep-entry").dialog({
+	autoOpen: false,
+	height: 350,
+	width: 400,
+	modal: true,
+	buttons:
+	{
+	    "Create sleep": function()
+	    {
+		// Create the sleep
+		$.post("/sleep/create/", {
+		    "start[]": dateToArray($("#confirm-sleep-entry [name='start']").datepicker("getDate")),
+		    "end[]": dateToArray($("#confirm-sleep-entry [name='end']").datepicker("getDate")),
+		    "date[]": dateToArray($("#confirm-sleep-entry [name='date']").datepicker("getDate")),
+		    "comments": $("#confirm-sleep-entry [name='comments']").val()
+		}, function() {
+		    // TODO: Update the page dyanmically (without reloading)
+		    // For now:
+		    location.reload();
+		});
+	    },
+	    Cancel: function()
+	    {
+		$(this).dialog("close");
+	    }
+	},
+	close: function()
+	{
+	    clearSleep(tentativeSleep);
+	    $(".confirm-sleep-entry input").removeClass("ui-state-error");
+	}
+    });
 });

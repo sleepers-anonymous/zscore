@@ -99,14 +99,18 @@ def editProfile(request):
             
 
 @login_required
-def submitSleep(request):
-    # TODO: Accept comments
+def createSleep(request):
     # Date-ify start, end, and center
     start = datetime.datetime(*(map(int, request.POST.getlist("start[]"))))
     end = datetime.datetime(*(map(int, request.POST.getlist("end[]"))))
-    center = datetime.date(*(map(int, request.POST.getlist("center[]"))[:3]))
+    date = datetime.date(*(map(int, request.POST.getlist("date[]"))[:3]))
+    # Pull out comments
+    if "comments" in request.POST:
+        comments = request.POST["comments"]
+    else:
+        comments = ""
     # Create the Sleep instance
-    Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments="", date=center)
+    Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments=comments, date=date)
     return HttpResponse('')
 
 @login_required
