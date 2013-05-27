@@ -56,6 +56,11 @@ class Sleep(models.Model):
         for i in sleepq:
             if not overlaps(self, i): raise ValidationError(u'Error: Overlapping Sleep Detected! You can\' be asleep twice at the same time!')
 
+class Allnighter(models.Model):
+    user = models.ForeignKey(User)
+    date = models.DateField()
+    comments = models.TextField(blank=True)
+
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default

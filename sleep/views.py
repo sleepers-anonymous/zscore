@@ -13,6 +13,9 @@ import datetime
 def home(request):
     return render(request, 'index.html')
 
+def faq(request):
+    return render(request, 'faq.html')
+
 @login_required
 def mysleep(request):
     return HttpResponse(render_to_string('sleep/mysleep.html',{},context_instance=RequestContext(request)))
