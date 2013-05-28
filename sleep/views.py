@@ -77,7 +77,7 @@ def creep(request,username=None):
             return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
         context = {
                 'user' : user,
-                'global' : user.movingStats(),
+                'global' : user.decayStats(),
                 }
         if priv>=p.PRIVACY_PUBLIC:
             context['sleeps']=user.sleep_set.all().order_by('-end_time')

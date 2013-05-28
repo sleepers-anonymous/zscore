@@ -109,7 +109,7 @@ class SleeperManager(models.Manager):
                 else:
                     sleeper.displayName=sleeper.username
                 if priv>p.PRIVACY_HIDDEN:
-                    d=sleeper.movingStats()
+                    d=sleeper.decayStats()
                     d['user']=sleeper
                     if user.is_authenticated() and user.pk==sleeper.pk:
                         d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
@@ -118,7 +118,7 @@ class SleeperManager(models.Manager):
                     scored.append(d)
             else:
                 if 'is_authenticated' in dir(user) and user.is_authenticated() and user.pk == sleeper.pk:
-                    d = sleeper.movingStats()
+                    d = sleeper.decayStats()
                     d['rank']='n/a'
                     sleeper.displayName=sleeper.username
                     d['user']=sleeper
@@ -197,7 +197,7 @@ class Sleeper(User):
             w = w*(len(data)-1.5)/len(data)
         return s/w
 
-    def decayStats(self,end=datetime.date.max,hl=3):
+    def decayStats(self,end=datetime.date.max,hl=4):
         sleep = self.sleepPerDay(datetime.date.min,end)
         d = {}
         try:
