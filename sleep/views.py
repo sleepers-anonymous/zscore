@@ -4,6 +4,7 @@ from django.http import *
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.core import serializers
+from django.db.models import Q
 
 from sleep.models import *
 from sleep.forms import *
@@ -36,8 +37,18 @@ def creep(request,username=None):
     if not username:
         if request.user.is_anonymous():
             creepable=Sleeper.objects.filter(sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS)
+            followed = []
         else:
-            creepable=Sleeper.objects.filter(sleeperprofile__privacyLoggedIn__gte=SleeperProfile.PRIVACY_STATS)
+            creepable=Sleeper.objects.filter(
+                    Q(sleeperprofile__privacyLoggedIn__gte=SleeperProfile.PRIVACY_STATS) | 
+                    (
+                        Q(sleeperprofile__privacyFriends__gte=SleeperProfile.PRIVACY_STATS) &
+                        Q(sleeperprofile__friends=request.user)
+                    )
+                )
+            sleeper = Sleeper.objects.get(pk=request.user.pk)
+            prof = sleeper.getOrCreateProfile()
+            followed = prof.follows.all()
         total=creepable.count()
         if request.method == 'POST':
             form=CreepSearchForm(request.POST)
@@ -53,6 +64,7 @@ def creep(request,username=None):
                             'form' : form,
                             'new' : False,
                             'total' : total,
+                            'followed' : followed,
                             }
                     return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
         else:
@@ -61,6 +73,7 @@ def creep(request,username=None):
                 'form' : form,
                 'new' : True,
                 'total' : total,
+                'followed' : followed,
                 }
         return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
     else:
@@ -69,6 +82,8 @@ def creep(request,username=None):
             p = user.getOrCreateProfile()
             if user.is_anonymous():
                 priv = p.privacy
+            elif request.user in p.friends.all():
+                priv = p.privacyFriends
             else:
                 priv = p.privacyLoggedIn
             if priv<=p.PRIVACY_NORMAL:
@@ -96,7 +111,90 @@ def editProfile(request):
         form = SleeperProfileForm(instance=p)
 
     return HttpResponse(render_to_string('editprofile.html', {'form': form},context_instance=RequestContext(request)))
+
+@login_required
+def friends(request):
+    sleeper = Sleeper.objects.get(pk=request.user.pk)
+    prof = sleeper.getOrCreateProfile()
+    friended = prof.friends.all()
+    followed = prof.follows.all()
+    if request.method == 'POST':
+        form=FriendSearchForm(request.POST)
+        if form.is_valid():
+            users = User.objects.filter(username__icontains=form.cleaned_data['username'])
+            count = users.count()
+            context = {
+                    'results' : users,
+                    'count' : count,
+                    'form' : form,
+                    'new' : False,
+                    'friended' : friended,
+                    'followed' : followed,
+                    }
+            return HttpResponse(render_to_string('friends.html',context,context_instance=RequestContext(request)))
+    else:
+        form = FriendSearchForm()
+    context = {
+            'form' : form,
+            'new' : True,
+            'friended' : friended,
+            'followed' : followed,
+            }
+    return HttpResponse(render_to_string('friends.html',context,context_instance=RequestContext(request)))
             
+@login_required
+def addFriend(request):
+    if 'id' in request.POST:
+        i = request.POST['id']
+        if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
+            return HttpResponseNotFound('')
+        sleeper = Sleeper.objects.get(pk=request.user.pk)
+        prof = sleeper.getOrCreateProfile()
+        prof.friends.add(i)
+        prof.save()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def removeFriend(request):
+    if 'id' in request.POST:
+        i = request.POST['id']
+        if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
+            return HttpResponseNotFound('')
+        sleeper = Sleeper.objects.get(pk=request.user.pk)
+        prof = sleeper.getOrCreateProfile()
+        prof.friends.remove(i)
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def follow(request):
+    if 'id' in request.POST:
+        i = request.POST['id']
+        if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
+            return HttpResponseNotFound('')
+        sleeper = Sleeper.objects.get(pk=request.user.pk)
+        prof = sleeper.getOrCreateProfile()
+        prof.follows.add(i)
+        prof.save()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def unfollow(request):
+    if 'id' in request.POST:
+        i = request.POST['id']
+        if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
+            return HttpResponseNotFound('')
+        sleeper = Sleeper.objects.get(pk=request.user.pk)
+        prof = sleeper.getOrCreateProfile()
+        prof.follows.remove(i)
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
 
 @login_required
 def createSleep(request):
