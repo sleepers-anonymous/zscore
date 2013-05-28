@@ -183,10 +183,26 @@ $(document).ready(function()
     today.setSeconds(0);
     today.setMilliseconds(0);
 
+    // Create a header for the times
+    var $tr = $("<tr></tr>").addClass("header-row");
+    $tr.append($("<th></th>").addClass("corner"));
+    for (var h = 0; h < HOURS_PER_DAY; ++h)
+    {
+	var $th = $("<th colspan=2></th>").addClass("column-header")
+	    .html(h + ":00");
+	$tr.append($th);
+    }
+    $sleep_table.append($tr);
     // Iterate backwards over the past week, starting from the current date
     for (var d = 0; d < DAYS_PER_WEEK; ++d)
     {
 	var $tr = $("<tr></tr>");
+	// Create a header for the row
+	var date = new Date(today);
+	date.setDate(date.getDate() - d);
+	var $td = $("<td></td>").html(date.toLocaleDateString())
+	    .addClass("row-header");
+	$tr.append($td);
 	// Create a left and right cell per hour
 	for (var h = 0; h < HOURS_PER_DAY; ++h)
 	{

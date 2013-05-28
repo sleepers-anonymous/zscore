@@ -1,15 +1,26 @@
 .sleep-table
 {
     border-collapse: collapse;
+    min-width: 1500px;
 }
-.sleep-table tr
+.sleep-table .corner
+{
+    width: 200px;
+}
+.sleep-table .column-header
+{
+    width: 60px;
+}
+.sleep-table .row-header
+{
+    border-left: 1px solid lightgray;
+    padding: 10px;
+    text-align: center;
+}
+.sleep-table tr:not(.header-row)
 {
     border-top: 1px solid lightgray;
     border-bottom: 1px solid lightgray;
-}
-.sleep-table td
-{
-    padding: 10px;
 }
 .sleep-table .left
 {
