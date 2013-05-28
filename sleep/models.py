@@ -78,6 +78,9 @@ class SleeperProfile(models.Model):
             )
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to anonymous users')
     privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to logged-in users')
+    privacyFriends = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to friends')
+    friends = models.ManyToManyField(User,related_name='friends+',blank=True)
+    follows = models.ManyToManyField(User,related_name='follows+',blank=True)
     use12HourTime = models.BooleanField(default=False)
 
     emailreminders = models.BooleanField(default=False)
