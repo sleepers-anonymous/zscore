@@ -24,6 +24,41 @@ tentativeSleep = null;
 // 2 = Click and drag
 mouseState = 0;
 
+// Utility function used by the mouseX functions to choose
+// a reasonable end time, if the one you are hovering over
+// would cause a negative time sleep
+function getValidEndTime(startTime, endTime)
+{
+    // Duplicate endTime, since we don't ever want to return
+    // the original (because it's likely we'll be mutating
+    // what we return)
+    var newEndTime = new Date(endTime);
+    if (newEndTime > startTime)
+    {
+	return newEndTime;
+    }
+
+    // Try bumping the end time to the current date
+    newEndTime.setDate(startTime.getDate());
+    if (newEndTime > startTime)
+    {
+	return newEndTime;
+    }
+
+    // Bump up by one more day, if that doesn't put us
+    // into the future. Else, just return the same time as
+    // the startTime.
+    var dateToday = (new Date()).getDate();
+    if (newEndTime.getDate() < dateToday)
+    {
+	newEndTime.setDate(newEndTime.getDate()+1);
+	return newEndTime;
+    }
+    else
+    {
+	return new Date(startTime);
+    }
+}
 function mouseDown(startTime, endTime)
 {
     // If we aren't in the middle of creating a sleep,
@@ -49,7 +84,7 @@ function mouseDown(startTime, endTime)
 	// Update mouseState
 	mouseState = 0;
 	// Complete the tentative sleep
-	tentativeSleep.end = endTime;
+	tentativeSleep.end = getValidEndTime(tentativeSleep.start, endTime);
 	// Spawn a popup to make final edits, save the tentative
 	// sleep
 	spawnPopup();
@@ -64,7 +99,7 @@ function mouseUp(startTime, endTime)
 	mouseState = 0;
 
 	// Update the tentative sleep
-	tentativeSleep.end = endTime;
+	tentativeSleep.end = getValidEndTime(tentativeSleep.start, endTime);
 	// Spawn a popup to make final edits, save the tentative
 	// sleep
 	spawnPopup();
@@ -77,9 +112,9 @@ function mouseMove(startTime, endTime)
     {
 	// Update mouseState
 	mouseState = 2;
-	if (endTime != tentativeSleep.end)
+	if (getValidEndTime(tentativeSleep.start, endTime) != tentativeSleep.end)
 	{
-	    tentativeSleep.end = endTime;
+	    tentativeSleep.end = getValidEndTime(tentativeSleep.start, endTime);
 	    drawSleep(tentativeSleep);
 	}
     }
