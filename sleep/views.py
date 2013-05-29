@@ -121,7 +121,7 @@ def friends(request):
     if request.method == 'POST':
         form=FriendSearchForm(request.POST)
         if form.is_valid():
-            users = User.objects.filter(username__icontains=form.cleaned_data['username'])
+            users = User.objects.filter(username__icontains=form.cleaned_data['username']).exclude(pk=request.user.pk)
             count = users.count()
             context = {
                     'results' : users,

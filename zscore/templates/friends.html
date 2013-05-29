@@ -90,9 +90,19 @@ Users you <i>follow</i> will show up here and in the <a href="/creep/">creep</a>
             {% for user in results %}
                 <tr>
                     <td>{{user.username}}</td>
+                    {% if user not in friended %}
                     <td><a class="add-friend-button" onclick="addFriend({{user.id}});" href="javascript:void(0);">friend</a></td>
+                    {% else %}
+                    <td>(already friends)</td>
+                    {% endif %}
+                    {% if user not in followed %}
                     <td><a class="follow-button" onclick="follow({{user.id}});" href="javascript:void(0);">follow</a></td>
+                    {% else %}
+                    <td>(already following)</td>
+                    {% endif %}
+                    {% if user not in friended and user not in followed %}
                     <td><a class="add-and-follow-button" onclick="addAndFollow({{user.id}});" href="javascript:void(0);">both</a></td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </table>
