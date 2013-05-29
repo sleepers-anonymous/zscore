@@ -24,42 +24,63 @@ tentativeSleep = null;
 // 2 = Click and drag
 mouseState = 0;
 
-function mouseDown(time)
+function mouseDown(startTime, endTime)
 {
-    // Update mouseState
-    mouseState = 1;
+    // If we aren't in the middle of creating a sleep,
+    // initiate a new one.
+    if (mouseState == 0 || mouseState == 1)
+    {
+	// Update mouseState
+	mouseState = 1;
 
-    // Create a tentative sleep
-    tentativeSleep = {
-	'pk': "tentative",
-	'start': time,
-	'end': null,
-	'comment': null,
-	'date': null
-    };
+	// Create a tentative sleep
+	tentativeSleep = {
+	    'pk': "tentative",
+	    'start': startTime,
+	    'end': null,
+	    'comment': null,
+	    'date': null
+	};
+    }
+    // If we were in the middle of creating a sleep,
+    // use this to terminate the sleep
+    else
+    {
+	// Update mouseState
+	mouseState = 0;
+	// Complete the tentative sleep
+	tentativeSleep.end = endTime;
+	// Spawn a popup to make final edits, save the tentative
+	// sleep
+	spawnPopup();
+    }
 }
-function mouseUp(time)
+function mouseUp(startTime, endTime)
 {
-    // Update mouseState
-    mouseState = 0;
+    // Only if we were previously dragging, complete this sleep
+    if (mouseState == 2)
+    {
+	// Update mouseState
+	mouseState = 0;
 
-    // Update the tentative sleep
-    tentativeSleep.end = time;
-    // Spawn a popup to make final edits, save the tentative
-    // sleep
-    spawnPopup();
+	// Update the tentative sleep
+	tentativeSleep.end = endTime;
+	// Spawn a popup to make final edits, save the tentative
+	// sleep
+	spawnPopup();
+    }
 }
-function mouseMove(time)
+function mouseMove(startTime, endTime)
 {
     // Only repond to click-and-drag
     if (mouseState == 1 || mouseState == 2)
     {
 	// Update mouseState
 	mouseState = 2;
-	if (time != tentativeSleep.end)
+	if (endTime != tentativeSleep.end)
 	{
-	    tentativeSleep.end = time;
-	    drawSleep(tentativeSleep, true);
+	    tentativeSleep.end = endTime;
+	    drawSleep(tentativeSleep);
 	}
     }
 }
@@ -222,13 +243,13 @@ $(document).ready(function()
 		// Split the block into the two half-hours;
 		// Set the mouse triggers
 		var $td_left = $("<td></td>").addClass("left");
-		$td_left.mousedown(function() {mouseDown(t_left)})
-		    .mousemove(function() {mouseMove(t_mid)})
-		    .mouseup(function() {mouseUp(t_mid)});
+		$td_left.mousedown(function() {mouseDown(t_left, t_mid)})
+		    .mousemove(function() {mouseMove(t_left, t_mid)})
+		    .mouseup(function() {mouseUp(t_left, t_mid)});
 		var $td_right = $("<td></td>").addClass("right");
-		$td_right.mousedown(function() {mouseDown(t_mid)})
-		    .mousemove(function() {mouseMove(t_right)})
-		    .mouseup(function() {mouseUp(t_right)});
+		$td_right.mousedown(function() {mouseDown(t_mid, t_right)})
+		    .mousemove(function() {mouseMove(t_mid, t_right)})
+		    .mouseup(function() {mouseUp(t_mid, t_right)});
 
 		$tr.append($td_left);
 		$tr.append($td_right);
