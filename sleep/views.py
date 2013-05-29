@@ -53,7 +53,7 @@ def creep(request,username=None):
         if request.method == 'POST':
             form=CreepSearchForm(request.POST)
             if form.is_valid():
-                users = creepable.filter(username__icontains=form.cleaned_data['username'])
+                users = creepable.filter(username__icontains=form.cleaned_data['username']).distinct()
                 count = users.count()
                 if count==1:
                     return HttpResponseRedirect('/creep/%s/' % users[0].username)
