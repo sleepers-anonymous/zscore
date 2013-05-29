@@ -164,33 +164,40 @@ function renderSleeps()
 }
 // Draw floating box from $td1 to $td2, potentially
 // drawing the beginning and end as a continuing beginning/end
-function drawSleepBox(sleep_pk, $td1, $td2, cont1, cont2)
+function drawSleepBox(sleep_pk, $td1, $td2, drawStartIcon, drawEndIcon)
 {
     // Fill in default values
-    if (typeof(cont1) === 'undefined')
+    if (typeof(drawStartIcon) === 'undefined')
     {
-	cont1 = false;
+	drawStartIcon = true;
     }
-    if (typeof(cont2) === 'undefined')
+    if (typeof(drawEndIcon) === 'undefined')
     {
-	cont2 = false;
+	drawEndIcon = true;
     }
 
+    // Compute the width and draw the box itself
     var width = $td2.position().left - $td1.position().left;
     var $sleep_box = $("<div></div>").css("padding-right", width+19).css("margin-right", -width-21)
 	.css("margin-left", 1).addClass("sleep-box")
 	.addClass("sleep-id-" + sleep_pk);
-    if (sleep_pk == "tentative")
+    // Add the tentative class if it's a tentative box (changes the color)
+    if (sleep_pk == "tentative") $sleep_box.addClass("tentative");
+
+    // Draw the start icon if needed
+    if (drawStartIcon)
     {
-	$sleep_box.addClass("tentative");
+	var $sleep_box_start = $("<div class='start'></div>");
+	if (sleep_pk == "tentative") $sleep_box_start.addClass("tentative");
+	$sleep_box.append($sleep_box_start);
     }
-    var $sleep_box_start = $("<div class='start'></div>");
-    var $sleep_box_end = $("<div class='end'></div>").css("margin-right", -width-29);
-    $sleep_box.append($sleep_box_start);
-    $sleep_box.append($sleep_box_end);
+    if (drawEndIcon)
+    {
+	var $sleep_box_end = $("<div class='end'></div>").css("margin-right", -width-29);
+	if (sleep_pk == "tentative") $sleep_box_end.addClass("tentative");
+	$sleep_box.append($sleep_box_end);
+    }
     $td1.append($sleep_box);
-    
-    // TODO: Handle cont1, cont2
 }
 // Draw a sleep on the grid
 function drawSleep(sleep)
