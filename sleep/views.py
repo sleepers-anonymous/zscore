@@ -49,7 +49,7 @@ def creep(request,username=None):
             sleeper = Sleeper.objects.get(pk=request.user.pk)
             prof = sleeper.getOrCreateProfile()
             followed = prof.follows.all()
-        total=creepable.count()
+        total=creepable.distinct().count()
         if request.method == 'POST':
             form=CreepSearchForm(request.POST)
             if form.is_valid():
@@ -121,7 +121,7 @@ def friends(request):
     if request.method == 'POST':
         form=FriendSearchForm(request.POST)
         if form.is_valid():
-            users = User.objects.filter(username__icontains=form.cleaned_data['username']).exclude(pk=request.user.pk)
+            users = User.objects.filter(username__icontains=form.cleaned_data['username']).exclude(pk=request.user.pk).distinct()
             count = users.count()
             context = {
                     'results' : users,
