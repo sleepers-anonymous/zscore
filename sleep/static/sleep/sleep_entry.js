@@ -129,9 +129,8 @@ function spawnPopup()
 }
 function clearSleep(sleep)
 {
-    // Clear the sleep blocks
-    $(".sleep-id-" + sleep.pk).removeClass("sleep-id-" + sleep.pk)
-	.css("background-color", "");
+    // Clear the sleep box
+    $(".sleep-id-" + sleep.pk).remove();
 }
 // Handle the JSON response from the server
 // containing a list of our sleeps
@@ -163,6 +162,36 @@ function renderSleeps()
 	drawSleep(sleep);
     }
 }
+// Draw floating box from $td1 to $td2, potentially
+// drawing the beginning and end as a continuing beginning/end
+function drawSleepBox(sleep_pk, $td1, $td2, cont1, cont2)
+{
+    // Fill in default values
+    if (typeof(cont1) === 'undefined')
+    {
+	cont1 = false;
+    }
+    if (typeof(cont2) === 'undefined')
+    {
+	cont2 = false;
+    }
+
+    var width = $td2.position().left - $td1.position().left;
+    var $sleep_box = $("<div></div>").css("padding-right", width+19).css("margin-right", -width-21)
+	.css("margin-left", 1).addClass("sleep-box")
+	.addClass("sleep-id-" + sleep_pk);
+    if (sleep_pk == "tentative")
+    {
+	$sleep_box.addClass("tentative");
+    }
+    var $sleep_box_start = $("<div class='start'></div>");
+    var $sleep_box_end = $("<div class='end'></div>").css("margin-right", -width-29);
+    $sleep_box.append($sleep_box_start);
+    $sleep_box.append($sleep_box_end);
+    $td1.append($sleep_box);
+    
+    // TODO: Handle cont1, cont2
+}
 // Draw a sleep on the grid
 function drawSleep(sleep)
 {
@@ -179,46 +208,18 @@ function drawSleep(sleep)
     end.setSeconds(0);
     end.setMicroseconds(0);
 
-    // First clear all of the current sleep blocks
-    $(".sleep-id-" + sleep.pk)
-	.css("background-color", "")
-        .removeClass("sleep-id-" + sleep.pk);
+    // First clear the current sleep box
+    $(".sleep-id-" + sleep.pk).remove();
     // Now find the appropriate blocks and fill them in
     var startblock = timeblocks[start.getTime()];
-    if (typeof(startblock) !== 'undefined')
-    {
-	var $starttd = startblock['start'];
-	if ($starttd != null)
-	{
-	    $starttd.addClass("sleep-id-" + sleep.pk);
-	    $starttd.css("background-color", "green");
-	}
-    }
-    start.setMinutes(start.getMinutes() + MINUTES_PER_HOUR/2);
-    while (start.getTime() < end.getTime())
-    {
-	var block = timeblocks[start.getTime()];
-	if (typeof(block) !== 'undefined')
-	{
-	    var $td = block['start'];
-	    if ($td != null)
-	    {
-		$td.addClass("sleep-id-" + sleep.pk);
-		$td.css("background-color", "blue");
-	    }
-	}
-	start.setMinutes(start.getMinutes() + MINUTES_PER_HOUR/2);
-    }
+    if (typeof(startblock) === 'undefined') return false;
+    var $starttd = startblock['start'];
+    if ($starttd == null) return false;
     var endblock = timeblocks[end.getTime()];
-    if (typeof(endblock) !== 'undefined')
-    {
-	var $endtd = endblock['end'];
-	if ($endtd != null)
-	{
-	    $endtd.addClass("sleep-id-" + sleep.pk);
-	    $endtd.css("background-color", "red");
-	}
-    }
+    if (typeof(endblock) === 'undefined') return false;
+    var $endtd = endblock['end'];
+    if ($endtd == null) return false;
+    drawSleepBox(sleep.pk, $starttd, $endtd);
 }
 
 $(document).ready(function()
