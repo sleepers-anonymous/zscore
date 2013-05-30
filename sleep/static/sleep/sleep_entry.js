@@ -393,6 +393,7 @@ $(document).ready(function()
 	height: 350,
 	width: 400,
 	modal: true,
+	position: {my: "center top", at: "center top", of: window},
 	buttons:
 	{
 	    "Create sleep": function()
