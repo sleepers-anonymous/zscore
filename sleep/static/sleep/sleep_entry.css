@@ -31,3 +31,43 @@
 {
     border-right: 1px solid lightgray;
 }
+
+.sleep-box
+{
+    background-color: purple;
+    position: relative; /* Floats the box on top of the table */
+    /*border: 1px solid purple;*/
+    width: 0;
+    height: 10px;
+}
+.sleep-box.tentative
+{
+    background-color: orange;
+}
+.sleep-box .start
+{
+    border-radius: 5px;
+    padding: 5px;
+    margin-left: -5px;
+    margin-right: -5px;
+    background-color: purple;
+    float: left;
+}
+.sleep-box .start.tentative
+{
+    background-color: orange;
+}
+.sleep-box .end
+{
+    border-left: 10px solid purple;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    float: right;
+    margin-left: -10px;
+}
+.sleep-box .end.tentative
+{
+    border-left: 10px solid orange;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}

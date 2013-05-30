@@ -24,42 +24,98 @@ tentativeSleep = null;
 // 2 = Click and drag
 mouseState = 0;
 
-function mouseDown(time)
+// Utility function used by the mouseX functions to choose
+// a reasonable end time, if the one you are hovering over
+// would cause a negative time sleep
+function getValidEndTime(startTime, endTime)
 {
-    // Update mouseState
-    mouseState = 1;
+    // Duplicate endTime, since we don't ever want to return
+    // the original (because it's likely we'll be mutating
+    // what we return)
+    var newEndTime = new Date(endTime);
+    if (newEndTime > startTime)
+    {
+	return newEndTime;
+    }
 
-    // Create a tentative sleep
-    tentativeSleep = {
-	'pk': "tentative",
-	'start': time,
-	'end': null,
-	'comment': null,
-	'date': null
-    };
+    // Try bumping the end time to the current date
+    newEndTime.setDate(startTime.getDate());
+    if (newEndTime > startTime)
+    {
+	return newEndTime;
+    }
+
+    // Bump up by one more day, if that doesn't put us
+    // into the future. Else, just return the same time as
+    // the startTime.
+    var dateToday = (new Date()).getDate();
+    if (newEndTime.getDate() < dateToday)
+    {
+	newEndTime.setDate(newEndTime.getDate()+1);
+	return newEndTime;
+    }
+    else
+    {
+	return new Date(startTime);
+    }
 }
-function mouseUp(time)
+function mouseDown(startTime, endTime)
 {
-    // Update mouseState
-    mouseState = 0;
+    // If we aren't in the middle of creating a sleep,
+    // initiate a new one.
+    if (mouseState == 0 || mouseState == 1)
+    {
+	// Update mouseState
+	mouseState = 1;
 
-    // Update the tentative sleep
-    tentativeSleep.end = time;
-    // Spawn a popup to make final edits, save the tentative
-    // sleep
-    spawnPopup();
+	// Create a tentative sleep
+	tentativeSleep = {
+	    'pk': "tentative",
+	    'start': startTime,
+	    'end': null,
+	    'comment': null,
+	    'date': null
+	};
+    }
+    // If we were in the middle of creating a sleep,
+    // use this to terminate the sleep
+    else
+    {
+	// Update mouseState
+	mouseState = 0;
+	// Complete the tentative sleep
+	tentativeSleep.end = getValidEndTime(tentativeSleep.start, endTime);
+	// Spawn a popup to make final edits, save the tentative
+	// sleep
+	spawnPopup();
+    }
 }
-function mouseMove(time)
+function mouseUp(startTime, endTime)
+{
+    // Only if we were previously dragging, complete this sleep
+    if (mouseState == 2)
+    {
+	// Update mouseState
+	mouseState = 0;
+
+	// Update the tentative sleep
+	tentativeSleep.end = getValidEndTime(tentativeSleep.start, endTime);
+	// Spawn a popup to make final edits, save the tentative
+	// sleep
+	spawnPopup();
+    }
+}
+function mouseMove(startTime, endTime)
 {
     // Only repond to click-and-drag
     if (mouseState == 1 || mouseState == 2)
     {
 	// Update mouseState
 	mouseState = 2;
-	if (time != tentativeSleep.end)
+	if (getValidEndTime(tentativeSleep.start, endTime) != tentativeSleep.end)
 	{
-	    tentativeSleep.end = time;
-	    drawSleep(tentativeSleep, true);
+	    tentativeSleep.end = getValidEndTime(tentativeSleep.start, endTime);
+	    drawSleep(tentativeSleep);
 	}
     }
 }
@@ -73,9 +129,8 @@ function spawnPopup()
 }
 function clearSleep(sleep)
 {
-    // Clear the sleep blocks
-    $(".sleep-id-" + sleep.pk).removeClass("sleep-id-" + sleep.pk)
-	.css("background-color", "");
+    // Clear the sleep box
+    $(".sleep-id-" + sleep.pk).remove();
 }
 // Handle the JSON response from the server
 // containing a list of our sleeps
@@ -107,6 +162,43 @@ function renderSleeps()
 	drawSleep(sleep);
     }
 }
+// Draw floating box from $td1 to $td2, potentially
+// drawing the beginning and end as a continuing beginning/end
+function drawSleepBox(sleep_pk, $td1, $td2, drawStartIcon, drawEndIcon)
+{
+    // Fill in default values
+    if (typeof(drawStartIcon) === 'undefined')
+    {
+	drawStartIcon = true;
+    }
+    if (typeof(drawEndIcon) === 'undefined')
+    {
+	drawEndIcon = true;
+    }
+
+    // Compute the width and draw the box itself
+    var width = $td2.position().left - $td1.position().left;
+    var $sleep_box = $("<div></div>").css("padding-right", width+19).css("margin-right", -width-21)
+	.css("margin-left", 1).addClass("sleep-box")
+	.addClass("sleep-id-" + sleep_pk);
+    // Add the tentative class if it's a tentative box (changes the color)
+    if (sleep_pk == "tentative") $sleep_box.addClass("tentative");
+
+    // Draw the start icon if needed
+    if (drawStartIcon)
+    {
+	var $sleep_box_start = $("<div class='start'></div>");
+	if (sleep_pk == "tentative") $sleep_box_start.addClass("tentative");
+	$sleep_box.append($sleep_box_start);
+    }
+    if (drawEndIcon)
+    {
+	var $sleep_box_end = $("<div class='end'></div>").css("margin-right", -width-29);
+	if (sleep_pk == "tentative") $sleep_box_end.addClass("tentative");
+	$sleep_box.append($sleep_box_end);
+    }
+    $td1.append($sleep_box);
+}
 // Draw a sleep on the grid
 function drawSleep(sleep)
 {
@@ -123,44 +215,71 @@ function drawSleep(sleep)
     end.setSeconds(0);
     end.setMicroseconds(0);
 
-    // First clear all of the current sleep blocks
-    $(".sleep-id-" + sleep.pk)
-	.css("background-color", "")
-        .removeClass("sleep-id-" + sleep.pk);
-    // Now find the appropriate blocks and fill them in
+    // First clear the current sleep box
+    $(".sleep-id-" + sleep.pk).remove();
+    // Now find the appropriate blocks
     var startblock = timeblocks[start.getTime()];
-    if (typeof(startblock) !== 'undefined')
-    {
-	var $starttd = startblock['start'];
-	if ($starttd != null)
-	{
-	    $starttd.addClass("sleep-id-" + sleep.pk);
-	    $starttd.css("background-color", "green");
-	}
-    }
-    start.setMinutes(start.getMinutes() + MINUTES_PER_HOUR/2);
-    while (start.getTime() < end.getTime())
-    {
-	var block = timeblocks[start.getTime()];
-	if (typeof(block) !== 'undefined')
-	{
-	    var $td = block['start'];
-	    if ($td != null)
-	    {
-		$td.addClass("sleep-id-" + sleep.pk);
-		$td.css("background-color", "blue");
-	    }
-	}
-	start.setMinutes(start.getMinutes() + MINUTES_PER_HOUR/2);
-    }
+    if (typeof(startblock) === 'undefined') return false;
+    var $starttd = startblock['start'];
+    if ($starttd == null) return false;
     var endblock = timeblocks[end.getTime()];
-    if (typeof(endblock) !== 'undefined')
+    if (typeof(endblock) === 'undefined') return false;
+    var $endtd = endblock['end'];
+    if ($endtd == null) return false;
+    // Fill them in with carryovers as needed
+    if (start.getDate() == end.getDate())
     {
-	var $endtd = endblock['end'];
-	if ($endtd != null)
+	// It's all one line -- render normally
+	drawSleepBox(sleep.pk, $starttd, $endtd);
+    }
+    else
+    {
+	// Multiline display with carryovers
+	var curDate = new Date(start);
+	while (curDate.getDate() <= end.getDate())
 	{
-	    $endtd.addClass("sleep-id-" + sleep.pk);
-	    $endtd.css("background-color", "red");
+	    if (curDate.getDate() == start.getDate())
+	    {
+		var endRowTime = new Date(start);
+		endRowTime.setHours(24);
+		endRowTime.setMinutes(0);
+		var endRowBlock = timeblocks[endRowTime.getTime()];
+		if (typeof(endRowBlock) === 'undefined') return false;
+		var $endRowTd = endRowBlock['end'];
+		if($endRowTd == null) return false;
+		drawSleepBox(sleep.pk, $starttd, $endRowTd, true, false);
+	    }
+	    else if (curDate.getDate() == end.getDate())
+	    {
+		var beginRowTime = new Date(end);
+		beginRowTime.setHours(0);
+		beginRowTime.setMinutes(0);
+		var beginRowBlock = timeblocks[beginRowTime.getTime()];
+		if (typeof(beginRowBlock) === 'undefined') return false;
+		var $beginRowTd = beginRowBlock['start'];
+		if($beginRowTd == null) return false;
+		drawSleepBox(sleep.pk, $beginRowTd, $endtd, false, true);
+	    }
+	    else
+	    {
+		var beginRowTime = new Date(curDate);
+		beginRowTime.setHours(0);
+		beginRowTime.setMinutes(0);
+		var beginRowBlock = timeblocks[beginRowTime.getTime()];
+		if (typeof(beginRowBlock) === 'undefined') return false;
+		var $beginRowTd = beginRowBlock['start'];
+		if($beginRowTd == null) return false;
+		var endRowTime = new Date(curDate);
+		endRowTime.setHours(24);
+		endRowTime.setMinutes(0);
+		var endRowBlock = timeblocks[endRowTime.getTime()];
+		if (typeof(endRowBlock) === 'undefined') return false;
+		var $endRowTd = endRowBlock['end'];
+		if($endRowTd == null) return false;
+		drawSleepBox(sleep.pk, $beginRowTd, $endRowTd, false, false);
+	    }
+	    // Increment the date
+	    curDate.setDate(curDate.getDate()+1);
 	}
     }
 }
@@ -222,13 +341,13 @@ $(document).ready(function()
 		// Split the block into the two half-hours;
 		// Set the mouse triggers
 		var $td_left = $("<td></td>").addClass("left");
-		$td_left.mousedown(function() {mouseDown(t_left)})
-		    .mousemove(function() {mouseMove(t_mid)})
-		    .mouseup(function() {mouseUp(t_mid)});
+		$td_left.mousedown(function() {mouseDown(t_left, t_mid)})
+		    .mousemove(function() {mouseMove(t_left, t_mid)})
+		    .mouseup(function() {mouseUp(t_left, t_mid)});
 		var $td_right = $("<td></td>").addClass("right");
-		$td_right.mousedown(function() {mouseDown(t_mid)})
-		    .mousemove(function() {mouseMove(t_right)})
-		    .mouseup(function() {mouseUp(t_right)});
+		$td_right.mousedown(function() {mouseDown(t_mid, t_right)})
+		    .mousemove(function() {mouseMove(t_mid, t_right)})
+		    .mouseup(function() {mouseUp(t_mid, t_right)});
 
 		$tr.append($td_left);
 		$tr.append($td_right);
@@ -274,6 +393,7 @@ $(document).ready(function()
 	height: 350,
 	width: 400,
 	modal: true,
+	position: {my: "center top", at: "center top", of: window},
 	buttons:
 	{
 	    "Create sleep": function()
