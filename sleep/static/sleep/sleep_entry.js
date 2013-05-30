@@ -217,7 +217,7 @@ function drawSleep(sleep)
 
     // First clear the current sleep box
     $(".sleep-id-" + sleep.pk).remove();
-    // Now find the appropriate blocks and fill them in
+    // Now find the appropriate blocks
     var startblock = timeblocks[start.getTime()];
     if (typeof(startblock) === 'undefined') return false;
     var $starttd = startblock['start'];
@@ -226,7 +226,62 @@ function drawSleep(sleep)
     if (typeof(endblock) === 'undefined') return false;
     var $endtd = endblock['end'];
     if ($endtd == null) return false;
-    drawSleepBox(sleep.pk, $starttd, $endtd);
+    // Fill them in with carryovers as needed
+    if (start.getDate() == end.getDate())
+    {
+	// It's all one line -- render normally
+	drawSleepBox(sleep.pk, $starttd, $endtd);
+    }
+    else
+    {
+	// Multiline display with carryovers
+	var curDate = new Date(start);
+	while (curDate.getDate() <= end.getDate())
+	{
+	    if (curDate.getDate() == start.getDate())
+	    {
+		var endRowTime = new Date(start);
+		endRowTime.setHours(24);
+		endRowTime.setMinutes(0);
+		var endRowBlock = timeblocks[endRowTime.getTime()];
+		if (typeof(endRowBlock) === 'undefined') return false;
+		var $endRowTd = endRowBlock['end'];
+		if($endRowTd == null) return false;
+		drawSleepBox(sleep.pk, $starttd, $endRowTd, true, false);
+	    }
+	    else if (curDate.getDate() == end.getDate())
+	    {
+		var beginRowTime = new Date(end);
+		beginRowTime.setHours(0);
+		beginRowTime.setMinutes(0);
+		var beginRowBlock = timeblocks[beginRowTime.getTime()];
+		if (typeof(beginRowBlock) === 'undefined') return false;
+		var $beginRowTd = beginRowBlock['start'];
+		if($beginRowTd == null) return false;
+		drawSleepBox(sleep.pk, $beginRowTd, $endtd, false, true);
+	    }
+	    else
+	    {
+		var beginRowTime = new Date(curDate);
+		beginRowTime.setHours(0);
+		beginRowTime.setMinutes(0);
+		var beginRowBlock = timeblocks[beginRowTime.getTime()];
+		if (typeof(beginRowBlock) === 'undefined') return false;
+		var $beginRowTd = beginRowBlock['start'];
+		if($beginRowTd == null) return false;
+		var endRowTime = new Date(curDate);
+		endRowTime.setHours(24);
+		endRowTime.setMinutes(0);
+		var endRowBlock = timeblocks[endRowTime.getTime()];
+		if (typeof(endRowBlock) === 'undefined') return false;
+		var $endRowTd = endRowBlock['end'];
+		if($endRowTd == null) return false;
+		drawSleepBox(sleep.pk, $beginRowTd, $endRowTd, false, false);
+	    }
+	    // Increment the date
+	    curDate.setDate(curDate.getDate()+1);
+	}
+    }
 }
 
 $(document).ready(function()
