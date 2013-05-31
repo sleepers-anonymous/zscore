@@ -6,6 +6,9 @@
 
 <h1>Creep on {{user}}</h1>
 
+{% if isself %}View yourself as <a href="/creep/{{user|lower}}/friends/">a friend</a>, <a href="/creep/{{user|lower}}/user">a zScore user</a>, or <a href="/creep/{{user|lower}}/anon/">random creeper on the internet</a> would see you!
+{% endif %}
+
 <h3>Stats</h3>
 <table>
   <tr><td>zScore</td><td>average</td><td>avgSqrt</td><td>stDev</td></tr>

@@ -33,7 +33,7 @@ def leaderboard(request,sortBy='zScore'):
             }
     return HttpResponse(render_to_string('leaderboard.html',context,context_instance=RequestContext(request)))
 
-def creep(request,username=None):
+def creep(request,username=None, asOther=None):
     if not username:
         if request.user.is_anonymous():
             creepable=Sleeper.objects.filter(sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS)
@@ -77,23 +77,27 @@ def creep(request,username=None):
                 }
         return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
     else:
+        context = {}
         try:
             user=Sleeper.objects.get(username=username)
             p = user.getOrCreateProfile()
             if user.is_anonymous():
                 priv = p.privacy
+            elif request.user.pk == user.pk:
+                priv = p.PRIVACY_PUBLIC
+                context["isself"] =True
             elif request.user in p.friends.all():
                 priv = p.privacyFriends
             else:
                 priv = p.privacyLoggedIn
+            if asOther:
+                otherD = {"friends":p.privacyFriends, "user": p.privacyLoggedIn,"anon": p.privacy}
+                if asOther in otherD: priv = min(priv, otherD[asOther])
             if priv<=p.PRIVACY_NORMAL:
                 return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
         except:
             return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
-        context = {
-                'user' : user,
-                'global' : user.decayStats(),
-                }
+        context.update({'user' : user,'global' : user.decayStats()})
         if priv>=p.PRIVACY_PUBLIC:
             context['sleeps']=user.sleep_set.all().order_by('-end_time')
         return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
