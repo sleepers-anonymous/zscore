@@ -1,0 +1,16 @@
+
+{% extends "frame.html" %}
+
+{% block content %}
+{% load datetime_utils %}
+
+<h1>Edit Sleep (from {{start}} to {{end}})</h1>
+
+<form method="post">{% csrf_token %}
+		{% if saveError %} <p>Overlapping sleep detected </p>{%endif%}
+		{% if successfulSave %}<p>Sleep updated!</p>{%endif%}
+{{ form.as_p }}
+<input type="submit" value="Submit" />
+</form>
+
+{% endblock %}
