@@ -57,6 +57,7 @@ urlpatterns = patterns('',
     url(r'^sleep/getSleeps/$', 'sleep.views.getSleepsJSON'),
     url(r'^sleep/create/$', 'sleep.views.createSleep'),
     url(r'^sleep/delete/$', 'sleep.views.deleteSleep'),
+    url(r'^sleep/edit/(?P<sleep>\d+)/', 'sleep.views.editSleep'),
     url(r'^$', 'sleep.views.home'),
     url(r'^faq/$', 'sleep.views.faq'),
 )
