@@ -11,7 +11,6 @@
 		{% if successfulSave %}<p>Sleep updated!</p>{%endif%}
 {{ form.as_p }}
 <input type="submit" value="Submit" />
-{% if successfulSave %} <button onclick="window.history.go(-2)">Go Back</button>{% endif %}
 </form>
-
+{% if successfulSave %} <button onclick="window.location='/mysleep/'">Go Back</button>{% endif %}
 {% endblock %}
