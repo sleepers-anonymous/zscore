@@ -46,14 +46,15 @@ class Sleep(models.Model):
         return self.end_time - self.start_time
 
     def overlaps(self, otherSleep):
-        return (min(self.end_time, otherSleep.end_time) - max(self.start_time, otherSleep.start_time) < datetime.timedelta(0))
+        return (min(self.end_time, otherSleep.end_time) - max(self.start_time, otherSleep.start_time) > datetime.timedelta(0))
 
     def validate_unique(self, exclude=None):
         #Yes this is derpy and inefficient and really should actually use the exclude field
         from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
-        sleepq = self.user.sleep_set.all()
+        sleepq = self.user.sleep_set.all().exclude(pk = self.pk)
         for i in sleepq:
-            if self.overlaps(i): raise ValidationError(u'Error: Overlapping Sleep Detected! You can\'t be asleep twice at the same time!')
+            if self.overlaps(i):
+                raise ValidationError
 
 class Allnighter(models.Model):
     user = models.ForeignKey(User)

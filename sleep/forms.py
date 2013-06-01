@@ -1,5 +1,5 @@
 from django import forms
-from sleep.models import SleeperProfile
+from sleep.models import SleeperProfile, Sleep
 
 class SleeperProfileForm(forms.ModelForm):
     class Meta:
@@ -12,3 +12,7 @@ class CreepSearchForm(forms.Form):
 class FriendSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
+class UpdateSleepForm(forms.ModelForm):
+    class Meta:
+        model = Sleep
+        fields = ['start_time','end_time', 'date', 'comments']

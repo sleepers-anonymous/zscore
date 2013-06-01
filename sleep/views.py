@@ -21,6 +21,37 @@ def faq(request):
 def mysleep(request):
     return HttpResponse(render_to_string('sleep/mysleep.html',{},context_instance=RequestContext(request)))
 
+@login_required
+def editSleep(request,sleep):
+    context = {}
+    sleep = Sleep.objects.filter(pk=sleep)
+    if sleep.count() != 1:
+        print sleep.count()
+        return render(request, "editsleepfailed.html")
+    user = Sleeper.objects.get(pk=request.user.pk)
+    tformat = "%I:%M %p %x" if user.getOrCreateProfile().use12HourTime else "%H:%M %x" 
+    if sleep[0].user.pk != user.pk:
+        return render(request, "editsleepfailed.html")
+    if request.method == 'POST':
+        form = UpdateSleepForm(request.POST, instance=sleep[0])
+        try:
+            form.is_valid()
+            form.save()
+            context["successfulSave"] = True
+            context["sleep"] = sleep[0]
+            context["form"] = form
+            context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
+            return HttpResponse(render_to_string('editsleep.html',context,context_instance=RequestContext(request)))
+        except:
+            context["successfulSave"] = False
+            context["saveError"] = "overlapping"
+            context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
+            return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
+    else:
+        form = UpdateSleepForm(instance = sleep[0])
+        context.update({"form":form, "sleep": sleep[0], "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
+        return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
+
 def leaderboard(request,sortBy='zScore'):
     if sortBy not in ['zScore','avg','avgSqrt']:
         sortBy='zScore'
