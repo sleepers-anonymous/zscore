@@ -30,7 +30,6 @@ class SleepManager(models.Manager):
                     atTime[i]+=1
         return atTime
 
-
 class Sleep(models.Model):
     objects = SleepManager()
 
@@ -114,8 +113,9 @@ class SleeperManager(models.Manager):
                 if priv>p.PRIVACY_HIDDEN:
                     d=sleeper.decayStats()
                     d['user']=sleeper
-                    if user.is_authenticated() and user.pk==sleeper.pk:
-                        d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
+                    if user.is_authenticated()
+                        if user.pk==sleeper.pk:
+                            d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
                     else:
                         d['opcode'] = None
                     scored.append(d)
