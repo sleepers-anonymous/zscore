@@ -193,11 +193,7 @@ class Sleeper(User):
     def wakeUpTime(self, date=datetime.date.today()):
         sleeps = self.sleep_set.filter(date=date)
         if sleeps.count() == 0: return None
-<<<<<<< HEAD
         times = [s.end_time for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
-=======
-        times = [s.end_time.time() for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
->>>>>>> master
         if len(times) == 0: return None
         else: return min(times).time()
 
