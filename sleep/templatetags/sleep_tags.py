@@ -8,8 +8,11 @@ register = template.Library()
 def sleepStatsView(context, renderContent='html'):
     user = context['request'].user
     sleeper = Sleeper.objects.get(pk=user.pk)
+    timestyle = "%I:%M %p" if sleeper.getOrCreateProfile().use12HourTime else "%H:%M"
     context['global'] = sleeper.movingStats()
     context['weekly'] = sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
+    w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today())
+    if w != None: context['wakeup'] = w.strftime(timestyle)
     context['decaying'] = sleeper.decayStats()
     context['total'] = sleeper.timeSlept()
     context['renderContent'] = renderContent

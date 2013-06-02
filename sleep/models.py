@@ -30,7 +30,6 @@ class SleepManager(models.Manager):
                     atTime[i]+=1
         return atTime
 
-
 class Sleep(models.Model):
     objects = SleepManager()
 
@@ -47,14 +46,15 @@ class Sleep(models.Model):
         return self.end_time - self.start_time
 
     def overlaps(self, otherSleep):
-        return (min(self.end_time, otherSleep.end_time) - max(self.start_time, otherSleep.start_time) < datetime.timedelta(0))
+        return (min(self.end_time, otherSleep.end_time) - max(self.start_time, otherSleep.start_time) > datetime.timedelta(0))
 
     def validate_unique(self, exclude=None):
         #Yes this is derpy and inefficient and really should actually use the exclude field
         from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
-        sleepq = Sleep.objects.filter(user=self.user)
+        sleepq = self.user.sleep_set.all().exclude(pk = self.pk)
         for i in sleepq:
-            if not overlaps(self, i): raise ValidationError(u'Error: Overlapping Sleep Detected! You can\' be asleep twice at the same time!')
+            if self.overlaps(i):
+                raise ValidationError
 
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
@@ -114,8 +114,9 @@ class SleeperManager(models.Manager):
                 if priv>p.PRIVACY_HIDDEN:
                     d=sleeper.decayStats()
                     d['user']=sleeper
-                    if user.is_authenticated() and user.pk==sleeper.pk:
-                        d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
+                    if user.is_authenticated():
+                        if user.pk==sleeper.pk:
+                            d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
                     else:
                         d['opcode'] = None
                     scored.append(d)
@@ -165,6 +166,29 @@ class Sleeper(User):
                 return byDays
         else:
             return []
+
+    def wakeUpTime(self, date=datetime.date.today()):
+        sleeps = self.sleep_set.filter(date=date)
+        if sleeps.count() == 0: return None
+        times = [s.end_time.time() for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
+        if len(times) == 0: return None
+        else: return min(times)
+
+    def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max):
+        import math
+        sleeps = self.sleep_set.filter(date__gte=start, date__lte=end).values('date', 'start_time', 'end_time')
+        if sleeps: dates=map(lambda x: x['date'], sleeps)
+        else: return None
+        def genDays(start, end):
+            d = start
+            while d <= end:
+                yield d
+                d += datetime.timedelta(1)
+        times = [self.wakeUpTime(d) for d in genDays(min(dates), max(dates))]
+        ctimes = [t.hour*3600 + t.minute*60 + t.second for t in times if t != None]
+        if len(ctimes) == 0: return None
+        av = sum(ctimes)/len(ctimes)
+        return datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
 
     def movingStats(self,start=datetime.date.min,end=datetime.date.max):
         sleep = self.sleepPerDay(start,end)
