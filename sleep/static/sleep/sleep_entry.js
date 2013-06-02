@@ -48,10 +48,14 @@ function getValidEndTime(startTime, endTime)
     // Bump up by one more day, if that doesn't put us
     // into the future. Else, just return the same time as
     // the startTime.
-    var dateToday = (new Date()).getDate();
-    if (newEndTime.getDate() < dateToday)
+    var dateToday = new Date();
+    dateToday.setHours(24);
+    dateToday.setMinutes(0);
+    dateToday.setSeconds(0);
+    dateToday.setMicroseconds(0);
+    newEndTime.setDate(newEndTime.getDate()+1);
+    if (newEndTime < dateToday)
     {
-	newEndTime.setDate(newEndTime.getDate()+1);
 	return newEndTime;
     }
     else
@@ -236,7 +240,11 @@ function drawSleep(sleep)
     {
 	// Multiline display with carryovers
 	var curDate = new Date(start);
-	while (curDate.getDate() <= end.getDate())
+	curDate.setHours(0);
+	curDate.setMinutes(0);
+	curDate.setSeconds(0);
+	curDate.setMicroseconds(0);
+	while (curDate <= end)
 	{
 	    if (curDate.getDate() == start.getDate())
 	    {
