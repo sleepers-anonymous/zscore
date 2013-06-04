@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import localtime
 
+import pytz
 import datetime
 import math
 
@@ -84,6 +85,8 @@ class SleeperProfile(models.Model):
     use12HourTime = models.BooleanField(default=False)
 
     emailreminders = models.BooleanField(default=False)
+
+    timezone = models.CharField(max_length=255, choices = [ (i,i) for i in pytz.common_timezones], default="US/Eastern")
 
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
