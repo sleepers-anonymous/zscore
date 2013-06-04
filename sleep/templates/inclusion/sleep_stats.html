@@ -7,7 +7,7 @@
 <div style="border: 1px solid black">
     <h3> My Stats </h3>
 		Total sleep: {{total|printDHM}} <br/>
-		{% if wakeup %}  In the last week, you woke up at {{wakeup}} <br /> {% endif  %}
+		{% if wakeup %}  In the last week, you woke up at {{wakeup}} on average<br /> {% endif  %}
     <table>
         <tr> <td></td> <td> zScore </td> <td> average </td> <td> avgSqrt </td> <td> stDev </td> </tr>
         <tr> <td> all time </td> <td> {{global.zScore|printHHMM}} </td> <td> {{global.avg|printHHMM}} </td> <td> {{global.avgSqrt|printHHMM}} </td> <td> {{global.stDev|printHHMM}} </td> </tr>

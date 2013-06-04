@@ -5,9 +5,11 @@ import datetime
 register = template.Library()
 
 @register.inclusion_tag('inclusion/graph_per_day.html')
-def graphPerDay(user):
+def graphPerDay(user, full=None):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    return { 'graphData' : sleeper.sleepPerDay(packDates=True,hours=True) }
+    if full == None: s = datetime.date.today() - datetime.timedelta(14)
+    elif full == "full": s = datetime.date.min
+    return { 'graphData' : sleeper.sleepPerDay(start = s, packDates=True,hours=True) }
 
 @register.inclusion_tag('inclusion/graph_time_of_day_bars.html')
 def graphTimeOfDayBars(user):

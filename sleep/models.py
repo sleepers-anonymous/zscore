@@ -170,12 +170,35 @@ class Sleeper(User):
         else:
             return []
 
+    def goToSleepTime(self, date=datetime.date.today()):
+        sleeps = self.sleep_set.filter(date=date)
+        if sleeps.count() == 0: return None
+        times = [s.start_time for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
+        if len(times) == 0: return None
+        else: return max(times).time()
+
+    def avgGoToSleepTime(self, start = datetime.date.min, end=datetime.date.max):
+        import math
+        sleeps = self.sleep_set.filter(date__gte=start, date__lte=end).values('date', 'start_time', 'end_time')
+        if sleeps: dates=map(lambda x: x['date'], sleeps)
+        else: return None
+        def genDays(start, end):
+            d = start
+            while d <= end:
+                yield d
+                d += datetime.timedelta(1)
+        times = [self.goToSleepTime(d) for d in genDays(min(dates), max(dates))]
+        ctimes = [t.hour*3600 + t.minute*60 + t.second for t in times if t != None]
+        if len(ctimes) == 0: return None
+        av = sum(ctimes)/len(ctimes)
+        return datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
+
     def wakeUpTime(self, date=datetime.date.today()):
         sleeps = self.sleep_set.filter(date=date)
         if sleeps.count() == 0: return None
-        times = [s.end_time.time() for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
+        times = [s.end_time for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
         if len(times) == 0: return None
-        else: return min(times)
+        else: return min(times).time()
 
     def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max):
         import math
