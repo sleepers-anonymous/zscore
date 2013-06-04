@@ -13,6 +13,7 @@ class FriendSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
 class UpdateSleepForm(forms.ModelForm):
+    forceOverlap = forms.BooleanField()
     class Meta:
         model = Sleep
         fields = ['start_time','end_time', 'date', 'comments']
