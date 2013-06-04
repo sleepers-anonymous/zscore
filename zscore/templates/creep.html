@@ -17,15 +17,17 @@
 
 {% if sleeps %}
   <h3>Sleep</h3>
+  <br />
+  {% graphPerDay user %}
+  <br />
+  {% graphTimeOfDayBars user %}
+  <br />
   <table>
   {% for sleep in sleeps %}
   <tr><td>{{sleep.start_time}}</td><td> to</td><td> {{sleep.end_time}}</td><td> ({{sleep.length|printHHMM}})</td></tr>
   {% endfor %}
   </table>
   <br/>
-  {% graphPerDay user %}
-  <br/>
-  {% graphTimeOfDayBars user %}
 {% endif %}
 
 
