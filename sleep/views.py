@@ -43,7 +43,7 @@ def editSleep(request,sleep):
             context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
             return HttpResponse(render_to_string('editsleep.html',context,context_instance=RequestContext(request)))
         except:
-            print request.POST
+#            print request.POST
             if "forceOverlap" in request.POST and request.POST['forceOverlap'] == 'on':
                 form.save()
                 context["successfulSave"] = True
