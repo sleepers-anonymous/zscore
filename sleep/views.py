@@ -85,7 +85,7 @@ def creep(request,username=None, asOther=None):
                 )
             sleeper = Sleeper.objects.get(pk=request.user.pk)
             prof = sleeper.getOrCreateProfile()
-            followed = prof.follows.all()
+            followed = prof.follows.order_by('username')
         total=creepable.distinct().count()
         if request.method == 'POST':
             form=CreepSearchForm(request.POST)
@@ -157,8 +157,8 @@ def editProfile(request):
 def friends(request):
     sleeper = Sleeper.objects.get(pk=request.user.pk)
     prof = sleeper.getOrCreateProfile()
-    friended = prof.friends.all()
-    followed = prof.follows.all()
+    friended = prof.friends.order_by('username')
+    followed = prof.follows.order_by('username')
     if request.method == 'POST':
         form=FriendSearchForm(request.POST)
         if form.is_valid():
