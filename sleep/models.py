@@ -159,9 +159,13 @@ class Sleeper(User):
     def getOrCreateProfile(self):
         return SleeperProfile.objects.get_or_create(user=self)[0]
 
-    def timeSlept(self,start=datetime.date.min,end=datetime.datetime.max):
+    def timeSleptByDate(self,start=datetime.date.min,end=datetime.date.max):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
         return sum([s.end_time-s.start_time for s in sleeps],datetime.timedelta(0))
+
+    def timeSleptByTime(self,start=datetime.datetime.min,end=datetime.datetime.max):
+        sleeps = self.sleep_set.filter(end_time__gt=start,start_time__lt=end)
+        return sum([min(s.end_time,end)-max(s.start_time,start) for s in sleeps],datetime.timedelta(0))
 
     def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False):
         if start==datetime.date.min and end==datetime.date.max:

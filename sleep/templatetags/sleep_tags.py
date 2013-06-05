@@ -1,6 +1,7 @@
 from django import template
 from sleep.models import Sleeper, Sleep
 import datetime
+import pytz
 register = template.Library()
 
 # Inclusion tags
@@ -11,7 +12,8 @@ def sleepStatsView(context, renderContent='html'):
     timestyle = "%I:%M %p" if sleeper.getOrCreateProfile().use12HourTime else "%H:%M"
     w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today())
     if w != None: context['wakeup'] = w.strftime(timestyle)
-    context['total'] = sleeper.timeSlept()
+    context['lastDay'] = sleeper.timeSleptByTime(datetime.datetime.utcnow().replace(tzinfo=pytz.utc)-datetime.timedelta(1),datetime.datetime.utcnow().replace(tzinfo=pytz.utc))
+    context['total'] = sleeper.timeSleptByDate()
     context['renderContent'] = renderContent
     return context
 @register.inclusion_tag('inclusion/stats_table.html')
