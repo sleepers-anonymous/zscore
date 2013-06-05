@@ -3,54 +3,6 @@
 {% block content %}
 <h1>Friends</h1>
 
-<h3>My Friends</h3>
-<i>Friends</i> can see whatever you set friends to be able to see in your <a href="/editprofile/">profile</a>.
-<script type="text/javascript">
-    function removeFriend(id) {
-      $.post("/friends/remove/", {
-        "id": id
-      }, function() {
-        window.location = window.location.href;
-      });
-    };
-</script>
-{% if friended %}
-    <table>
-        {% for user in friended %}
-            <tr>
-                <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
-                <td><a class="remove-friend-button" onclick="removeFriend({{user.id}});" href="javascript:void(0);">remove</a></td>
-            </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    Add friends below!
-{% endif %}
-
-<h3>Following</h3>
-Users you <i>follow</i> will show up here and in the <a href="/creep/">creep</a> page, for your convenience.  They can't see that you follow them.
-<script type="text/javascript">
-    function unfollow(id) {
-      $.post("/friends/unfollow/", {
-        "id": id
-      }, function() {
-        window.location = window.location.href;
-      });
-    };
-</script>
-{% if followed %}
-    <table>
-        {% for user in followed %}
-            <tr>
-                <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
-                <td><a class="unfollow-button" onclick="unfollow({{user.id}});" href="javascript:void(0);">unfollow</a></td>
-            </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    Follow other users below!
-{% endif %}
-
 <h3>Add and Follow</h3>
 <form action="/friends/" method="post">{% csrf_token %}
     {{ form.as_p }}
@@ -109,6 +61,56 @@ Users you <i>follow</i> will show up here and in the <a href="/creep/">creep</a>
     {% else %}
         No users found.<br/>
     {% endif %}
+{% endif %}
+
+
+
+<h3>My Friends</h3>
+<i>Friends</i> can see whatever you set friends to be able to see in your <a href="/editprofile/">profile</a>.
+<script type="text/javascript">
+    function removeFriend(id) {
+      $.post("/friends/remove/", {
+        "id": id
+      }, function() {
+        window.location = window.location.href;
+      });
+    };
+</script>
+{% if friended %}
+    <table>
+        {% for user in friended %}
+            <tr>
+                <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
+                <td><a class="remove-friend-button" onclick="removeFriend({{user.id}});" href="javascript:void(0);">remove</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    Add friends below!
+{% endif %}
+
+<h3>Following</h3>
+Users you <i>follow</i> will show up here and in the <a href="/creep/">creep</a> page, for your convenience.  They can't see that you follow them.
+<script type="text/javascript">
+    function unfollow(id) {
+      $.post("/friends/unfollow/", {
+        "id": id
+      }, function() {
+        window.location = window.location.href;
+      });
+    };
+</script>
+{% if followed %}
+    <table>
+        {% for user in followed %}
+            <tr>
+                <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
+                <td><a class="unfollow-button" onclick="unfollow({{user.id}});" href="javascript:void(0);">unfollow</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    Follow other users below!
 {% endif %}
 
 {% endblock %}        
