@@ -142,7 +142,10 @@ class SleeperManager(models.Manager):
                     d['user']=sleeper
                     d['opcode']='me'
                     extra.append(d)
-        scored.sort(key=lambda x: -x[sortBy])
+        if sortBy in ['stDev']:
+            scored.sort(key=lambda x: x[sortBy])
+        else:
+            scored.sort(key=lambda x: -x[sortBy])
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
         return scored+extra
