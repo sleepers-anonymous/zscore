@@ -12,7 +12,7 @@ def sleepStatsView(context, renderContent='html'):
     timestyle = "%I:%M %p" if sleeper.getOrCreateProfile().use12HourTime else "%H:%M"
     w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today())
     if w != None: context['wakeup'] = w.strftime(timestyle)
-    context['lastDay'] = sleeper.timeSleptByTime(datetime.datetime.utcnow().replace(tzinfo=pytz.utc)-datetime.timedelta(1),datetime.datetime.utcnow().replace(tzinfo=pytz.utc))
+    context['lastDay'] = sleeper.timeSleptByTime(datetime.datetime.now()-datetime.timedelta(1),datetime.datetime.now())
     context['total'] = sleeper.timeSleptByDate()
     context['renderContent'] = renderContent
     return context
