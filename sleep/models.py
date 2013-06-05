@@ -42,6 +42,16 @@ class SleepManager(models.Manager):
             endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
         return (startAtTime,endAtTime)
 
+    def sleepLengths(self,res=10):
+        sleeps = Sleep.objects.all()
+        lengths = map(lambda x: x.length().total_seconds() / (60*res),sleeps)
+        packed = [0] * int(max(lengths)+1)
+        for length in lengths:
+            if length>0:
+                packed[int(length)]+=1
+        return packed
+
+
 class Sleep(models.Model):
     objects = SleepManager()
 

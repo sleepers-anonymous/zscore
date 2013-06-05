@@ -1,0 +1,32 @@
+<canvas id="sleepLengthChart" width="610" height="400"></canvas>
+<script>
+var chartData = {
+  labels : [
+    {% for i in labels %}
+      "{{i}}",
+    {% endfor %}
+    ],
+  datasets : [
+    {
+      fillColor: "rgba(0,0,120,0.5)",
+      strokeColor : "rgba(0,0,120,1)",
+      pointColor : "rgba(0,0,120,1)",
+      pointStrokeColor : "rgba(120,120,240,1)",
+      data : [
+        {% for i in graphData %}
+          {{i}},
+        {% endfor %}
+        ],
+    }
+  ]
+}
+
+var chartOptions = {
+    pointDot : false,
+    scaleShowGridLines : false,
+    scaleShowLabels : false,
+    scaleLineColor : "rgba(0,0,0,0)",
+}
+
+var sleepChart = new Chart(document.getElementById("sleepLengthChart").getContext("2d")).Line(chartData,chartOptions);
+</script>
