@@ -3,18 +3,22 @@
 <form action="/editprofile/" method="post">{% csrf_token %}
     {{ form.non_field_errors }}
     <p>
-    {{form.use12HourTime.errors }}
-    Use 12 hour time:
-    {{form.use12HourTime}}
+    <h4>General settings</h4>
+    {{form.use12HourTime.errors }}<br />
+    <label for="id_use12HourTime">Use 12 hour time:</label>
+    {{form.use12HourTime}} <br />
+    <label for="id_idealSleep">Ideal sleep length (hours)</label>
+    {{form.idealSleep}} <br/ >{{form.idealSleep.errors}}<br />
     <p>
+    <h4>Privacy settings</h4>
     {{ form.privacy.errors }}
     <label for="id_privacy">Privacy to anonymous users:</label>
     {{ form.privacy }}<br/>
     {{ form.privacyLoggedIn.errors }}
-    <label for="id_privacy">Privacy to logged-in users:</label>
+    <label for="id_privacyLoggedIn">Privacy to logged-in users:</label>
     {{ form.privacyLoggedIn }}<br/>
     {{ form.privacyFriends.errors }}
-    <label for="id_privacy">Privacy to friends:</label>
+    <label for="id_privacyFriends">Privacy to friends:</label>
     {{ form.privacyFriends }}<br/>
     <b>About the privacy choices</b><br/>
     Hidden: you will not be shown in the leaderboard at all<br/>
