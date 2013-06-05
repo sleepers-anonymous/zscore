@@ -242,9 +242,11 @@ class Sleeper(User):
         try:
             avgSqrt = (sum(map(lambda x: math.sqrt(x),sleep))/len(sleep))**2
             d['avgSqrt']=avgSqrt
+            avgLog = math.exp(sum(map(lambda x: math.log(x+1),sleep))/len(sleep) - 1)
+            d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt']:
+        for k in ['avg','stDev','zScore','avgSqrt','avgLog']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:
@@ -275,9 +277,11 @@ class Sleeper(User):
         try:
             avgSqrt = self.decaying(map(lambda x: math.sqrt(x),sleep),hl)**2
             d['avgSqrt']=avgSqrt
+            avgLog = math.exp(self.decaying(map(lambda x: math.log(x+1),sleep),hl) - 1)
+            d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt']:
+        for k in ['avg','stDev','zScore','avgSqrt','avgLog']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:
