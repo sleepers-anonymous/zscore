@@ -62,7 +62,7 @@ def graphSleepTimes():
 
 @register.inclusion_tag('inclusion/graph_sleep_start_end_times.html')
 def graphSleepStartEndTimes():
-    res = 30
+    res = 60
     labels = [""] * (24 * 60 / res)
     for i in range(24):
         labels[i*60/res]=str(i)+":00"
