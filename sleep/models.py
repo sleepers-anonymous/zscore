@@ -128,7 +128,7 @@ class SleeperManager(models.Manager):
                 if priv>p.PRIVACY_HIDDEN:
                     d=sleeper.decayStats()
                     d['user']=sleeper
-                    if user.is_authenticated():
+                    if 'is_authenticated' in dir(user) and user.is_authenticated():
                         if user.pk==sleeper.pk:
                             d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
                     else:
