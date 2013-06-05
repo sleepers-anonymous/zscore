@@ -150,6 +150,41 @@ class SleeperManager(models.Manager):
             scored[i]['rank']=i+1
         return scored+extra
 
+    def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max):
+        sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile')
+        scored=[]
+        for sleeper in sleepers:
+            p = sleeper.getOrCreateProfile()
+            if user is None:
+                priv = p.PRIVACY_HIDDEN
+            elif user is 'all':
+                priv = p.PRIVACY_PUBLIC
+            elif user.is_anonymous():
+                priv = p.privacy
+            elif user.pk==sleeper.pk:
+                priv = p.PRIVACY_PUBLIC
+            else:
+                priv = p.privacyLoggedIn
+
+            if priv<=p.PRIVACY_REDACTED:
+                sleeper.displayName="[redacted]"
+            else:
+                sleeper.displayName=sleeper.username
+            if priv>p.PRIVACY_HIDDEN:
+                d={'time':sleeper.timeSleptByDay(start,end)}
+                d['user']=sleeper
+                if 'is_authenticated' in dir(user) and user.is_authenticated():
+                    if user.pk==sleeper.pk:
+                        d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
+                else:
+                    d['opcode'] = None
+                scored.append(d)
+        scored.sort(key=lambda x: -x['time'])
+        for i in xrange(len(scored)):
+            scored[i]['rank']=i+1
+        return scored
+        
+
 class Sleeper(User):
     class Meta:
         proxy = True
