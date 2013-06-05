@@ -109,6 +109,12 @@ class SleeperProfile(models.Model):
 
     timezone = models.CharField(max_length=255, choices = [ (i,i) for i in pytz.common_timezones], default="US/Eastern")
 
+    idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
+
+    def getIdealSleep(self):
+        """Returns idealSleep as a timedelta"""
+        return datetime.timedelta(hours=float(self.idealSleep))
+
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
 
