@@ -68,3 +68,15 @@ def graphSleepStartEndTimes():
         labels[i*60/res]=str(i)+":00"
     start,end = Sleep.objects.sleepStartEndTimes(res=res)
     return { 'startData' : start, 'endData' : end, 'labels' : labels }
+
+@register.inclusion_tag('inclusion/graph_sleep_lengths.html')
+def graphSleepLengths():
+    res = 60
+    hours = 16
+    labels = [""] * (hours * 60 / res) + ["16:00+"]
+    for i in range(hours):
+        labels[i*60/res]=str(i)+":00"
+    lengths = Sleep.objects.sleepLengths(res=res)
+    graphData = lengths[:(hours * 60 / res)]
+    graphData.append(sum(lengths[(hours*60/res):]))
+    return { 'graphData': graphData, 'labels' : labels }
