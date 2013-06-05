@@ -31,6 +31,17 @@ class SleepManager(models.Manager):
                     atTime[i]+=1
         return atTime
 
+    def sleepStartEndTimes(self,res=10):
+        sleeps = Sleep.objects.all()
+        startAtTime = [0] * (24 * 60 / res)
+        endAtTime = [0] * (24 * 60 / res)
+        for sleep in sleeps:
+            startTime = localtime(sleep.start_time).time()
+            endTime = localtime(sleep.end_time).time()
+            startAtTime[(startTime.hour * 60 + startTime.minute) / res]+=1
+            endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
+        return (startAtTime,endAtTime)
+
 class Sleep(models.Model):
     objects = SleepManager()
 

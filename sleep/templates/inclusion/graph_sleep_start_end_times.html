@@ -1,0 +1,43 @@
+<canvas id="sleepStartEndChart" width="610" height="400"></canvas>
+<script>
+var chartData = {
+  labels : [
+    {% for i in labels %}
+      "{{i}}",
+    {% endfor %}
+    ],
+  datasets : [
+    {
+      fillColor: "rgba(0,120,0,0.5)",
+      strokeColor : "rgba(0,120,0,1)",
+      pointColor : "rgba(0,120,0,1)",
+      pointStrokeColor : "rgba(120,240,120,1)",
+      data : [
+        {% for i in startData %}
+          {{i}},
+        {% endfor %}
+        ],
+    },
+    {
+      fillColor: "rgba(120,0,0,0.5)",
+      strokeColor : "rgba(120,0,0,1)",
+      pointColor : "rgba(120,0,0,1)",
+      pointStrokeColor : "rgba(240,120,120,1)",
+      data : [
+        {% for i in endData %}
+          {{i}},
+        {% endfor %}
+        ],
+    }
+  ]
+}
+
+var chartOptions = {
+    pointDot : false,
+    scaleShowGridLines : false,
+    scaleShowLabels : false,
+    scaleLineColor : "rgba(0,0,0,0)",
+}
+
+var sleepChart = new Chart(document.getElementById("sleepStartEndChart").getContext("2d")).Line(chartData,chartOptions);
+</script>
