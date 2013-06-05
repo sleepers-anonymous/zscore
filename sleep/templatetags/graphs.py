@@ -79,4 +79,4 @@ def graphSleepLengths():
     lengths = Sleep.objects.sleepLengths(res=res)
     graphData = lengths[:(hours * 60 / res)]
     graphData.append(sum(lengths[(hours*60/res):]))
-    return { 'graphData': lengths, 'labels' : labels }
+    return { 'graphData': graphData, 'labels' : labels }
