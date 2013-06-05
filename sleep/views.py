@@ -63,7 +63,7 @@ def leaderboard(request,sortBy='zScore'):
         sortBy='zScore'
     ss = Sleeper.objects.sorted_sleepers(sortBy,request.user)
     top = [ s for s in ss if s['rank']<=10 or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
-    lastDayWinner = Sleeper.objects.bestByTime(datetime.datetime.now()-datetime.timedelta(1),datetime.datetime.now())[0]
+    lastDayWinner = Sleeper.objects.bestByTime(datetime.datetime.now()-datetime.timedelta(1),datetime.datetime.now(),request.user)[0]
     context = {
             'top' : top,
             'lastDay' : lastDay,

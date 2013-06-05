@@ -150,7 +150,7 @@ class SleeperManager(models.Manager):
             scored[i]['rank']=i+1
         return scored+extra
 
-    def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max):
+    def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile')
         scored=[]
         for sleeper in sleepers:
