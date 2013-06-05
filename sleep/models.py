@@ -171,7 +171,7 @@ class SleeperManager(models.Manager):
             else:
                 sleeper.displayName=sleeper.username
             if priv>p.PRIVACY_HIDDEN:
-                d={'time':sleeper.timeSleptByDay(start,end)}
+                d={'time':sleeper.timeSleptByTime(start,end)}
                 d['user']=sleeper
                 if 'is_authenticated' in dir(user) and user.is_authenticated():
                     if user.pk==sleeper.pk:
