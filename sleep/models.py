@@ -103,6 +103,7 @@ class SleeperProfile(models.Model):
     privacyFriends = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to friends')
     friends = models.ManyToManyField(User,related_name='friends+',blank=True)
     follows = models.ManyToManyField(User,related_name='follows+',blank=True)
+    requested = models.ManyToManyField(User,related_name='requests',blank=True,through='FriendRequest')
     use12HourTime = models.BooleanField(default=False)
 
     emailreminders = models.BooleanField(default=False)
@@ -199,6 +200,11 @@ class SleeperManager(models.Manager):
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
         return scored
+
+class FriendRequest(models.Model):
+    requestor = models.ForeignKey(SleeperProfile)
+    requestee = models.ForeignKey(User)
+    accepted = models.NullBooleanField()
         
 
 class Sleeper(User):
