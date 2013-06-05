@@ -3,6 +3,7 @@
 {% block content %}
 {% load datetime_utils %}
 {% load graphs %}
+{% load sleep_tags %}
 
 <h1>Creep on {{user}}</h1>
 
@@ -10,10 +11,7 @@
 {% endif %}
 <table width=100%><tr><td valign = "top">
 <h3>Stats</h3>
-<table>
-    <tr><td>zScore</td><td>average</td><td>avgSqrt</td><td>avgLog</td><td>avgRecip</td><td>stDev</td></tr>
-    <tr><td>{{global.zScore|printHHMM}}</td><td>{{global.avg|printHHMM}}</td><td>{{global.avgSqrt|printHHMM}}</td><td>{{global.avgLog|printHHMM}}</td><td>{{global.avgRecip|printHHMM}}</td><td>{{global.stDev|printHHMM}}</td></tr>
-</table>
+{% sleepStatsTable user %}
 
 {% if sleeps %}
   <br />

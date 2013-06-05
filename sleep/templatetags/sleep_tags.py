@@ -9,13 +9,18 @@ def sleepStatsView(context, renderContent='html'):
     user = context['request'].user
     sleeper = Sleeper.objects.get(pk=user.pk)
     timestyle = "%I:%M %p" if sleeper.getOrCreateProfile().use12HourTime else "%H:%M"
-    context['global'] = sleeper.movingStats()
-    context['weekly'] = sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
     w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today())
     if w != None: context['wakeup'] = w.strftime(timestyle)
-    context['decaying'] = sleeper.decayStats()
     context['total'] = sleeper.timeSlept()
     context['renderContent'] = renderContent
+    return context
+@register.inclusion_tag('inclusion/stats_table.html')
+def sleepStatsTable(user):
+    context = {}
+    sleeper = Sleeper.objects.get(pk=user.pk)
+    context['global'] = sleeper.movingStats()
+    context['weekly'] = sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
+    context['decaying'] = sleeper.decayStats()
     return context
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)
 def sleepListView(context, renderContent='html'):

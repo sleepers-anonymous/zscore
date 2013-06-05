@@ -1,0 +1,7 @@
+{% load datetime_utils %}
+<table>
+    <tr> <td></td> <td> zScore </td> <td> average </td> <td> avgSqrt </td> <td> avgLog </td> <td> avgRecip </td> <td> stDev </td> </tr>
+    <tr> <td> all time </td> <td> {{global.zScore|printHHMM}} </td> <td> {{global.avg|printHHMM}} </td> <td> {{global.avgSqrt|printHHMM}} </td> <td> {{global.avgLog|printHHMM}} </td> <td> {{global.avgRecip|printHHMM}} </td> <td> {{global.stDev|printHHMM}} </td> </tr>
+    <tr> <td> past week </td> <td> {{weekly.zScore|printHHMM}} </td> <td> {{weekly.avg|printHHMM}} </td> <td> {{weekly.avgSqrt|printHHMM}} </td> <td> {{weekly.avgLog|printHHMM}} </td> <td> {{weekly.avgRecip|printHHMM}} </td> <td> {{weekly.stDev|printHHMM}} </td> </tr>
+    <tr> <td> exponentially decaying </td> <td> {{decaying.zScore|printHHMM}} </td> <td> {{decaying.avg|printHHMM}} </td> <td> {{decaying.avgSqrt|printHHMM}} </td> <td> {{decaying.avgLog|printHHMM}} </td> <td> {{decaying.avgRecip|printHHMM}} </td> <td> {{decaying.stDev|printHHMM}} </td> </tr>
+</table>
