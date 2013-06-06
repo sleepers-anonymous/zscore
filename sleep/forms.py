@@ -1,6 +1,9 @@
 from django import forms
 from sleep.models import SleeperProfile, Sleep
 
+import pytz
+import datetime
+
 class SleeperProfileForm(forms.ModelForm):
     class Meta:
         model = SleeperProfile
@@ -12,8 +15,26 @@ class CreepSearchForm(forms.Form):
 class FriendSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
-class UpdateSleepForm(forms.ModelForm):
-    forceOverlap = forms.BooleanField(required=False)
+class SleepForm(forms.ModelForm):
+    start_time = forms.CharField(max_length=20)
+    end_time = forms.CharField(max_length=20)
     class Meta:
         model = Sleep
         fields = ['start_time','end_time', 'date', 'comments', 'timezone']
+
+    def __init__(self, user, fmt, *args, **kwargs):
+        self.fmt = fmt
+        self.user = user
+        super(SleepForm,self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super(SleepForm,self).clean()
+        tz = pytz.timezone(cleaned_data['timezone'])
+        for k in ['start_time','end_time']:
+            #manually convert the strf-ed time to a datetime.datetime so we can make sure to do it in the right timezone
+            dt = datetime.datetime.strptime(cleaned_data[k],self.fmt)
+            cleaned_data[k]=tz.localize(dt)
+        overlaps = Sleep.objects.filter(start_time__lt=cleaned_data['end_time'],end_time__gt=cleaned_data['start_time'],user=self.user)
+        if overlaps:
+            raise forms.ValidationError("This sleep overlaps with %s!" % overlaps[0])
+        return cleaned_data

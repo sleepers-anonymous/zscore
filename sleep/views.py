@@ -24,72 +24,55 @@ def mysleep(request):
     return HttpResponse(render_to_string('sleep/mysleep.html',{},context_instance=RequestContext(request)))
 
 @login_required
-def editOrCreateSleep(request,sleep = None):
-    context = {}
-    create = False
-    if sleep:
-        sleep = Sleep.objects.filter(pk=sleep)
-        if sleep.count() != 1:  return render(request, "editsleepfailed.html")
-    else: create = True
-    user = Sleeper.objects.get(pk=request.user.pk)
-    tformat = "%I:%M %p %x" if user.getOrCreateProfile().use12HourTime else "%H:%M %x" 
-    if not(create) and sleep[0].user.pk != user.pk: return render(request, "editsleepfailed.html")
-    if request.method == 'POST':
-        if create: form = UpdateSleepForm(request.POST)
-        else: form = UpdateSleepForm(request.POST, instance=sleep[0])
-        try:
-            if create:
-                newsleep = form.save(commit=False)
-                newsleep.user_id= user.id
-                newsleep.full_clean()
-                newsleep.save()
-                form = UpdateSleepForm(instance=newsleep)
-            else:
-                try:
-                    form.is_valid()
-                except AttributeError:
-                    raise ValidationError("Overlapping Sleep Detected!")
-                form.save()
-                context["sleep"] = sleep[0]
-            context["successfulSave"] = True
-            context["form"] = form
-            if create: return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
-            context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
-            return HttpResponse(render_to_string('editsleep.html',context,context_instance=RequestContext(request)))
-        except ValidationError, e:
-            print e
-            if "forceOverlap" in request.POST and request.POST['forceOverlap'] == 'on':
-                if create:
-                    newsleep = form.save(commit=False)
-                    newsleep.user_id = user.id
-                    newsleep.save()
-                    form = UpdateSleepForm(instance=newsleep)
-                else:
-                    form.save()
-                    context["sleep"] = sleep[0]
-                context["successfulSave"] = True
-            else:
-                if hasattr(e, "message_dict"): context["saveError"] = "; ".join(e.message_dict["__all__"]).encode("ascii", "ignore")
-                if hasattr(e, "messages"): context["saveError"]= "; ".join(e.messages).encode("ascii", "ignore")
-                context["successfulSave"] = False
-            context["form"] = form
-            if create: return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
-            context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
-            return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
+def editOrCreateSleep(request,sleep = None,success=False):
+    context = {'success': success}
+    sleeper = Sleeper.objects.get(pk=request.user.pk)
+    prof = sleeper.getOrCreateProfile()
+    defaulttz = prof.timezone
+    if prof.use12HourTime:
+        fmt = "%I:%M %p %x"
     else:
-        if create:
-            today = datetime.date.today().strftime("%m/%d/%Y")
-            initial = {"start_time": today + " 00:00",
-                        "end_time": today + " 00:00",
-                        "date": today,
-                        "timezone":user.getOrCreateProfile().timezone,
-                        }
-            form = UpdateSleepForm(initial = initial)
-            context.update({"form":form})
-            return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
-        else: form = UpdateSleepForm(instance = sleep[0])
-        context.update({"form":form, "sleep": sleep[0], "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
-        return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
+        fmt = "%H:%M %x"
+    if sleep: # we're editing a sleep
+        try:
+            s = Sleep.objects.get(pk=sleep)
+            if s.user != request.user:
+                return HttpResponseForbidden('')
+            context['sleep'] = s
+        except MultipleObjectsReturned:
+            return HttpResponseBadRequest('')
+        except DoesNotExist:
+            return HttpResponseNotFound('')
+        if request.method == 'POST':
+            form = SleepForm(request.user, fmt, request.POST, instance=s)
+        else:
+            form = SleepForm(request.user, fmt, instance=s)
+    else: # we're creating a new sleep
+        if request.method == 'POST':
+            form = SleepForm(request.user, fmt, request.POST)
+        else:
+            today = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
+            initial = {
+                    "start_time" : today.strftime(fmt),
+                    "end_time" : today.strftime(fmt),
+                    "date" : today.date().strftime("%x"),
+                    "timezone" : defaulttz,
+                    }
+            form = SleepForm(request.user, fmt, initial=initial)
+    if request.method == 'POST':
+        if form.is_valid():
+            new = form.save(commit=False)
+            if sleep == None:
+                new.user = request.user
+                new.save()
+                form = SleepForm(request.user, fmt, instance=new)
+                return HttpResponseRedirect('/sleep/simple/success/')
+            else:
+                new.save()
+                return HttpResponseRedirect('/mysleep/')
+    context['form']=form
+    return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
+
 
 def leaderboard(request,sortBy='zScore'):
     if sortBy not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev']:

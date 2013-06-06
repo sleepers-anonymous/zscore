@@ -4,17 +4,15 @@
 {% block content %}
 {% load datetime_utils %}
 
-<h1>Edit Sleep (from {{start}} to {{end}})</h1>
+{% if sleep %}
+<h1>Edit Sleep (from {{sleep.start}} to {{sleep.end}})</h1>
+{% else %}
+<h1>Create Sleep</h1>
+{% endif %}
+{% if succcess %}Saved!{% endif %}
 
-<form method="post">{% csrf_token %}
-    {% if saveError %} <p>{{saveError}}! Is this really what you want? <br />Yes, I really want to submit an overlapping sleep {{ form.forceOverlap }}</p>{% endif %}
-		{% if successfulSave %}<p>Sleep updated!</p>{%endif%}
-        <p><label for="id_start_time">Start time</label>: {{ form.start_time }} {{form.start_time.errors}} </p>
-        <p><label for="id_end_time">End time:</label> {{ form.end_time}} {{form.end_time.errors}} </p>
-        <p><label for="id_date">Date:</label> {{ form.date }}{{ form.date.errors }} </p>
-        <p><label for="id_comments">Comments:</label> {{ form.comments }}{{form.comments.errors}} </p>
-        <p><label for="id_timezone">Timezone:</label> {{ form.timezone }}{{form.timezone.errors}} </p>
+<form action = "/sleep/simple/" method="post">{% csrf_token %}
+    {{form.as_p}}
 <input type="submit" value="Submit" />
 </form>
-{% if successfulSave %} <button onclick="window.location='/mysleep/'">Go Back</button>{% endif %}
 {% endblock %}
