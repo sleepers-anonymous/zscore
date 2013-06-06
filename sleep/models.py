@@ -83,7 +83,7 @@ class Sleep(models.Model):
             user = self.user
         except: return None
         sleepq = self.user.sleep_set.all()
-        if self.pk != None: sleeqp.exclude(pk = self.pk)
+        if self.pk != None: sleepq.exclude(pk = self.pk)
         for i in sleepq:
             if self.overlaps(i):
                 raise ValidationError
