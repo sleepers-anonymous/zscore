@@ -317,12 +317,12 @@ class Sleeper(User):
         except:
             pass
         try:
-            offset = 4*60*60.
+            offset = 60*60.
             avgRecip = 1/(sum(map(lambda x: 1/(offset+x),sleep))/len(sleep))-offset
             d['avgRecip']=avgRecip
             avgSqrt = (sum(map(lambda x: math.sqrt(x),sleep))/len(sleep))**2
             d['avgSqrt']=avgSqrt
-            avgLog = math.exp(sum(map(lambda x: math.log(x+1),sleep))/len(sleep))-1
+            avgLog = math.exp(sum(map(lambda x: math.log(x+offset),sleep))/len(sleep))-offset
             d['avgLog']=avgLog
         except:
             pass
@@ -355,12 +355,12 @@ class Sleeper(User):
         except:
             pass
         try:
-            offset = 4*60*60.
+            offset = 60*60.
             avgRecip = 1/(self.decaying(map(lambda x: 1/(offset+x),sleep),hl))-offset
             d['avgRecip']=avgRecip
             avgSqrt = self.decaying(map(lambda x: math.sqrt(x),sleep),hl)**2
             d['avgSqrt']=avgSqrt
-            avgLog = math.exp(self.decaying(map(lambda x: math.log(x+1),sleep),hl))-1
+            avgLog = math.exp(self.decaying(map(lambda x: math.log(x+offset),sleep),hl))-offset
             d['avgLog']=avgLog
         except:
             pass
