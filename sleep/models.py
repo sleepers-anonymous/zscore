@@ -87,6 +87,14 @@ class Sleep(models.Model):
             if self.overlaps(i):
                 raise ValidationError
 
+    def start_local_time(self):
+        tz = pytz.timezone(self.timezone)
+        return self.start_time.astimezone(tz)
+
+    def end_local_time(self):
+        tz = pytz.timezone(self.timezone)
+        return self.end_time.astimezone(tz)
+
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
     date = models.DateField()
@@ -258,7 +266,7 @@ class Sleeper(User):
     def goToSleepTime(self, date=datetime.date.today()):
         sleeps = self.sleep_set.filter(date=date)
         if sleeps.count() == 0: return None
-        times = [s.start_time for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
+        times = [s.start_local_time() for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
         if len(times) == 0: return None
         else: return max(times).time()
 
@@ -281,7 +289,7 @@ class Sleeper(User):
     def wakeUpTime(self, date=datetime.date.today()):
         sleeps = self.sleep_set.filter(date=date)
         if sleeps.count() == 0: return None
-        times = [s.end_time for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
+        times = [s.end_local_time() for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
         if len(times) == 0: return None
         else: return min(times).time()
 
