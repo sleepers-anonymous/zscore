@@ -34,6 +34,16 @@
 	  <td><label for="comments">User comments</label></td>
 	  <td><input type="text" name="comments" autofocus /></td>
 	</tr>
+	<tr>
+	  <td><label for="timezone">Timezone</label></td>
+      <td>
+        <select type="text" name="timezone">
+          {% for timezone in timezones %}
+          <option value="{{timezone}}" {% if timezone == mytz %}selected{% endif%}>{{timezone}}</option>
+          {% endfor %}
+        </select>
+      </td>
+	</tr>
       </table>
     </fieldset>
   </form>

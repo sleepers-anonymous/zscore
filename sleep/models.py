@@ -1,10 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils.timezone import localtime
 
 import pytz
 import datetime
 import math
+
+from zscore import settings
+
+TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 
 class SleepManager(models.Manager):
     def totalSleep(self):
@@ -15,16 +18,17 @@ class SleepManager(models.Manager):
         sleeps = Sleep.objects.all()
         atTime = [0] * (24 * 60 / res) 
         for sleep in sleeps:
-            startDate = localtime(sleep.start_time).date()
-            endDate = localtime(sleep.end_time).date()
+            tz = pytz.timezone(sleep.timezone)
+            startDate = sleep.start_time.astimezone(tz).date()
+            endDate = sleep.end_time.astimezone(tz).date()
             dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
             for d in dr:
                 if d == startDate:
-                    startTime = localtime(sleep.start_time).time()
+                    startTime = sleep.start_time.astimezone(tz).time()
                 else:
                     startTime = datetime.time(0)
                 if d == endDate:
-                    endTime = localtime(sleep.end_time).time()
+                    endTime = sleep.end_time.astimezone(tz).time()
                 else:
                     endTime = datetime.time(23,59)
                 for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
@@ -36,8 +40,9 @@ class SleepManager(models.Manager):
         startAtTime = [0] * (24 * 60 / res)
         endAtTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
-            startTime = localtime(sleep.start_time).time()
-            endTime = localtime(sleep.end_time).time()
+            tz = pytz.timezone(sleep.timezone)
+            startTime = sleep.start_time.astimezone(tz).time()
+            endTime = sleep.end_time.astimezone(tz).time()
             startAtTime[(startTime.hour * 60 + startTime.minute) / res]+=1
             endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
         return (startAtTime,endAtTime)
@@ -59,6 +64,7 @@ class Sleep(models.Model):
     end_time = models.DateTimeField()
     comments = models.TextField(blank=True)
     date = models.DateField()
+    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
     def __unicode__(self):
         return "Sleep from %s to %s" % (self.start_time,self.end_time)
@@ -102,11 +108,12 @@ class SleeperProfile(models.Model):
     privacyFriends = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to friends')
     friends = models.ManyToManyField(User,related_name='friends+',blank=True)
     follows = models.ManyToManyField(User,related_name='follows+',blank=True)
+    requested = models.ManyToManyField(User,related_name='requests',blank=True,through='FriendRequest')
     use12HourTime = models.BooleanField(default=False)
 
     emailreminders = models.BooleanField(default=False)
 
-    timezone = models.CharField(max_length=255, choices = [ (i,i) for i in pytz.common_timezones], default="US/Eastern")
+    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
     idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
     #Decimalfield restricts to two decimal places, float would not.
@@ -199,6 +206,11 @@ class SleeperManager(models.Manager):
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
         return scored
+
+class FriendRequest(models.Model):
+    requestor = models.ForeignKey(SleeperProfile)
+    requestee = models.ForeignKey(User)
+    accepted = models.NullBooleanField()
         
 
 class Sleeper(User):

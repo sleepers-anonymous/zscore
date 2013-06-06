@@ -10,6 +10,7 @@ from sleep.models import *
 from sleep.forms import *
 
 import datetime
+import pytz
 
 def home(request):
     return render(request, 'index.html')
@@ -63,7 +64,8 @@ def leaderboard(request,sortBy='zScore'):
         sortBy='zScore'
     ss = Sleeper.objects.sorted_sleepers(sortBy,request.user)
     top = [ s for s in ss if s['rank']<=10 or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
-    lastDayWinner = Sleeper.objects.bestByTime(datetime.datetime.now()-datetime.timedelta(1),datetime.datetime.now(),request.user)[0]
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    lastDayWinner = Sleeper.objects.bestByTime(now-datetime.timedelta(1),now,request.user)[0]
     context = {
             'top' : top,
             'lastDayWinner' : lastDayWinner,
@@ -159,8 +161,8 @@ def editProfile(request):
 def friends(request):
     sleeper = Sleeper.objects.get(pk=request.user.pk)
     prof = sleeper.getOrCreateProfile()
-    friended = prof.friends.order_by('username')
-    followed = prof.follows.order_by('username')
+    friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username')
+    requests = sleeper.requests.filter(friendrequest__accepted=None).order_by('user__username')
     if request.method == 'POST':
         form=FriendSearchForm(request.POST)
         if form.is_valid():
@@ -171,8 +173,8 @@ def friends(request):
                     'count' : count,
                     'form' : form,
                     'new' : False,
-                    'friended' : friended,
-                    'followed' : followed,
+                    'friendfollow' : friendfollow,
+                    'requests' : requests,
                     }
             return HttpResponse(render_to_string('friends.html',context,context_instance=RequestContext(request)))
     else:
@@ -180,11 +182,45 @@ def friends(request):
     context = {
             'form' : form,
             'new' : True,
-            'friended' : friended,
-            'followed' : followed,
+            'friendfollow' : friendfollow,
+            'requests' : requests,
             }
     return HttpResponse(render_to_string('friends.html',context,context_instance=RequestContext(request)))
             
+@login_required
+def requestFriend(request):
+    if 'id' in request.POST:
+        i = request.POST['id']
+        if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
+            return HttpResponseNotFound('')
+        sleeper = Sleeper.objects.get(pk=request.user.pk)
+        prof = sleeper.getOrCreateProfile()
+        them = Sleeper.objects.get(pk=i)
+        if not FriendRequest.objects.filter(requestor=prof,requestee=them):
+            themProf = them.getOrCreateProfile()
+            if request.user in themProf.friends.all():
+                accept = True
+            else:
+                accept = None
+            FriendRequest.objects.create(requestor=prof,requestee=them,accepted=accept)
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def hideRequest(request):
+    if 'id' in request.POST:
+        i = request.POST['id']
+        if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
+            return HttpResponseNotFound('')
+        frs = FriendRequest.objects.filter(requestor__user__pk=i,requestee=request.user)
+        for fr in frs:
+            fr.accepted=False
+            fr.save()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
 @login_required
 def addFriend(request):
     if 'id' in request.POST:
@@ -195,6 +231,10 @@ def addFriend(request):
         prof = sleeper.getOrCreateProfile()
         prof.friends.add(i)
         prof.save()
+        frs = FriendRequest.objects.filter(requestor__user__pk=i,requestee=request.user)
+        for fr in frs:
+            fr.accepted=True
+            fr.save()
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
@@ -242,8 +282,11 @@ def unfollow(request):
 @login_required
 def createSleep(request):
     # Date-ify start, end, and center
+    timezone = pytz.timezone(request.POST['timezone'])
     start = datetime.datetime(*(map(int, request.POST.getlist("start[]"))))
+    start=timezone.localize(start)
     end = datetime.datetime(*(map(int, request.POST.getlist("end[]"))))
+    end=timezone.localize(end)
     date = datetime.date(*(map(int, request.POST.getlist("date[]"))[:3]))
     # Pull out comments
     if "comments" in request.POST:
@@ -251,7 +294,7 @@ def createSleep(request):
     else:
         comments = ""
     # Create the Sleep instance
-    Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments=comments, date=date)
+    Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments=comments, date=date,timezone=timezone)
     return HttpResponse('')
 
 @login_required
@@ -271,6 +314,11 @@ def deleteSleep(request):
 @login_required
 def getSleepsJSON(request):
     u = request.user
-    sleeps = Sleep.objects.filter(user=u)
+    sleeps = list(Sleep.objects.filter(user=u))
+    for sleep in sleeps:
+        tz = pytz.timezone(sleep.timezone)
+        #warning: the following is kind of hacky but it's better than dealing with the timezones in JS.  JS doesn't understand timezones, so we convert the timezone server-side, then pass it through to JS without telling the JS what timezone it's in.  JS interprets it as local time, which is slightly incorrect but works since all we want to do is get the hours/minutes/seconds back out as local time.
+        sleep.start_time=sleep.start_time.astimezone(tz).replace(tzinfo=None)
+        sleep.end_time=sleep.end_time.astimezone(tz).replace(tzinfo=None)
     data = serializers.serialize('json', sleeps)
     return HttpResponse(data, mimetype='application/json')

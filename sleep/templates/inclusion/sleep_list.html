@@ -1,6 +1,7 @@
 {% if renderContent == 'css' %}
 
 {% else %}
+{% load tz %}
 <script type="text/javascript">
 function deleteSleep(id) {
   $.post("/sleep/delete/", {
@@ -20,7 +21,9 @@ function deleteSleep(id) {
     {% for sleep in sleeps %}
     <tr id="sleep-entry-id-{{sleep.id}}">
       <td><a href="javascript:void(0);" class="sleep-delete-button" onclick="deleteSleep({{sleep.id}});">x</a></td>
+          {% timezone sleep.timezone %}
 			<td>{{sleep.date}}: {{sleep.start_time}} to {{sleep.end_time}} ({{sleep.length}}) </td><td><a href="/sleep/edit/{{sleep.pk}}/">[edit]</a></td>
+            {% endtimezone %}
 	</tr>
 	{% if sleep.comments %} <tr><td>&nbsp;</td><td>{{sleep.comments|truncatewords:20}}</td><td>&nbsp;</td></tr>{% endif %}
     {% endfor %}

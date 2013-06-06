@@ -1,5 +1,5 @@
 from django import template
-from sleep.models import Sleeper, Sleep
+from sleep.models import *
 import datetime
 import pytz
 register = template.Library()
@@ -12,7 +12,8 @@ def sleepStatsView(context, renderContent='html'):
     timestyle = "%I:%M %p" if sleeper.getOrCreateProfile().use12HourTime else "%H:%M"
     w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today())
     if w != None: context['wakeup'] = w.strftime(timestyle)
-    context['lastDay'] = sleeper.timeSleptByTime(datetime.datetime.now()-datetime.timedelta(1),datetime.datetime.now())
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    context['lastDay'] = sleeper.timeSleptByTime(now-datetime.timedelta(1),now)
     context['total'] = sleeper.timeSleptByDate()
     context['renderContent'] = renderContent
 return context
@@ -36,10 +37,21 @@ def sleepListView(context, renderContent='html'):
             'numdates': numdates,
             'numsleeps': numsleeps,
             'renderContent': renderContent}
+<<<<<<< HEAD
 
 @register.inclusion_tag('inclusion/sleep_entry.html')
 def sleepEntryView(renderContent='html'):
     return {'renderContent': renderContent}
+=======
+@register.inclusion_tag('inclusion/sleep_entry.html', takes_context=True)
+def sleepEntryView(context,renderContent='html'):
+    sleeper=Sleeper.objects.get(pk=context['request'].user.pk)
+    prof=sleeper.getOrCreateProfile()
+    return {'renderContent': renderContent,
+            'timezones': [tz[0] for tz in TIMEZONES],
+            'mytz': prof.timezone,
+            }
+>>>>>>> a2bab301aa8822bc523eaa8bf46c38e4b28bbe4a
 
 @register.inclusion_tag('inclusion/sleep_view_table.html')
 def sleepViewTable(user, start = datetime.date.min, end = datetime.date.max, request):
@@ -51,3 +63,26 @@ def displayUser(username):
         return '''<a href="/creep/%s/">%s</a>''' % (username , username)
     else:
         return username
+
+@register.inclusion_tag('inclusion/display_friend.html')
+def displayFriend(you,them,requested=False):
+    sleeper=Sleeper.objects.get(pk=you.pk)
+    prof = sleeper.getOrCreateProfile()
+    friends = (them.pk,) in prof.friends.values_list('pk')
+    following = (them.pk,) in prof.follows.values_list('pk')
+    context = {
+            'you' : you,
+            'them' : them,
+            'friends' : friends,
+            'following' : following,
+            'requested' : requested or requested=='True',
+            }
+    return context
+
+@register.simple_tag
+def displayFriendRequests(user):
+    fr = FriendRequest.objects.filter(requestee=user,accepted=None)
+    if fr:
+        return " <b>(%s)</b>" % fr.count()
+    else:
+        return ""

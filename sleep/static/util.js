@@ -30,3 +30,46 @@ $.ajaxSetup({
         }
     }
 });
+
+function addFriend(id,link) {
+  $.post("/friends/add/", {
+    "id": id
+  }, function() {
+    link.innerHTML="added";
+  });
+};
+function removeFriend(id,link) {
+  $.post("/friends/remove/", {
+    "id": id
+  }, function() {
+    link.innerHTML="removed";
+  });
+};
+function follow(id,link) {
+  $.post("/friends/follow/", {
+    "id": id
+  }, function() {
+    link.innerHTML="followed";
+  });
+};
+function unfollow(id,link) {
+  $.post("/friends/unfollow/", {
+    "id": id
+  }, function() {
+    link.innerHTML="unfollowed";
+  });
+};
+function friendRequest(id,link) {
+  $.post("/friends/request/", {
+    "id" : id
+  }, function() {
+    link.innerHTML="requested";
+  });
+};
+function hideRequest(id,link) {
+  $.post("/friends/hide/", {
+    "id" : id
+  }, function() {
+    link.innerHTML="hidden";
+  });
+};
