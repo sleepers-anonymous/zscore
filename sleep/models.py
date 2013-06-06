@@ -19,16 +19,17 @@ class SleepManager(models.Manager):
         sleeps = Sleep.objects.all()
         atTime = [0] * (24 * 60 / res) 
         for sleep in sleeps:
-            startDate = localtime(sleep.start_time).date()
-            endDate = localtime(sleep.end_time).date()
+            tz = pytz.timezone(sleep.timezone)
+            startDate = sleep.start_time.astimezone(tz).date()
+            endDate = sleep.end_time.astimezone(tz).date()
             dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
             for d in dr:
                 if d == startDate:
-                    startTime = localtime(sleep.start_time).time()
+                    startTime = sleep.start_time.astimezone(tz).time()
                 else:
                     startTime = datetime.time(0)
                 if d == endDate:
-                    endTime = localtime(sleep.end_time).time()
+                    endTime = sleep.end_time.astimezone(tz).time()
                 else:
                     endTime = datetime.time(23,59)
                 for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
@@ -40,8 +41,9 @@ class SleepManager(models.Manager):
         startAtTime = [0] * (24 * 60 / res)
         endAtTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
-            startTime = localtime(sleep.start_time).time()
-            endTime = localtime(sleep.end_time).time()
+            tz = pytz.timezone(sleep.timezone)
+            startTime = sleep.start_time.astimezone(tz).time()
+            endTime = sleep.end_time.astimezone(tz).time()
             startAtTime[(startTime.hour * 60 + startTime.minute) / res]+=1
             endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
         return (startAtTime,endAtTime)
