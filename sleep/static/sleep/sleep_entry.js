@@ -149,8 +149,8 @@ function processSleeps(jsonData)
 	var sleep = jsonData[i];
 	sleeps[sleep.pk] = {
 	    'pk': sleep.pk,
-	    'start': new Date(sleep.fields.start_time),
-	    'end': new Date(sleep.fields.end_time),
+	    'start': moment(sleep.fields.start_time).toDate(),
+	    'end': moment(sleep.fields.end_time).toDate(),
 	    'comments': sleep.fields.comments,
 	    'date': new Date(sleep.fields.date),
         'timezone': sleep.fields.timezone,
