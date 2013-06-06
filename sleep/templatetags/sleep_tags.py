@@ -37,12 +37,7 @@ def sleepListView(context, renderContent='html'):
             'numdates': numdates,
             'numsleeps': numsleeps,
             'renderContent': renderContent}
-<<<<<<< HEAD
 
-@register.inclusion_tag('inclusion/sleep_entry.html')
-def sleepEntryView(renderContent='html'):
-    return {'renderContent': renderContent}
-=======
 @register.inclusion_tag('inclusion/sleep_entry.html', takes_context=True)
 def sleepEntryView(context,renderContent='html'):
     sleeper=Sleeper.objects.get(pk=context['request'].user.pk)
@@ -51,7 +46,6 @@ def sleepEntryView(context,renderContent='html'):
             'timezones': [tz[0] for tz in TIMEZONES],
             'mytz': prof.timezone,
             }
->>>>>>> a2bab301aa8822bc523eaa8bf46c38e4b28bbe4a
 
 @register.inclusion_tag('inclusion/sleep_view_table.html')
 def sleepViewTable(user, start = datetime.date.min, end = datetime.date.max, request):
