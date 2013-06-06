@@ -95,6 +95,10 @@ class Sleep(models.Model):
     def end_local_time(self):
         tz = pytz.timezone(self.timezone)
         return self.end_time.astimezone(tz)
+    
+    def getSleepTZ(self):
+        """Returns the timezone as a timezone object"""
+        return pytz.timezone(self.timezone)
 
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
@@ -134,6 +138,10 @@ class SleeperProfile(models.Model):
     def getIdealSleep(self):
         """Returns idealSleep as a timedelta"""
         return datetime.timedelta(hours=float(self.idealSleep))
+
+    def getUserTZ(self):
+        """Returns user timezone as a timezone object"""
+        return pytz.timezone(self.timezone)
 
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
