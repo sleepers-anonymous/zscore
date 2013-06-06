@@ -1,5 +1,4 @@
 from django import template
-from django.utils.timezone import localtime
 from sleep.models import *
 import datetime
 register = template.Library()
@@ -17,8 +16,8 @@ def graphTimeOfDayBars(user):
     sleeps = sleeper.sleep_set.all()
     if not sleeps:
         return { 'sleeps' : [] }
-    first = min([localtime(s.start_time) for s in sleeps]).date()
-    last = max([localtime(s.end_time) for s in sleeps]).date()
+    first = min([s.start_time.astimezone(pytz.timezone(s.timezone)) for s in sleeps]).date()
+    last = max([s.end_time.astimezone(pytz.timezone(s.timezone)) for s in sleeps]).date()
     n = (last-first).days + 1
     dateRange = [first + datetime.timedelta(i) for i in range(n)]
     for i in range(n):
@@ -28,16 +27,17 @@ def graphTimeOfDayBars(user):
     
     sleepsProcessed = []
     for sleep in sleeps:
-        startDate = localtime(sleep.start_time).date()
-        endDate = localtime(sleep.end_time).date()
+        tz = pytz.timezone(sleep.timezone)
+        startDate = sleep.start_time.astimezone(tz).date()
+        endDate = sleep.end_time.astimezone(tz).date()
         dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
         for d in dr:
             if d == startDate:
-                startTime = localtime(sleep.start_time).time()
+                startTime = sleep.start_time.astimezone(tz).time()
             else:
                 startTime = datetime.time(0)
             if d == endDate:
-                endTime = localtime(sleep.end_time).time()
+                endTime = sleep.end_time.astimezone(tz).time()
             else:
                 endTime = datetime.time(23,59)
             sleepsProcessed.append((startTime.hour * 15 + startTime.minute / 4., (d-first).days * 15, endTime.hour * 15 + endTime.minute / 4. - startTime.hour * 15 - startTime.minute / 4., 15))
