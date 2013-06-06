@@ -86,7 +86,7 @@ class Sleep(models.Model):
         if self.pk != None: sleepq.exclude(pk = self.pk)
         for i in sleepq:
             if self.overlaps(i):
-                raise ValidationError
+                raise ValidationError, "Overlapping Sleep Detected"
 
     def start_local_time(self):
         tz = pytz.timezone(self.timezone)
