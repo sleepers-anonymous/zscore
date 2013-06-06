@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 import pytz
 import datetime
 import math
+import itertools
 
 from zscore import settings
 
@@ -259,51 +260,45 @@ class Sleeper(User):
         else:
             return []
 
+    def genDays(start,end):
+        d=start
+        while d <= end:
+            yield d
+            d += datetime.timedelta(1)
+
+    def sleepWakeTime(self,t='end',start=datetime.date.today(),end=datetime.date.today()):
+        sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
+        if t=='end':
+            f=Sleep.end_local_time
+        elif t=='start':
+            f=Sleep.start_local_time
+        else:
+            return None
+        datestimes = [(s.date, f(s)) for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
+        daily={}
+        for i in datestimes:
+            if i[0] in daily:
+                daily[i[0]]=max(daily[i[0]],i[1])
+            else:
+                daily[i[0]]=i[1]
+        seconds = [t.time().hour*3600 + t.time().minute*60 + t.time().second for t in daily.itervalues()]
+        if daily:
+            av = sum(seconds)/len(seconds)
+            return datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
+        else:
+            return None
+
     def goToSleepTime(self, date=datetime.date.today()):
-        sleeps = self.sleep_set.filter(date=date)
-        if sleeps.count() == 0: return None
-        times = [s.start_local_time() for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
-        if len(times) == 0: return None
-        else: return max(times).time()
+        return self.sleepWakeTime('start',date,date)
 
     def avgGoToSleepTime(self, start = datetime.date.min, end=datetime.date.max):
-        import math
-        sleeps = self.sleep_set.filter(date__gte=start, date__lte=end).values('date', 'start_time', 'end_time')
-        if sleeps: dates=map(lambda x: x['date'], sleeps)
-        else: return None
-        def genDays(start, end):
-            d = start
-            while d <= end:
-                yield d
-                d += datetime.timedelta(1)
-        times = [self.goToSleepTime(d) for d in genDays(min(dates), max(dates))]
-        ctimes = [t.hour*3600 + t.minute*60 + t.second for t in times if t != None]
-        if len(ctimes) == 0: return None
-        av = sum(ctimes)/len(ctimes)
-        return datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
+        return self.sleepWakeTime('start',start,end)
 
     def wakeUpTime(self, date=datetime.date.today()):
-        sleeps = self.sleep_set.filter(date=date)
-        if sleeps.count() == 0: return None
-        times = [s.end_local_time() for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
-        if len(times) == 0: return None
-        else: return min(times).time()
+        return self.sleepWakeTime('end',date,date)
 
     def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max):
-        import math
-        sleeps = self.sleep_set.filter(date__gte=start, date__lte=end).values('date', 'start_time', 'end_time')
-        if sleeps: dates=map(lambda x: x['date'], sleeps)
-        else: return None
-        def genDays(start, end):
-            d = start
-            while d <= end:
-                yield d
-                d += datetime.timedelta(1)
-        times = [self.wakeUpTime(d) for d in genDays(min(dates), max(dates))]
-        ctimes = [t.hour*3600 + t.minute*60 + t.second for t in times if t != None]
-        if len(ctimes) == 0: return None
-        av = sum(ctimes)/len(ctimes)
-        return datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
+        return self.sleepWakeTime('end',start,end)
 
     def movingStats(self,start=datetime.date.min,end=datetime.date.max):
         sleep = self.sleepPerDay(start,end)
