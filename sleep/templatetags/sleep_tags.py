@@ -48,7 +48,7 @@ def sleepEntryView(context,renderContent='html'):
             }
 
 @register.inclusion_tag('inclusion/sleep_view_table.html')
-def sleepViewTable(user, start = datetime.date.min, end = datetime.date.max, request):
+def sleepViewTable(user, start = datetime.date.min, end = datetime.date.max):
     pass
 
 @register.simple_tag
