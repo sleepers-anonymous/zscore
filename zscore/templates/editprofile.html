@@ -12,8 +12,9 @@
     <label for="id_timezone">Timezone</label>
     {{form.timezone}} <br/ >{{form.timezone.errors}}<br />
     </p>
-    <p>
+    <p><input type="submit" value="Save" /></p>
     <h4>Privacy settings</h4>
+    <p>
     {{ form.privacy.errors }}
     <label for="id_privacy">Privacy to anonymous users:</label>
     {{ form.privacy }}<br/>
