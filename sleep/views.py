@@ -45,7 +45,10 @@ def editOrCreateSleep(request,sleep = None):
                 newsleep.save()
                 form = UpdateSleepForm(instance=newsleep)
             else:
-                form.is_valid()
+                try:
+                    form.is_valid()
+                except AttributeError:
+                    raise ValidationError("Overlapping Sleep Detected!")
                 form.save()
                 context["sleep"] = sleep[0]
             context["successfulSave"] = True
@@ -54,6 +57,7 @@ def editOrCreateSleep(request,sleep = None):
             context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
             return HttpResponse(render_to_string('editsleep.html',context,context_instance=RequestContext(request)))
         except ValidationError, e:
+            print e
             if "forceOverlap" in request.POST and request.POST['forceOverlap'] == 'on':
                 if create:
                     newsleep = form.save(commit=False)
@@ -65,7 +69,8 @@ def editOrCreateSleep(request,sleep = None):
                     context["sleep"] = sleep[0]
                 context["successfulSave"] = True
             else:
-                context["saveError"] = "; ".join(e.message_dict["__all__"]).encode("ascii", "ignore")
+                if hasattr(e, "message_dict"): context["saveError"] = "; ".join(e.message_dict["__all__"]).encode("ascii", "ignore")
+                if hasattr(e, "messages"): context["saveError"]= "; ".join(e.messages).encode("ascii", "ignore")
                 context["successfulSave"] = False
             context["form"] = form
             if create: return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
