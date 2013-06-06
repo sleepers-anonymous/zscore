@@ -36,6 +36,7 @@
       {% if request.user.is_staff %}
       <a href="/admin/">admin</a>
       {% endif %}
+      <a href="/faq/">FAQ</a>
       {% if request.user.is_authenticated %}
       logged in as {% displayUser request.user.username %} (<a href="/editprofile/">edit profile</a> <a href="/friends/">friends{% displayFriendRequests request.user %}</a> <a href="/accounts/logout">log out</a>)
       {% else %}
