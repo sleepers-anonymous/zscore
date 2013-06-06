@@ -29,12 +29,18 @@ class SleepForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(SleepForm,self).clean()
-        tz = pytz.timezone(cleaned_data['timezone'])
-        for k in ['start_time','end_time']:
-            #manually convert the strf-ed time to a datetime.datetime so we can make sure to do it in the right timezone
-            dt = datetime.datetime.strptime(cleaned_data[k],self.fmt)
-            cleaned_data[k]=tz.localize(dt)
-        overlaps = Sleep.objects.filter(start_time__lt=cleaned_data['end_time'],end_time__gt=cleaned_data['start_time'],user=self.user)
-        if overlaps:
-            raise forms.ValidationError("This sleep overlaps with %s!" % overlaps[0])
+        if 'timezone' in cleaned_data and 'start_time' in cleaned_data and 'end_time' in cleaned_data:
+            tz = pytz.timezone(cleaned_data['timezone'])
+            for k in ['start_time','end_time']:
+                #manually convert the strf-ed time to a datetime.datetime so we can make sure to do it in the right timezone
+                try:
+                    dt = datetime.datetime.strptime(cleaned_data[k],self.fmt)
+                    cleaned_data[k]=tz.localize(dt)
+                except ValueError:
+                    self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.datetime.now().strftime(self.fmt)])
+                    del cleaned_data[k]
+            if 'start_time' in cleaned_data and 'end_time' in cleaned_data:
+                overlaps = Sleep.objects.filter(start_time__lt=cleaned_data['end_time'],end_time__gt=cleaned_data['start_time'],user=self.user)
+                if overlaps:
+                    raise forms.ValidationError("This sleep overlaps with %s!" % overlaps[0])
         return cleaned_data
