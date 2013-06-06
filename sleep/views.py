@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.core import serializers
 from django.db.models import Q
+from django.core.exceptions import ValidationError, NON_FIELD_ERROR
 
 from sleep.models import *
 from sleep.forms import *
@@ -52,7 +53,7 @@ def editOrCreateSleep(request,sleep = None):
             if create: return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
             context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
             return HttpResponse(render_to_string('editsleep.html',context,context_instance=RequestContext(request)))
-        except ValueError:
+        except ValidationError:
             if "forceOverlap" in request.POST and request.POST['forceOverlap'] == 'on':
                 if create:
                     newsleep = form.save(commit=False)
