@@ -16,7 +16,8 @@ def sleepStatsView(context, renderContent='html'):
     context['lastDay'] = sleeper.timeSleptByTime(now-datetime.timedelta(1),now)
     context['total'] = sleeper.timeSleptByDate()
     context['renderContent'] = renderContent
-    return context
+return context
+
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
     context = {}
@@ -25,6 +26,7 @@ def sleepStatsTable(user):
     context['weekly'] = sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
     context['decaying'] = sleeper.decayStats()
     return context
+
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)
 def sleepListView(context, renderContent='html'):
     user = context['request'].user
@@ -35,6 +37,7 @@ def sleepListView(context, renderContent='html'):
             'numdates': numdates,
             'numsleeps': numsleeps,
             'renderContent': renderContent}
+
 @register.inclusion_tag('inclusion/sleep_entry.html', takes_context=True)
 def sleepEntryView(context,renderContent='html'):
     sleeper=Sleeper.objects.get(pk=context['request'].user.pk)
@@ -43,6 +46,10 @@ def sleepEntryView(context,renderContent='html'):
             'timezones': [tz[0] for tz in TIMEZONES],
             'mytz': prof.timezone,
             }
+
+@register.inclusion_tag('inclusion/sleep_view_table.html')
+def sleepViewTable(user, start = datetime.date.min, end = datetime.date.max, request):
+    pass
 
 @register.simple_tag
 def displayUser(username):
