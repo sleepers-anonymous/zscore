@@ -7,7 +7,7 @@
 <h1>SimpleSleepCreation</h1>
 
 <form method="post">{% csrf_token %}
-    {% if saveError %} <p>Overlapping sleep detected! Is this really what you want? <br />Yes, I really want to submit an overlapping sleep {{ form.forceOverlap }}</p>{% endif %}
+    {% if saveError %} <p>{{saveError}}! Is this really what you want? <br />Yes, I really want to submit an overlapping sleep {{ form.forceOverlap }}</p>{% endif %}
 		{% if successfulSave %}<p>Sleep entered!</p>{%else%}
         <p><label for="id_start_time">Start time:</label> {{ form.start_time }}</p>
         <p><label for="id_end_time">End time:</label>{{ form.end_time}}</p>
