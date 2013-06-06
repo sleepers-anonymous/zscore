@@ -65,8 +65,8 @@ def editOrCreateSleep(request,sleep = None):
                     context["sleep"] = sleep[0]
                 context["successfulSave"] = True
             else:
+                context["saveError"] = "; ".join(e.message_dict["__all__"]).encode("ascii", "ignore")
                 context["successfulSave"] = False
-                context["saveError"] = e
             context["form"] = form
             if create: return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
             context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
