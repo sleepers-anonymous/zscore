@@ -10,6 +10,7 @@ from sleep.models import *
 from sleep.forms import *
 
 import datetime
+import pytz
 
 def home(request):
     return render(request, 'index.html')
@@ -281,8 +282,11 @@ def unfollow(request):
 @login_required
 def createSleep(request):
     # Date-ify start, end, and center
+    timezone = pytz.timezone(request.POST['timezone'])
     start = datetime.datetime(*(map(int, request.POST.getlist("start[]"))))
+    start=timezone.localize(start)
     end = datetime.datetime(*(map(int, request.POST.getlist("end[]"))))
+    end=timezone.localize(end)
     date = datetime.date(*(map(int, request.POST.getlist("date[]"))[:3]))
     # Pull out comments
     if "comments" in request.POST:
@@ -290,7 +294,7 @@ def createSleep(request):
     else:
         comments = ""
     # Create the Sleep instance
-    Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments=comments, date=date)
+    Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments=comments, date=date,timezone=timezone)
     return HttpResponse('')
 
 @login_required
@@ -310,6 +314,11 @@ def deleteSleep(request):
 @login_required
 def getSleepsJSON(request):
     u = request.user
-    sleeps = Sleep.objects.filter(user=u)
+    sleeps = list(Sleep.objects.filter(user=u))
+    for sleep in sleeps:
+        tz = pytz.timezone(sleep.timezone)
+        #warning: the following is kind of hacky but it's better than dealing with the timezones in JS.  JS doesn't understand timezones, so we convert the timezone server-side, then pass it through to JS without telling the JS what timezone it's in.  JS interprets it as local time, which is slightly incorrect but works since all we want to do is get the hours/minutes/seconds back out as local time.
+        sleep.start_time=sleep.start_time.astimezone(tz).replace(tzinfo=None)
+        sleep.end_time=sleep.end_time.astimezone(tz).replace(tzinfo=None)
     data = serializers.serialize('json', sleeps)
     return HttpResponse(data, mimetype='application/json')

@@ -17,6 +17,7 @@ tentativeSleep = null;
 // 'comment' -- a String; the user's comment on this sleep
 // 'date' -- a Date object, in which we only care about the
 //           actual day; which day to associate the sleep with
+// 'timezone' -- the timezone in which we entered the sleep
 
 // Track the global mouse state
 // 0 = No click
@@ -151,7 +152,8 @@ function processSleeps(jsonData)
 	    'start': new Date(sleep.fields.start_time),
 	    'end': new Date(sleep.fields.end_time),
 	    'comments': sleep.fields.comments,
-	    'date': new Date(sleep.fields.date)
+	    'date': new Date(sleep.fields.date),
+        'timezone': sleep.fields.timezone,
 	};
     }
     // Now render all our current sleeps
@@ -411,7 +413,8 @@ $(document).ready(function()
 		    "start[]": dateToArray($("#confirm-sleep-entry [name='start']").datepicker("getDate")),
 		    "end[]": dateToArray($("#confirm-sleep-entry [name='end']").datepicker("getDate")),
 		    "date[]": dateToArray($("#confirm-sleep-entry [name='date']").datepicker("getDate")),
-		    "comments": $("#confirm-sleep-entry [name='comments']").val()
+		    "comments": $("#confirm-sleep-entry [name='comments']").val(),
+		    "timezone": $("#confirm-sleep-entry [name='timezone']").val()
 		}, function() {
 		    // TODO: Update the page dyanmically (without reloading)
 		    // For now:
