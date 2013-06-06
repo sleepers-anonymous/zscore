@@ -1,5 +1,7 @@
 {% extends 'frame.html' %}
 
+{% load sleep_tags %}
+
 {% block content %}
 <h1>Friends</h1>
 
@@ -11,51 +13,9 @@
 {% if not new %}
     {% if count %}
         Found {{count}} users.<br/>
-        <script type="text/javascript">
-            function addFriend(id) {
-              $.post("/friends/add/", {
-                "id": id
-              }, function() {
-                window.location = window.location.href;
-              });
-            };
-            function follow(id) {
-              $.post("/friends/follow/", {
-                "id": id
-              }, function() {
-                window.location = window.location.href;
-              });
-            };
-            function addAndFollow(id) {
-              $.post("/friends/add/", {
-                "id": id
-                }, function() {
-                $.post("/friends/follow/", {
-                  "id": id
-                }, function() {
-                  window.location = window.location.href;
-                });
-              });
-            };
-        </script>
         <table>
             {% for user in results %}
-                <tr>
-                    <td>{{user.username}}</td>
-                    {% if user not in friended %}
-                    <td><a class="add-friend-button" onclick="addFriend({{user.id}});" href="javascript:void(0);">friend</a></td>
-                    {% else %}
-                    <td>(already friends)</td>
-                    {% endif %}
-                    {% if user not in followed %}
-                    <td><a class="follow-button" onclick="follow({{user.id}});" href="javascript:void(0);">follow</a></td>
-                    {% else %}
-                    <td>(already following)</td>
-                    {% endif %}
-                    {% if user not in friended and user not in followed %}
-                    <td><a class="add-and-follow-button" onclick="addAndFollow({{user.id}});" href="javascript:void(0);">both</a></td>
-                    {% endif %}
-                </tr>
+                {% displayFriend request.user user %}
             {% endfor %}
         </table>
     {% else %}
@@ -63,54 +23,26 @@
     {% endif %}
 {% endif %}
 
-
-
-<h3>My Friends</h3>
-<i>Friends</i> can see whatever you set friends to be able to see in your <a href="/editprofile/">profile</a>.
-<script type="text/javascript">
-    function removeFriend(id) {
-      $.post("/friends/remove/", {
-        "id": id
-      }, function() {
-        window.location = window.location.href;
-      });
-    };
-</script>
-{% if friended %}
+{% if requests %}
+    <h3>Friend Requests</h3>
+    The users below have asked you to friend them.  They won't know if you friend them, hide the request, or leave it here.
     <table>
-        {% for user in friended %}
-            <tr>
-                <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
-                <td><a class="remove-friend-button" onclick="removeFriend({{user.id}});" href="javascript:void(0);">remove</a></td>
-            </tr>
+        {% for prof in requests %}
+            {% displayFriend request.user prof.user 'True' %}
         {% endfor %}
     </table>
-{% else %}
-    Add friends below!
 {% endif %}
 
-<h3>Following</h3>
-Users you <i>follow</i> will show up here and in the <a href="/creep/">creep</a> page, for your convenience.  They can't see that you follow them.
-<script type="text/javascript">
-    function unfollow(id) {
-      $.post("/friends/unfollow/", {
-        "id": id
-      }, function() {
-        window.location = window.location.href;
-      });
-    };
-</script>
-{% if followed %}
+<h3>My Friends and Follows</h3>
+<i>Friends</i> can see whatever you set friends to be able to see in your <a href="/editprofile/">profile</a>.  Users you <i>follow</i> will show up here and in the <a href="/creep/">creep</a> page, for your convenience.  They can't see that you follow them.
+{% if friendfollow %}
     <table>
-        {% for user in followed %}
-            <tr>
-                <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
-                <td><a class="unfollow-button" onclick="unfollow({{user.id}});" href="javascript:void(0);">unfollow</a></td>
-            </tr>
+        {% for user in friendfollow %}
+            {% displayFriend request.user user %}
         {% endfor %}
     </table>
 {% else %}
-    Follow other users below!
+    Add friends or follow other users above!
 {% endif %}
 
 {% endblock %}        

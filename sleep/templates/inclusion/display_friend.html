@@ -1,0 +1,18 @@
+<tr>
+    <td><a href="/creep/{{them.username}}">{{them.username}}</a></td>
+    {% if friends %}
+    <td><a class="remove-friend-button" onclick="removeFriend({{them.id}},this)" href="javascript:void(0);">remove</a></td>
+    {% else %}
+    <td><a class="add-friend-button" onclick="addFriend({{them.id}},this);" href="javascript:void(0);">friend</a></td>
+    {% endif %}
+    {% if following %}
+    <td><a class="unfollow-button" onclick="unfollow({{them.id}},this);" href="javascript:void(0);">unfollow</a></td>
+    {% else %}
+    <td><a class="follow-button" onclick="follow({{them.id}},this);" href="javascript:void(0);">follow</a></td>
+    {% endif %}
+    {% if requested %}
+    <td><a class="hide-button" onclick="hideRequest({{them.id}},this);" href="javascript:void(0);">hide</a></td>
+    {% else %}
+    <td><a class="request-button" onclick="friendRequest({{them.id}},this);" href="javascript:void(0);">request</a></td>
+    {% endif %}
+</tr>

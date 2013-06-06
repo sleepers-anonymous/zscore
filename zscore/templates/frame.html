@@ -34,7 +34,7 @@
       <a href="/admin/">admin</a>
       {% endif %}
       {% if request.user.is_authenticated %}
-      logged in as {% displayUser request.user.username %} (<a href="/editprofile/">edit profile</a> <a href="/friends/">friends</a> <a href="/accounts/logout">log out</a>)
+      logged in as {% displayUser request.user.username %} (<a href="/editprofile/">edit profile</a> <a href="/friends/">friends{% displayFriendRequests request.user %}</a> <a href="/accounts/logout">log out</a>)
       {% else %}
       <a href="/accounts/login">log in</a> <a href="/accounts/create">register</a> <br/>
       {% endif %}

@@ -1,5 +1,5 @@
 from django import template
-from sleep.models import Sleeper, Sleep
+from sleep.models import *
 import datetime
 import pytz
 register = template.Library()
@@ -44,3 +44,26 @@ def displayUser(username):
         return '''<a href="/creep/%s/">%s</a>''' % (username , username)
     else:
         return username
+
+@register.inclusion_tag('inclusion/display_friend.html')
+def displayFriend(you,them,requested=False):
+    sleeper=Sleeper.objects.get(pk=you.pk)
+    prof = sleeper.getOrCreateProfile()
+    friends = (them.pk,) in prof.friends.values_list('pk')
+    following = (them.pk,) in prof.follows.values_list('pk')
+    context = {
+            'you' : you,
+            'them' : them,
+            'friends' : friends,
+            'following' : following,
+            'requested' : requested or requested=='True',
+            }
+    return context
+
+@register.simple_tag
+def displayFriendRequests(user):
+    fr = FriendRequest.objects.filter(requestee=user,accepted=None)
+    if fr:
+        return " <b>(%s)</b>" % fr.count()
+    else:
+        return ""
