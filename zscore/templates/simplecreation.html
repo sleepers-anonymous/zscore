@@ -1,0 +1,20 @@
+
+{% extends "frame.html" %}
+
+{% block content %}
+{% load datetime_utils %}
+
+<h1>SimpleSleepCreation</h1>
+
+<form method="post">{% csrf_token %}
+    {% if saveError %} <p>Overlapping sleep detected! Is this really what you want? <br />Yes, I really want to submit an overlapping sleep {{ form.forceOverlap }}</p>{% endif %}
+		{% if successfulSave %}<p>Sleep entered!</p>{%else%}
+        <p>Start time: {{ form.start_time }}</p>
+        <p>End time:{{ form.end_time}}</p>
+        <p>Date:{{ form.date}}</p>
+        <p>Comments{{ form.comments}}</p>
+        <p>Timezone{{ form.timezone}}</p>
+        <input type="submit" value="Submit" /> {%endif%}
+</form>
+{% if successfulSave %} <button onclick="window.location='/mysleep/'">Go Back</button>{% endif %}
+{% endblock %}
