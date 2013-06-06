@@ -4,6 +4,7 @@
 {% load datetime_utils %}
 {% load graphs %}
 {% load sleep_tags %}
+{% load tz %}
 
 <h1>Creep on {{user}}</h1>
 
@@ -22,7 +23,9 @@
   <h3>Sleep</h3>
   <table>
   {% for sleep in sleeps %}
+  {% timezone sleep.timezone %}
   <tr><td>{{sleep.start_time}}</td><td> to</td><td> {{sleep.end_time}}</td><td> ({{sleep.length|printHHMM}})</td></tr>
+  {% endtimezone %}
   {% endfor %}
   </table>
   <br/>
