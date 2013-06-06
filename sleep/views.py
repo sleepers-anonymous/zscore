@@ -23,39 +23,65 @@ def mysleep(request):
     return HttpResponse(render_to_string('sleep/mysleep.html',{},context_instance=RequestContext(request)))
 
 @login_required
-def editSleep(request,sleep):
+def editOrCreateSleep(request,sleep = None):
     context = {}
-    sleep = Sleep.objects.filter(pk=sleep)
-    if sleep.count() != 1:
-        print sleep.count()
-        return render(request, "editsleepfailed.html")
+    create = False
+    if sleep:
+        sleep = Sleep.objects.filter(pk=sleep)
+        if sleep.count() != 1:  return render(request, "editsleepfailed.html")
+    else: create = True
     user = Sleeper.objects.get(pk=request.user.pk)
     tformat = "%I:%M %p %x" if user.getOrCreateProfile().use12HourTime else "%H:%M %x" 
-    if sleep[0].user.pk != user.pk:
-        return render(request, "editsleepfailed.html")
+    if not(create) and sleep[0].user.pk != user.pk: return render(request, "editsleepfailed.html")
     if request.method == 'POST':
-        form = UpdateSleepForm(request.POST, instance=sleep[0])
+        if create: form = UpdateSleepForm(request.POST)
+        else: form = UpdateSleepForm(request.POST, instance=sleep[0])
         try:
-            form.is_valid()
-            form.save()
+            if create:
+                newsleep = form.save(commit=False)
+                newsleep.user_id= user.id
+                newsleep.full_clean()
+                newsleep.save()
+                form = UpdateSleepForm(instance=newsleep)
+            else:
+                form.is_valid()
+                form.save()
+                context["sleep"] = sleep[0]
             context["successfulSave"] = True
-            context["sleep"] = sleep[0]
             context["form"] = form
+            if create: return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
             context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
             return HttpResponse(render_to_string('editsleep.html',context,context_instance=RequestContext(request)))
-        except:
+        except ValueError:
             if "forceOverlap" in request.POST and request.POST['forceOverlap'] == 'on':
-                form.save()
+                if create:
+                    newsleep = form.save(commit=False)
+                    newsleep.user_id = user.id
+                    newsleep.save()
+                    form = UpdateSleepForm(instance=newsleep)
+                else:
+                    form.save()
+                    context["sleep"] = sleep[0]
                 context["successfulSave"] = True
-                context["sleep"] = sleep[0]
             else:
                 context["successfulSave"] = False
                 context["saveError"] = "overlapping"
             context["form"] = form
+            if create: return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
             context.update({ "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
             return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
     else:
-        form = UpdateSleepForm(instance = sleep[0])
+        if create:
+            today = datetime.date.today().strftime("%m/%d/%Y")
+            initial = {"start_time": today + " 00:00",
+                        "end_time": today + " 00:00",
+                        "date": today,
+                        "timezone":user.getOrCreateProfile().timezone,
+                        }
+            form = UpdateSleepForm(initial = initial)
+            context.update({"form":form})
+            return HttpResponse(render_to_string('simplecreation.html', context, context_instance=RequestContext(request)))
+        else: form = UpdateSleepForm(instance = sleep[0])
         context.update({"form":form, "sleep": sleep[0], "start": sleep[0].start_time.strftime(tformat), "end": sleep[0].end_time.strftime(tformat)})
         return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
 

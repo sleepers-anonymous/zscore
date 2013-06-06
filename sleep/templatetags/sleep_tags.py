@@ -16,7 +16,7 @@ def sleepStatsView(context, renderContent='html'):
     context['lastDay'] = sleeper.timeSleptByTime(now-datetime.timedelta(1),now)
     context['total'] = sleeper.timeSleptByDate()
     context['renderContent'] = renderContent
-return context
+    return context
 
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
@@ -48,7 +48,7 @@ def sleepEntryView(context,renderContent='html'):
             }
 
 @register.inclusion_tag('inclusion/sleep_view_table.html')
-def sleepViewTable(user, start = datetime.date.min, end = datetime.date.max, request):
+def sleepViewTable(user, request, start = datetime.date.min, end = datetime.date.max):
     pass
 
 @register.simple_tag

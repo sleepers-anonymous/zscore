@@ -78,7 +78,11 @@ class Sleep(models.Model):
     def validate_unique(self, exclude=None):
         #Yes this is derpy and inefficient and really should actually use the exclude field
         from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
-        sleepq = self.user.sleep_set.all().exclude(pk = self.pk)
+        try:
+            user = self.user
+        except: return None
+        sleepq = self.user.sleep_set.all()
+        if self.pk != None: sleeqp.exclude(pk = self.pk)
         for i in sleepq:
             if self.overlaps(i):
                 raise ValidationError
