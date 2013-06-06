@@ -6,6 +6,10 @@ import pytz
 import datetime
 import math
 
+from zscore import settings
+
+TIMEZONES = [ (i,i) for i in pytz.common_timezones]
+
 class SleepManager(models.Manager):
     def totalSleep(self):
         sleeps =  Sleep.objects.all()
@@ -60,6 +64,7 @@ class Sleep(models.Model):
     end_time = models.DateTimeField()
     comments = models.TextField(blank=True)
     date = models.DateField()
+    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
     def __unicode__(self):
         return "Sleep from %s to %s" % (self.start_time,self.end_time)
@@ -108,7 +113,7 @@ class SleeperProfile(models.Model):
 
     emailreminders = models.BooleanField(default=False)
 
-    timezone = models.CharField(max_length=255, choices = [ (i,i) for i in pytz.common_timezones], default="US/Eastern")
+    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
     idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
 
