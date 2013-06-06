@@ -51,7 +51,6 @@ class SleepManager(models.Manager):
                 packed[int(length)]+=1
         return packed
 
-
 class Sleep(models.Model):
     objects = SleepManager()
 
@@ -110,6 +109,7 @@ class SleeperProfile(models.Model):
     timezone = models.CharField(max_length=255, choices = [ (i,i) for i in pytz.common_timezones], default="US/Eastern")
 
     idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
+    #Decimalfield restricts to two decimal places, float would not.
 
     def getIdealSleep(self):
         """Returns idealSleep as a timedelta"""

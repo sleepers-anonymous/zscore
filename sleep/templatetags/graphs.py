@@ -42,12 +42,15 @@ def graphTimeOfDayBars(user):
                 endTime = datetime.time(23,59)
             sleepsProcessed.append((startTime.hour * 15 + startTime.minute / 4., (d-first).days * 15, endTime.hour * 15 + endTime.minute / 4. - startTime.hour * 15 - startTime.minute / 4., 15))
 
+    avgWakeUpTime = sleeper.avgWakeUpTime()
+
     context = {
             'hassleep': True,
             'sleeps' : sleepsProcessed,
             'dateRange' : dateRange,
             'times' : times,
             'height' : height,
+            'avgWakeUpTime': avgWakeUpTime,
             }
     return context
     
