@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import *
 
 import pytz
 import datetime
@@ -110,7 +111,6 @@ class Allnighter(models.Model):
 
     def validate_unique(self, exclude=None):
         #Should edit to include the exclude field)
-        from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
         try: user= self.user
         except:return None
         allnighterq = self.user.allnighter_set.all()
