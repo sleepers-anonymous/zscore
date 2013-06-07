@@ -52,7 +52,7 @@ def editOrCreateSleep(request,sleep = None,success=False):
                     "date" : s.date.strftime("%x"),
                     }
             form = SleepForm(request.user, fmt, instance=s, initial=initial)
-        context.update({"start": s.start_time.strftime(fmt), "end": s.end_time.strftime(fmt)})
+        context.update({"start": s.start_time.strftime(fmt), "end": s.end_time.strftime(fmt), "tz": s.timezone})
     else: # we're creating a new sleep
         if request.method == 'POST':
             form = SleepForm(request.user, fmt, request.POST)
