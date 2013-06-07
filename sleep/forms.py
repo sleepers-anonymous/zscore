@@ -41,6 +41,7 @@ class SleepForm(forms.ModelForm):
                     self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.datetime(1999, 12, 31, 23, 59, 59).strftime(self.fmt)])
                     del cleaned_data[k]
             if 'start_time' in cleaned_data and 'end_time' in cleaned_data:
+                if cleaned_data["start_time"] >= cleaned_data["end_time"]: raise ValidationError({NON_FIELD_ERRORS: ["End time must be later than start time!"]})
                 overlaps = Sleep.objects.filter(start_time__lt=cleaned_data['end_time'],end_time__gt=cleaned_data['start_time'],user=self.user).distinct()
                 i = getattr(self, "instance", None)
                 if i != None: overlaps = overlaps.exclude(pk = i.pk)
