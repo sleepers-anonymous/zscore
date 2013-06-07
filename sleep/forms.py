@@ -1,5 +1,6 @@
 from django import forms
 from sleep.models import SleeperProfile, Sleep
+from django.core.exceptions import *
 
 import pytz
 import datetime
@@ -42,5 +43,5 @@ class SleepForm(forms.ModelForm):
             if 'start_time' in cleaned_data and 'end_time' in cleaned_data:
                 overlaps = Sleep.objects.filter(start_time__lt=cleaned_data['end_time'],end_time__gt=cleaned_data['start_time'],user=self.user)
                 if overlaps:
-                    raise forms.ValidationError("This sleep overlaps with %s!" % overlaps[0])
+                    raise ValidationError({NON_FIELD_ERRORS: "This sleep overlaps with %s!" % overlaps[0]})
         return cleaned_data
