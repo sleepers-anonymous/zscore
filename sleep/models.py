@@ -101,6 +101,14 @@ class Sleep(models.Model):
         """Returns the timezone as a timezone object"""
         return pytz.timezone(self.timezone)
 
+    def updateTZ(self,tzname):
+        """Updates the timezone while keeping the local time the same.  Intended for use from the shell; use at your own risk."""
+        newtz = pytz.timezone(tzname)
+        self.start_time = newtz.localize(self.start_local_time().replace(tzinfo=None))
+        self.end_time = newtz.localize(self.end_local_time().replace(tzinfo=None))
+        self.timezone = tzname #we have to make sure to do this last!
+        self.save()
+
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
     date = models.DateField()
