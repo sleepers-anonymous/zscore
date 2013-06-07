@@ -68,7 +68,7 @@ class Sleep(models.Model):
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
     def __unicode__(self):
-        tformat = "%I:%M %p %x" if self.user.getOrCreateProfile().use12HourTime else "%H:%M %x" 
+        tformat = "%I:%M %p %x" if Sleeper.objects.get(pk=self.user.pk).getOrCreateProfile().use12HourTime else "%H:%M %x" 
         return "Sleep from %s to %s" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat))
 
     def length(self):
