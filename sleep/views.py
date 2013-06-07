@@ -36,12 +36,12 @@ def editOrCreateSleep(request,sleep = None,success=False):
         try:
             s = Sleep.objects.get(pk=sleep)
             if s.user != request.user:
-                return HttpResponseForbidden('')
+                raise PermissionDenied
             context['sleep'] = s
-        except MultipleObjectsReturned:
+        except Sleep.MultipleObjectsReturned:
             return HttpResponseBadRequest('')
-        except DoesNotExist:
-            return HttpResponseNotFound('')
+        except Sleep.DoesNotExist:
+            raise Http404
         if request.method == 'POST':
             form = SleepForm(request.user, fmt, request.POST, instance=s)
         else:
@@ -208,7 +208,7 @@ def requestFriend(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
+            raise Http404
         them = Sleeper.objects.get(pk=i)
         if not FriendRequest.objects.filter(requestor=request.user.sleeperprofile,requestee=them):
             if request.user in them.sleeperprofile.friends.all():
@@ -225,7 +225,7 @@ def hideRequest(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
+            raise Http404
         frs = FriendRequest.objects.filter(requestor__user__pk=i,requestee=request.user)
         for fr in frs:
             fr.accepted=False
@@ -239,7 +239,7 @@ def addFriend(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
+            raise Http404
         prof = request.user.sleeperprofile
         prof.friends.add(i)
         prof.save()
@@ -256,7 +256,7 @@ def removeFriend(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
+            raise Http404
         prof = request.user.sleeperprofile
         prof.friends.remove(i)
         return HttpResponse('')
@@ -268,7 +268,7 @@ def follow(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
+            raise Http404
         prof = request.user.sleeperprofile
         prof.follows.add(i)
         prof.save()
@@ -281,7 +281,7 @@ def unfollow(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
+            raise Http404
         prof = request.user.sleeperprofile
         prof.follows.remove(i)
         return HttpResponse('')
@@ -312,10 +312,10 @@ def deleteSleep(request):
         i = request.POST['id']
         s = Sleep.objects.filter(pk=i)
         if len(s) == 0:
-            return HttpResponseNotFound('')
+            raise Http404
         s = s[0]
         if s.user != request.user:
-            return HttpResponseForbidden('')
+            raise PermissionDenied
         s.delete()
         return HttpResponse('')
     return HttpResponseBadRequest('')
