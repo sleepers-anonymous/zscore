@@ -40,4 +40,5 @@ class SleepForm(forms.ModelForm):
                 except ValueError:
                     self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.datetime(1999, 12, 31, 23, 59, 59).strftime(self.fmt)])
                     del cleaned_data[k]
+            if "start_time" in cleaned_data and "end_time" in cleaned_data and cleaned_data["start_time"] >= cleaned_data["end_time"]: raise ValidationError({NON_FIELD_ERRORS: ["End time must be later than start time!"]}) 
         return cleaned_data
