@@ -69,7 +69,7 @@ class Sleep(models.Model):
 
     def __unicode__(self):
         tformat = "%I:%M %p %x" if self.user.getOrCreateProfile().use12HourTime else "%H:%M %x" 
-        return "Sleep from %s to %s" % (self.start_time.strftime(tformat),self.end_time.strftime(tformat))
+        return "Sleep from %s to %s" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat))
 
     def length(self):
         return self.end_time - self.start_time
