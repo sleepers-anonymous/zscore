@@ -46,7 +46,12 @@ def editOrCreateSleep(request,sleep = None,success=False):
         if request.method == 'POST':
             form = SleepForm(request.user, fmt, request.POST, instance=s)
         else:
-            form = SleepForm(request.user, fmt, instance=s)
+            initial = {
+                    "start_time" : s.start_local_time().strftime(fmt),
+                    "end_time" : s.end_local_time().strftime(fmt),
+                    "date" : s.date.strftime("%x"),
+                    }
+            form = SleepForm(request.user, fmt, instance=s, initial=initial)
         context.update({"start": s.start_time.strftime(fmt), "end": s.end_time.strftime(fmt)})
     else: # we're creating a new sleep
         if request.method == 'POST':
