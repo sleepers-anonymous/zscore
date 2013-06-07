@@ -44,7 +44,7 @@ class SleepForm(forms.ModelForm):
             if 'start_time' in cleaned_data and 'end_time' in cleaned_data:
                 overlaps = Sleep.objects.filter(start_time__lt=cleaned_data['end_time'],end_time__gt=cleaned_data['start_time'],user=self.user).distinct()
                 i = getattr(self, "instance", None)
-                if i != None: overlaps.exclude(pk = i.pk)
+                if i != None: overlaps = overlaps.exclude(pk = i.pk)
                 if overlaps:
                     print [o.pk for o in overlaps]
                     print self.instance.pk
