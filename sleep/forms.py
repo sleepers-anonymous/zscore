@@ -29,7 +29,6 @@ class SleepForm(forms.ModelForm):
         super(SleepForm,self).__init__(*args, **kwargs)
 
     def clean(self):
-        print self.instance
         cleaned_data = super(SleepForm,self).clean()
         if 'timezone' in cleaned_data and 'start_time' in cleaned_data and 'end_time' in cleaned_data:
             tz = pytz.timezone(cleaned_data['timezone'])
@@ -46,7 +45,5 @@ class SleepForm(forms.ModelForm):
                 i = getattr(self, "instance", None)
                 if i != None: overlaps = overlaps.exclude(pk = i.pk)
                 if overlaps:
-                    print [o.pk for o in overlaps]
-                    print self.instance.pk
                     raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
         return cleaned_data
