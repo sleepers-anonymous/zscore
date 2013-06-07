@@ -66,9 +66,9 @@ def sleepViewTable(request, **kwargs):
     prof = Sleeper.object.get(pk=request.user.pk).getOrCreateProfile()
     fmt = ("%I:%M %p", "%I:%M %p %x") if prof.use12HourTime else ("%H:%M", "%H:%M %x")
     dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%D"
-    listofsleeps = []
+    sleeps = []
     for sleep in sleepq:
-        d = {"start_time": 0}
+        d = {"start_time": sleep.start_time.strftime(fmt), "end_time": sleep.end_time.strftime(fmt), "date": sleep.date.strftime(dfmt)}
     pass
 
 @register.simple_tag
