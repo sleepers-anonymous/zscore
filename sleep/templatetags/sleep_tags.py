@@ -49,15 +49,19 @@ def sleepEntryView(context,renderContent='html'):
 
 @register.inclusion_tag('inclusion/sleep_view_table.html')
 def sleepViewTable(request, **kwargs):
+    """Prints a tablified list of sleeps: Options: start, end, user, showcomments, showedit, and reverse"""
     settings = {
             "start": datetime.date.min,
             "end": datetime.date.max,
             "user": request.user,
-            "showcomments": True,
+            "showcomments": False,
+            "showedit": False,
+            "reverse": False,
             }
     settings.update(kwargs)
     settings["user"] = Sleeper.objects.get(pk = settings["user"].pk)
     sleepq = settings["user"].sleep_set.filter(start_time__gte=settings["start"], end_time__lte=settings["end"])
+    prof = Sleeper.object.get(pk=request.user.pk).getOrCreateProfile()
     pass
 
 @register.simple_tag
