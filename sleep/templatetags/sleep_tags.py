@@ -48,7 +48,16 @@ def sleepEntryView(context,renderContent='html'):
             }
 
 @register.inclusion_tag('inclusion/sleep_view_table.html')
-def sleepViewTable(user, request, start = datetime.date.min, end = datetime.date.max):
+def sleepViewTable(request, **kwargs):
+    settings = {
+            "start": datetime.date.min,
+            "end": datetime.date.max,
+            "user": request.user,
+            "showcomments": True,
+            }
+    settings.update(kwargs)
+    settings["user"] = Sleeper.objects.get(pk = settings["user"].pk)
+    sleepq = settings["user"].sleep_set.filter(start_time__gte=settings["start"], end_time__lte=settings["end"])
     pass
 
 @register.simple_tag
