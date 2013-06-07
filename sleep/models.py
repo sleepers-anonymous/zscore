@@ -105,6 +105,14 @@ class Allnighter(models.Model):
     date = models.DateField()
     comments = models.TextField(blank=True)
 
+    def validate_unique(self, exclude=None):
+        #Should edit to include the exclude field)
+        from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+        try: user= self.user
+        except:return None
+        allnighterq = self.user.allnighter_set.all()
+
+
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default
