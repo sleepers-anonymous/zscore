@@ -74,20 +74,14 @@ class Sleep(models.Model):
     def length(self):
         return self.end_time - self.start_time
 
-    def overlaps(self, otherSleep):
-        return (min(self.end_time, otherSleep.end_time) - max(self.start_time, otherSleep.start_time) > datetime.timedelta(0))
-
     def validate_unique(self, exclude=None):
         #Yes this is derpy and inefficient and really should actually use the exclude field
-        from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
         try:
-            user = self.user
-        except: return None
-        sleepq = self.user.sleep_set.all()
-        if self.pk != None: sleepq.exclude(pk = self.pk)
-        for i in sleepq:
-            if self.overlaps(i):
-                raise ValidationError, "Overlapping Sleep Detected"
+            overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user)
+        except:
+            return None #we're probably just not actually done setting up the model here; ideally we would not have to do this?
+        if overlaps:
+            raise ValidationError({NON_FIELD_ERRORS: "This sleep overlaps with %s!" % overlaps[0]})
 
     def start_local_time(self):
         tz = pytz.timezone(self.timezone)
