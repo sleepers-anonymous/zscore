@@ -70,7 +70,7 @@ class Sleep(models.Model):
 
     def __unicode__(self):
         tformat = "%I:%M %p %x" if Sleeper.objects.get(pk=self.user.pk).getOrCreateProfile().use12HourTime else "%H:%M %x" 
-        return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.timezone)
+        return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
 
     def length(self):
         return self.end_time - self.start_time
@@ -99,6 +99,10 @@ class Sleep(models.Model):
         self.end_time = newtz.localize(self.end_local_time().replace(tzinfo=None))
         self.timezone = tzname #we have to make sure to do this last!
         self.save()
+
+    def getTZShortName(self):
+        """Gets the short of a time zone"""
+        return self.getSleepTZ().tzname(datetime.datetime(self.date.year, self.date.month, self.date.day))
 
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
