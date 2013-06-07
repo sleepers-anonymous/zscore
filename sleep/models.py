@@ -76,11 +76,7 @@ class Sleep(models.Model):
         return self.end_time - self.start_time
 
     def validate_unique(self, exclude=None):
-        #Yes this is derpy and inefficient and really should actually use the exclude field
-        try:
-            overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
-        except:
-            return None #we're probably just not actually done setting up the model here; ideally we would not have to do this?
+        overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
         if overlaps:
             raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
 

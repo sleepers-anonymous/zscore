@@ -55,7 +55,7 @@ def editOrCreateSleep(request,sleep = None,success=False):
         context.update({"start": s.start_time.strftime(fmt), "end": s.end_time.strftime(fmt)})
     else: # we're creating a new sleep
         if request.method == 'POST':
-            form = SleepForm(request.user, fmt, request.POST)
+            form = SleepForm(request.user, fmt, request.POST, instance=Sleep(user=request.user))
         else:
             today = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
             initial = {
