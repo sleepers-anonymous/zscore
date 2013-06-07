@@ -9,7 +9,7 @@
 {% else %}
 <h1>Create Sleep</h1>
 {% endif %}
-{% if succcess %}Saved!{% endif %}
+{% if success %}Saved!{% endif %}
 
 <form action = "/sleep/simple/" method="post">{% csrf_token %}
     {{form.as_p}}
