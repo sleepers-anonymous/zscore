@@ -16,8 +16,8 @@ class FriendSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
 class SleepForm(forms.ModelForm):
-    start_time = forms.CharField(max_length=20)
-    end_time = forms.CharField(max_length=20)
+    start_time = forms.CharField(max_length=30)
+    end_time = forms.CharField(max_length=30)
     class Meta:
         model = Sleep
         fields = ['start_time','end_time', 'date', 'comments', 'timezone']
