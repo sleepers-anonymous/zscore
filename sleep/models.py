@@ -82,7 +82,7 @@ class Sleep(models.Model):
         except:
             return None #we're probably just not actually done setting up the model here; ideally we would not have to do this?
         if overlaps:
-            raise ValidationError({NON_FIELD_ERRORS: "This sleep overlaps with %s!" % overlaps[0]})
+            raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
 
     def start_local_time(self):
         tz = pytz.timezone(self.timezone)
