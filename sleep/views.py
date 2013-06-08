@@ -219,7 +219,7 @@ def requestFriend(request):
                 accept = True
             else:
                 accept = None
-            FriendRequest.objects.create(requestor=prof,requestee=them,accepted=accept)
+            FriendRequest.objects.create(requestor=request.user.sleeperprofile,requestee=them,accepted=accept)
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
