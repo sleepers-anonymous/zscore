@@ -26,8 +26,7 @@ def mysleep(request):
 @login_required
 def editOrCreateSleep(request,sleep = None,success=False):
     context = {'success': success}
-    sleeper = Sleeper.objects.get(pk=request.user.pk)
-    prof = sleeper.getOrCreateProfile()
+    prof = request.user.sleeperprofile
     defaulttz = prof.timezone
     if prof.use12HourTime:
         fmt = "%I:%M %p %x"
@@ -37,12 +36,12 @@ def editOrCreateSleep(request,sleep = None,success=False):
         try:
             s = Sleep.objects.get(pk=sleep)
             if s.user != request.user:
-                return HttpResponseForbidden('')
+                raise PermissionDenied
             context['sleep'] = s
-        except MultipleObjectsReturned:
+        except Sleep.MultipleObjectsReturned:
             return HttpResponseBadRequest('')
-        except DoesNotExist:
-            return HttpResponseNotFound('')
+        except Sleep.DoesNotExist:
+            raise Http404
         if request.method == 'POST':
             form = SleepForm(request.user, fmt, request.POST, instance=s)
         else:
@@ -108,9 +107,7 @@ def creep(request,username=None, asOther=None):
                         Q(sleeperprofile__friends=request.user)
                     )
                 )
-            sleeper = Sleeper.objects.get(pk=request.user.pk)
-            prof = sleeper.getOrCreateProfile()
-            followed = prof.follows.order_by('username')
+            followed = request.user.sleeperprofile.follows.order_by('username')
         total=creepable.distinct().count()
         if request.method == 'POST':
             form=CreepSearchForm(request.POST)
@@ -142,7 +139,7 @@ def creep(request,username=None, asOther=None):
         context = {}
         try:
             user=Sleeper.objects.get(username=username)
-            p = user.getOrCreateProfile()
+            p = user.sleeperprofile
             if user.is_anonymous():
                 priv = p.privacy
             elif request.user.pk == user.pk:
@@ -166,8 +163,7 @@ def creep(request,username=None, asOther=None):
 
 @login_required
 def editProfile(request):
-    sleeper = Sleeper.objects.get(pk=request.user.pk)
-    p = sleeper.getOrCreateProfile()
+    p = request.user.sleeperprofile
     if request.method == 'POST':
         form = SleeperProfileForm(request.POST, instance=p)
         if form.is_valid():
@@ -180,8 +176,7 @@ def editProfile(request):
 
 @login_required
 def friends(request):
-    sleeper = Sleeper.objects.get(pk=request.user.pk)
-    prof = sleeper.getOrCreateProfile()
+    prof = request.user.sleeperprofile
     friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username')
     requests = sleeper.requests.filter(friendrequest__accepted=None).order_by('user__username')
     if request.method == 'POST':
@@ -213,13 +208,10 @@ def requestFriend(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
-        sleeper = Sleeper.objects.get(pk=request.user.pk)
-        prof = sleeper.getOrCreateProfile()
+            raise Http404
         them = Sleeper.objects.get(pk=i)
-        if not FriendRequest.objects.filter(requestor=prof,requestee=them):
-            themProf = them.getOrCreateProfile()
-            if request.user in themProf.friends.all():
+        if not FriendRequest.objects.filter(requestor=request.user.sleeperprofile,requestee=them):
+            if request.user in them.sleeperprofile.friends.all():
                 accept = True
             else:
                 accept = None
@@ -233,7 +225,7 @@ def hideRequest(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
+            raise Http404
         frs = FriendRequest.objects.filter(requestor__user__pk=i,requestee=request.user)
         for fr in frs:
             fr.accepted=False
@@ -247,9 +239,8 @@ def addFriend(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
-        sleeper = Sleeper.objects.get(pk=request.user.pk)
-        prof = sleeper.getOrCreateProfile()
+            raise Http404
+        prof = request.user.sleeperprofile
         prof.friends.add(i)
         prof.save()
         frs = FriendRequest.objects.filter(requestor__user__pk=i,requestee=request.user)
@@ -265,9 +256,8 @@ def removeFriend(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
-        sleeper = Sleeper.objects.get(pk=request.user.pk)
-        prof = sleeper.getOrCreateProfile()
+            raise Http404
+        prof = request.user.sleeperprofile
         prof.friends.remove(i)
         return HttpResponse('')
     else:
@@ -278,9 +268,8 @@ def follow(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
-        sleeper = Sleeper.objects.get(pk=request.user.pk)
-        prof = sleeper.getOrCreateProfile()
+            raise Http404
+        prof = request.user.sleeperprofile
         prof.follows.add(i)
         prof.save()
         return HttpResponse('')
@@ -292,9 +281,8 @@ def unfollow(request):
     if 'id' in request.POST:
         i = request.POST['id']
         if i==request.user.pk or len(User.objects.filter(pk=i))!=1:
-            return HttpResponseNotFound('')
-        sleeper = Sleeper.objects.get(pk=request.user.pk)
-        prof = sleeper.getOrCreateProfile()
+            raise Http404
+        prof = request.user.sleeperprofile
         prof.follows.remove(i)
         return HttpResponse('')
     else:
@@ -324,10 +312,10 @@ def deleteSleep(request):
         i = request.POST['id']
         s = Sleep.objects.filter(pk=i)
         if len(s) == 0:
-            return HttpResponseNotFound('')
+            raise Http404
         s = s[0]
         if s.user != request.user:
-            return HttpResponseForbidden('')
+            raise PermissionDenied
         s.delete()
         return HttpResponse('')
     return HttpResponseBadRequest('')

@@ -69,7 +69,7 @@ class Sleep(models.Model):
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
     def __unicode__(self):
-        tformat = "%I:%M %p %x" if Sleeper.objects.get(pk=self.user.pk).getOrCreateProfile().use12HourTime else "%H:%M %x" 
+        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x" 
         return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
 
     def length(self):
@@ -164,7 +164,7 @@ class SleeperManager(models.Manager):
         extra=[]
         for sleeper in sleepers:
             if len(sleeper.sleepPerDay())>2 and sleeper.sleepPerDay(packDates=True)[-1]['date'] >= datetime.date.today()-datetime.timedelta(5):
-                p = sleeper.getOrCreateProfile()
+                p = sleeper.sleeperprofile
                 if user is None:
                     priv = p.PRIVACY_HIDDEN
                 elif user is 'all':
@@ -209,7 +209,7 @@ class SleeperManager(models.Manager):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile')
         scored=[]
         for sleeper in sleepers:
-            p = sleeper.getOrCreateProfile()
+            p = sleeper.sleeperprofile
             if user is None:
                 priv = p.PRIVACY_HIDDEN
             elif user is 'all':
@@ -252,6 +252,7 @@ class Sleeper(User):
     objects = SleeperManager()
 
     def getOrCreateProfile(self):
+        print "You probably don't actually want this method, User.sleeperprofile should work just fine."
         return SleeperProfile.objects.get_or_create(user=self)[0]
 
     def timeSleptByDate(self,start=datetime.date.min,end=datetime.date.max):

@@ -9,7 +9,7 @@ register = template.Library()
 def sleepStatsView(context, renderContent='html'):
     user = context['request'].user
     sleeper = Sleeper.objects.get(pk=user.pk)
-    timestyle = "%I:%M %p" if sleeper.getOrCreateProfile().use12HourTime else "%H:%M"
+    timestyle = "%I:%M %p" if sleeper.sleeperprofile.use12HourTime else "%H:%M"
     w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today())
     if w != None: context['wakeup'] = w.strftime(timestyle)
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -40,11 +40,9 @@ def sleepListView(context, renderContent='html'):
 
 @register.inclusion_tag('inclusion/sleep_entry.html', takes_context=True)
 def sleepEntryView(context,renderContent='html'):
-    sleeper=Sleeper.objects.get(pk=context['request'].user.pk)
-    prof=sleeper.getOrCreateProfile()
     return {'renderContent': renderContent,
             'timezones': [tz[0] for tz in TIMEZONES],
-            'mytz': prof.timezone,
+            'mytz': context['request'].user.sleeperprofile.timezone,
             }
 
 @register.inclusion_tag('inclusion/sleep_view_table.html')
@@ -63,7 +61,7 @@ def sleepViewTable(request, **kwargs):
     sleepq = settings["user"].sleep_set.filter(start_time__gte=settings["start"], end_time__lte=settings["end"]).order_by('-start_time', '-end_time')
     if settings["reverse"]: sleepq = sleepq.order_by('-start_time', '-end_time')
     else: sleepq = sleepq.order_by('start_time', 'end_time')
-    prof = Sleeper.object.get(pk=request.user.pk).getOrCreateProfile()
+    prof = request.user.sleeperprofile
     fmt = ("%I:%M %p", "%I:%M %p %x") if prof.use12HourTime else ("%H:%M", "%H:%M %x")
     dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%D"
     sleeps = []
@@ -80,8 +78,7 @@ def displayUser(username):
 
 @register.inclusion_tag('inclusion/display_friend.html')
 def displayFriend(you,them,requested=False):
-    sleeper=Sleeper.objects.get(pk=you.pk)
-    prof = sleeper.getOrCreateProfile()
+    prof = you.sleeperprofile
     friends = (them.pk,) in prof.friends.values_list('pk')
     following = (them.pk,) in prof.follows.values_list('pk')
     context = {
