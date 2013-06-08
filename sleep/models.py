@@ -11,152 +11,6 @@ from zscore import settings
 
 TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 
-class SleepManager(models.Manager):
-    def totalSleep(self):
-        sleeps =  Sleep.objects.all()
-        return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
-
-    def sleepTimes(self,res=1):
-        sleeps = Sleep.objects.all()
-        atTime = [0] * (24 * 60 / res) 
-        for sleep in sleeps:
-            tz = pytz.timezone(sleep.timezone)
-            startDate = sleep.start_time.astimezone(tz).date()
-            endDate = sleep.end_time.astimezone(tz).date()
-            dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
-            for d in dr:
-                if d == startDate:
-                    startTime = sleep.start_time.astimezone(tz).time()
-                else:
-                    startTime = datetime.time(0)
-                if d == endDate:
-                    endTime = sleep.end_time.astimezone(tz).time()
-                else:
-                    endTime = datetime.time(23,59)
-                for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
-                    atTime[i]+=1
-        return atTime
-
-    def sleepStartEndTimes(self,res=10):
-        sleeps = Sleep.objects.all()
-        startAtTime = [0] * (24 * 60 / res)
-        endAtTime = [0] * (24 * 60 / res)
-        for sleep in sleeps:
-            tz = pytz.timezone(sleep.timezone)
-            startTime = sleep.start_time.astimezone(tz).time()
-            endTime = sleep.end_time.astimezone(tz).time()
-            startAtTime[(startTime.hour * 60 + startTime.minute) / res]+=1
-            endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
-        return (startAtTime,endAtTime)
-
-    def sleepLengths(self,res=10):
-        sleeps = Sleep.objects.all()
-        lengths = map(lambda x: x.length().total_seconds() / (60*res),sleeps)
-        packed = [0] * int(max(lengths)+1)
-        for length in lengths:
-            if length>0:
-                packed[int(length)]+=1
-        return packed
-
-class Sleep(models.Model):
-    objects = SleepManager()
-
-    user = models.ForeignKey(User)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    comments = models.TextField(blank=True)
-    date = models.DateField()
-    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
-
-    def __unicode__(self):
-        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x" 
-        return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
-
-    def length(self):
-        return self.end_time - self.start_time
-
-    def validate_unique(self, exclude=None):
-        overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
-        if overlaps:
-            raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
-
-    def start_local_time(self):
-        tz = pytz.timezone(self.timezone)
-        return self.start_time.astimezone(tz)
-
-    def end_local_time(self):
-        tz = pytz.timezone(self.timezone)
-        return self.end_time.astimezone(tz)
-    
-    def getSleepTZ(self):
-        """Returns the timezone as a timezone object"""
-        return pytz.timezone(self.timezone)
-
-    def updateTZ(self,tzname):
-        """Updates the timezone while keeping the local time the same.  Intended for use from the shell; use at your own risk."""
-        newtz = pytz.timezone(tzname)
-        self.start_time = newtz.localize(self.start_local_time().replace(tzinfo=None))
-        self.end_time = newtz.localize(self.end_local_time().replace(tzinfo=None))
-        self.timezone = tzname #we have to make sure to do this last!
-        self.save()
-
-    def getTZShortName(self):
-        """Gets the short of a time zone"""
-        return self.getSleepTZ().tzname(datetime.datetime(self.date.year, self.date.month, self.date.day))
-
-class Allnighter(models.Model):
-    user = models.ForeignKey(User)
-    date = models.DateField()
-    comments = models.TextField(blank=True)
-
-    def validate_unique(self, exclude=None):
-        #Should edit to include the exclude field)
-        try: user= self.user
-        except:return None
-        allnighterq = self.user.allnighter_set.all()
-
-
-class SleeperProfile(models.Model):
-    user = models.OneToOneField(User)
-    # all other fields should have a default
-    PRIVACY_HIDDEN = -100
-    PRIVACY_REDACTED = -50
-    PRIVACY_NORMAL = 0
-    PRIVACY_STATS = 50
-    PRIVACY_PUBLIC = 100
-    PRIVACY_CHOICES = (
-            (PRIVACY_HIDDEN, 'Hidden'),
-            (PRIVACY_REDACTED, 'Redacted'),
-            (PRIVACY_NORMAL, 'Normal'),
-            (PRIVACY_STATS, 'Stats Public'),
-            (PRIVACY_PUBLIC, 'Sleep Public'),
-            )
-    privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to anonymous users')
-    privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to logged-in users')
-    privacyFriends = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to friends')
-    friends = models.ManyToManyField(User,related_name='friends+',blank=True)
-    follows = models.ManyToManyField(User,related_name='follows+',blank=True)
-    requested = models.ManyToManyField(User,related_name='requests',blank=True,through='FriendRequest')
-    use12HourTime = models.BooleanField(default=False)
-
-    emailreminders = models.BooleanField(default=False)
-
-    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
-
-    idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
-    #Decimalfield restricts to two decimal places, float would not.
-
-    def getIdealSleep(self):
-        """Returns idealSleep as a timedelta"""
-        return datetime.timedelta(hours=float(self.idealSleep))
-
-    def getUserTZ(self):
-        """Returns user timezone as a timezone object"""
-        return pytz.timezone(self.timezone)
-
-    def __unicode__(self):
-        return "SleeperProfile for user %s" % self.user
-
 class SleeperManager(models.Manager):
     def sorted_sleepers(self,sortBy='zScore',user=None):
         sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile')
@@ -238,12 +92,6 @@ class SleeperManager(models.Manager):
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
         return scored
-
-class FriendRequest(models.Model):
-    requestor = models.ForeignKey(SleeperProfile)
-    requestee = models.ForeignKey(User)
-    accepted = models.NullBooleanField()
-        
 
 class Sleeper(User):
     class Meta:
@@ -390,4 +238,158 @@ class Sleeper(User):
             else:
                 d[k]=datetime.timedelta(0,d[k])
         return d
+
+class SleepManager(models.Manager):
+    def totalSleep(self):
+        sleeps =  Sleep.objects.all()
+        return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
+
+    def sleepTimes(self,res=1):
+        sleeps = Sleep.objects.all()
+        atTime = [0] * (24 * 60 / res) 
+        for sleep in sleeps:
+            tz = pytz.timezone(sleep.timezone)
+            startDate = sleep.start_time.astimezone(tz).date()
+            endDate = sleep.end_time.astimezone(tz).date()
+            dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
+            for d in dr:
+                if d == startDate:
+                    startTime = sleep.start_time.astimezone(tz).time()
+                else:
+                    startTime = datetime.time(0)
+                if d == endDate:
+                    endTime = sleep.end_time.astimezone(tz).time()
+                else:
+                    endTime = datetime.time(23,59)
+                for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
+                    atTime[i]+=1
+        return atTime
+
+    def sleepStartEndTimes(self,res=10):
+        sleeps = Sleep.objects.all()
+        startAtTime = [0] * (24 * 60 / res)
+        endAtTime = [0] * (24 * 60 / res)
+        for sleep in sleeps:
+            tz = pytz.timezone(sleep.timezone)
+            startTime = sleep.start_time.astimezone(tz).time()
+            endTime = sleep.end_time.astimezone(tz).time()
+            startAtTime[(startTime.hour * 60 + startTime.minute) / res]+=1
+            endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
+        return (startAtTime,endAtTime)
+
+    def sleepLengths(self,res=10):
+        sleeps = Sleep.objects.all()
+        lengths = map(lambda x: x.length().total_seconds() / (60*res),sleeps)
+        packed = [0] * int(max(lengths)+1)
+        for length in lengths:
+            if length>0:
+                packed[int(length)]+=1
+        return packed
+
+class Sleep(models.Model):
+    objects = SleepManager()
+
+    user = models.ForeignKey(Sleeper)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    comments = models.TextField(blank=True)
+    date = models.DateField()
+    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
+
+    def __unicode__(self):
+        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x" 
+        return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
+
+    def length(self):
+        return self.end_time - self.start_time
+
+    def validate_unique(self, exclude=None):
+        overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
+        if overlaps:
+            raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
+
+    def start_local_time(self):
+        tz = pytz.timezone(self.timezone)
+        return self.start_time.astimezone(tz)
+
+    def end_local_time(self):
+        tz = pytz.timezone(self.timezone)
+        return self.end_time.astimezone(tz)
+    
+    def getSleepTZ(self):
+        """Returns the timezone as a timezone object"""
+        return pytz.timezone(self.timezone)
+
+    def updateTZ(self,tzname):
+        """Updates the timezone while keeping the local time the same.  Intended for use from the shell; use at your own risk."""
+        newtz = pytz.timezone(tzname)
+        self.start_time = newtz.localize(self.start_local_time().replace(tzinfo=None))
+        self.end_time = newtz.localize(self.end_local_time().replace(tzinfo=None))
+        self.timezone = tzname #we have to make sure to do this last!
+        self.save()
+
+    def getTZShortName(self):
+        """Gets the short of a time zone"""
+        return self.getSleepTZ().tzname(datetime.datetime(self.date.year, self.date.month, self.date.day))
+
+class Allnighter(models.Model):
+    user = models.ForeignKey(Sleeper)
+    date = models.DateField()
+    comments = models.TextField(blank=True)
+
+    def validate_unique(self, exclude=None):
+        #Should edit to include the exclude field)
+        try: user= self.user
+        except:return None
+        allnighterq = self.user.allnighter_set.all()
+
+
+class SleeperProfile(models.Model):
+    user = models.OneToOneField(Sleeper)
+    # all other fields should have a default
+    PRIVACY_HIDDEN = -100
+    PRIVACY_REDACTED = -50
+    PRIVACY_NORMAL = 0
+    PRIVACY_STATS = 50
+    PRIVACY_PUBLIC = 100
+    PRIVACY_CHOICES = (
+            (PRIVACY_HIDDEN, 'Hidden'),
+            (PRIVACY_REDACTED, 'Redacted'),
+            (PRIVACY_NORMAL, 'Normal'),
+            (PRIVACY_STATS, 'Stats Public'),
+            (PRIVACY_PUBLIC, 'Sleep Public'),
+            )
+    privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to anonymous users')
+    privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to logged-in users')
+    privacyFriends = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to friends')
+    friends = models.ManyToManyField(Sleeper,related_name='friends+',blank=True)
+    follows = models.ManyToManyField(Sleeper,related_name='follows+',blank=True)
+    requested = models.ManyToManyField(Sleeper,related_name='requests',blank=True,through='FriendRequest')
+    use12HourTime = models.BooleanField(default=False)
+
+    emailreminders = models.BooleanField(default=False)
+
+    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
+
+    idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
+    #Decimalfield restricts to two decimal places, float would not.
+
+    def getIdealSleep(self):
+        """Returns idealSleep as a timedelta"""
+        return datetime.timedelta(hours=float(self.idealSleep))
+
+    def getUserTZ(self):
+        """Returns user timezone as a timezone object"""
+        return pytz.timezone(self.timezone)
+
+    def __unicode__(self):
+        return "SleeperProfile for user %s" % self.user
+
+
+
+class FriendRequest(models.Model):
+    requestor = models.ForeignKey(SleeperProfile)
+    requestee = models.ForeignKey(Sleeper)
+    accepted = models.NullBooleanField()
+        
 
