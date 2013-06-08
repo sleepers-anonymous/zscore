@@ -178,7 +178,7 @@ def editProfile(request):
 def friends(request):
     prof = request.user.sleeperprofile
     friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username')
-    requests = sleeper.requests.filter(friendrequest__accepted=None).order_by('user__username')
+    requests = request.user.requests.filter(friendrequest__accepted=None).order_by('user__username')
     if request.method == 'POST':
         form=FriendSearchForm(request.POST)
         if form.is_valid():
