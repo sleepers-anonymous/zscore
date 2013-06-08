@@ -113,7 +113,8 @@ class Allnighter(models.Model):
         #Should edit to include the exclude field)
         try: user= self.user
         except:return None
-        allnighterq = self.user.allnighter_set.all()
+        allnighterq = self.user.allnighter_set.filter(date=self.date).exclude(pk = self.pk)
+        if allnighterq.count() != 0 :raise ValidationError({NON_FIELD_ERRORS: ["You have already entered an allnighter for %s" % self.date]})
 
 
 class SleeperProfile(models.Model):
@@ -390,4 +391,7 @@ class Sleeper(User):
             else:
                 d[k]=datetime.timedelta(0,d[k])
         return d
+
+class SchoolOrWorkPlace(models.Model):
+    name = models.CharField(max_length=255)
 
