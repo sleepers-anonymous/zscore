@@ -78,10 +78,14 @@ def editOrCreateSleep(request,sleep = None,success=False):
     context['form']=form
     return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
 
+def leaderboardLegacy(request,sortBy):
+    return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
 
-def leaderboard(request,sortBy='zScore'):
-    if sortBy not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev']:
+def leaderboard(request):
+    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev']:
         sortBy='zScore'
+    else:
+        sortBy=request.GET['sort']
     ss = Sleeper.objects.sorted_sleepers(sortBy,request.user)
     top = [ s for s in ss if s['rank']<=10 or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
