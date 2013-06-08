@@ -16,6 +16,11 @@ class CreepSearchForm(forms.Form):
 class FriendSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
+class AllNighterForm(forms.ModelForm):
+    class Meta:
+        model = Allnighter
+        fields = ["date", "comments"]
+
 class SleepForm(forms.ModelForm):
     start_time = forms.CharField(max_length=30)
     end_time = forms.CharField(max_length=30)
