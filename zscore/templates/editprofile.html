@@ -2,28 +2,22 @@
 {% block content %}
 <form action="/editprofile/" method="post">{% csrf_token %}
     {{ form.non_field_errors }}
-    <p>
+
     <h4>General settings</h4>
-    {{form.use12HourTime.errors }}<br />
-    <label for="id_use12HourTime">Use 12 hour time:</label>
-    {{form.use12HourTime}} <br />
-    <label for="id_idealSleep">Ideal sleep length (hours)</label>
-    {{form.idealSleep}} <br/ >{{form.idealSleep.errors}}<br />
-    <label for="id_timezone">Timezone</label>
-    {{form.timezone}} <br/ >{{form.timezone.errors}}<br />
-    </p>
+    <table>
+    <tr><td><label for="id_use12HourTime">Use 12 hour time:</label></td> <td>{{form.use12HourTime}} </td><td> {{form.user12HourTime.errors}}</td></tr>
+    <tr><td><label for="id_idealSleep">Ideal sleep length (hours)</label></td><td>{{form.idealSleep}}</td><td>{{form.idealSleep.errors}}</td></tr>
+    <tr><td><label for="id_timezone">Timezone</label></td><td>{{form.timezone}}</td><td>{{form.timezone.errors}}</td></tr>
+    </table>
+
     <p><input type="submit" value="Save" /></p>
     <h4>Privacy settings</h4>
+    <table>
+    <tr><td><label for="id_privacy">Privacy to anonymous users:</label></td><td> {{ form.privacy }}</td><td> {{ form.privacy.errors }} </td></tr>
+    <tr><td><label for="id_privacyLoggedIn">Privacy to logged-in users:</label></td><td>{{ form.privacyLoggedIn }}</td><td>{{ form.privacyLoggedIn.errors }}</td></tr> 
+    <tr><td><label for="id_privacyFriends">Privacy to friends:</label></td><td>{{ form.privacyFriends }}</td><td>{{ form.privacyFriends.errors }}</td></tr>
+    </table>
     <p>
-    {{ form.privacy.errors }}
-    <label for="id_privacy">Privacy to anonymous users:</label>
-    {{ form.privacy }}<br/>
-    {{ form.privacyLoggedIn.errors }}
-    <label for="id_privacyLoggedIn">Privacy to logged-in users:</label>
-    {{ form.privacyLoggedIn }}<br/>
-    {{ form.privacyFriends.errors }}
-    <label for="id_privacyFriends">Privacy to friends:</label>
-    {{ form.privacyFriends }}<br/>
     <b>About the privacy choices</b><br/>
     Hidden: you will not be shown in the leaderboard at all<br/>
     Redacted: you will be shown in the leaderboard (if in the top 10) with username [redacted]<br/>
