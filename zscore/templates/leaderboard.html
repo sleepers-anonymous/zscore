@@ -12,12 +12,12 @@
     <tr>
         <td>Rank</td>
         <td>Username</td>
-        <td><a href="/leaderboard/">zScore</a></td>
-        <td><a href="/leaderboard/avg/">average</a></td>
-        <td><a href="/leaderboard/avgSqrt/">avgSqrt</a></td>
-        <td><a href="/leaderboard/avgLog/">avgLog</a></td>
-        <td><a href="/leaderboard/avgRecip/">avgRecip</a></td>
-        <td><a href="/leaderboard/stDev/">stDev</a></td>
+        <td><a href="?sort=zScore">zScore</a></td>
+        <td><a href="?sort=avg">avg</a></td>
+        <td><a href="?sort=avgSqrt">avgSqrt</a></td>
+        <td><a href="?sort=avgLog">avgLog</a></td>
+        <td><a href="?sort=avgRecip">avgRecip</a></td>
+        <td><a href="?sort=stDev">stDev</a></td>
     </tr>
   {% for s in top %}
   <tr {% if s.opcode == "me" %} style="background-color:#DEF2FF" {% endif %}>

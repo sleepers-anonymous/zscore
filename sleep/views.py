@@ -78,10 +78,14 @@ def editOrCreateSleep(request,sleep = None,success=False):
     context['form']=form
     return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
 
+def leaderboardLegacy(request,sortBy):
+    return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
 
-def leaderboard(request,sortBy='zScore'):
-    if sortBy not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev']:
+def leaderboard(request):
+    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev']:
         sortBy='zScore'
+    else:
+        sortBy=request.GET['sort']
     ss = Sleeper.objects.sorted_sleepers(sortBy,request.user)
     top = [ s for s in ss if s['rank']<=10 or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -178,7 +182,7 @@ def editProfile(request):
 def friends(request):
     prof = request.user.sleeperprofile
     friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username')
-    requests = sleeper.requests.filter(friendrequest__accepted=None).order_by('user__username')
+    requests = request.user.requests.filter(friendrequest__accepted=None).order_by('user__username')
     if request.method == 'POST':
         form=FriendSearchForm(request.POST)
         if form.is_valid():
