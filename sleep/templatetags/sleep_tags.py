@@ -76,8 +76,9 @@ def sleepViewTable(request, **kwargs):
             d = {"start_time": sleep.start_local_time().strftime(fmt[1]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
         if settings["showcomments"]:
             d["comments"] = sleep.comments
+        if settings["showedit"]: d["pk"] = sleep.pk
         sleeps.append(d)
-    context = {"sleeps": sleeps}
+    context = {"sleeps": sleeps, "settings": settings}
     return context
 
 @register.simple_tag
