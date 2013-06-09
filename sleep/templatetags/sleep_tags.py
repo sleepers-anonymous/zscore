@@ -12,6 +12,8 @@ def sleepStatsView(context, renderContent='html'):
     timestyle = "%I:%M %p" if sleeper.sleeperprofile.use12HourTime else "%H:%M"
     w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today())
     if w != None: context['wakeup'] = w.strftime(timestyle)
+    sleeptime = sleeper.avgGoToSleepTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today())
+    if sleeptime != None: context["sleeptime"] = sleeptime.strftime(timestyle)
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     context['lastDay'] = sleeper.timeSleptByTime(now-datetime.timedelta(1),now)
     context['total'] = sleeper.timeSleptByDate()
@@ -68,9 +70,15 @@ def sleepViewTable(request, **kwargs):
     dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%D"
     sleeps = []
     for sleep in sleepq:
-        d = {"start_time": sleep.start_time.strftime(fmt), "end_time": sleep.end_time.strftime(fmt), "date": sleep.date.strftime(dfmt)}
+        if sleep.start_local_time().date() == sleep.end_local_time().date():
+            d = {"start_time": sleep.start_local_time().strftime(fmt[0]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
+        else:
+            d = {"start_time": sleep.start_local_time().strftime(fmt[1]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
+        if settings["showcomments"]:
+            d["comments"] = sleep.comments
         sleeps.append(d)
-    pass
+    context = {"sleeps": sleeps}
+    return context
 
 @register.simple_tag
 def displayUser(username):
