@@ -21,6 +21,10 @@ class AllNighterForm(forms.ModelForm):
         model = Allnighter
         fields = ["date", "comments"]
 
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(AllNighterForm, self).__init(*args, **kwargs)
+
 class SleepForm(forms.ModelForm):
     start_time = forms.CharField(max_length=30)
     end_time = forms.CharField(max_length=30)
