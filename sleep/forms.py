@@ -1,5 +1,5 @@
 from django import forms
-from sleep.models import SleeperProfile, Sleep
+from sleep.models import SleeperProfile, Sleep, Allnighter
 from django.core.exceptions import *
 
 import pytz
