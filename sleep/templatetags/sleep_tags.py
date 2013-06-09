@@ -77,6 +77,7 @@ def sleepViewTable(request, **kwargs):
         if settings["showcomments"]:
             d["comments"] = sleep.comments
         if settings["showedit"]: d["pk"] = sleep.pk
+        d["tz"] = sleep.getTZShortName()
         sleeps.append(d)
     context = {"sleeps": sleeps, "settings": settings}
     return context
