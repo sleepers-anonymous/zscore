@@ -175,7 +175,6 @@ def editProfile(request):
             return HttpResponseRedirect('/editprofile/')
     else:
         form = SleeperProfileForm(instance=p)
-
     return HttpResponse(render_to_string('editprofile.html', {'form': form},context_instance=RequestContext(request)))
 
 @login_required
