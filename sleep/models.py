@@ -202,7 +202,7 @@ class SleeperManager(models.Manager):
                     d['user']=sleeper
                     d['opcode']='me'
                     extra.append(d)
-        if sortBy in ['stDev']:
+        if sortBy in ['stDev', 'idealDev']:
             scored.sort(key=lambda x: x[sortBy])
         else:
             scored.sort(key=lambda x: -x[sortBy])
