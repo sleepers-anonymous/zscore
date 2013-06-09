@@ -295,15 +295,17 @@ class Sleeper(User):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
         if t=='end':
             f=Sleep.end_local_time
+            g = min
         elif t=='start':
             f=Sleep.start_local_time
+            g = max
         else:
             return None
         datestimes = [(s.date, f(s)) for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
         daily={}
         for i in datestimes:
             if i[0] in daily:
-                daily[i[0]]=max(daily[i[0]],i[1])
+                daily[i[0]]=g(daily[i[0]],i[1])
             else:
                 daily[i[0]]=i[1]
         seconds = [daily[t].time().hour*3600 + daily[t].time().minute*60 + daily[t].time().second - 86400 * (t - daily[t].date()).days for t in daily.viewkeys()]
