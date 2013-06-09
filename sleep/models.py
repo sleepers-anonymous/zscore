@@ -306,9 +306,10 @@ class Sleeper(User):
                 daily[i[0]]=max(daily[i[0]],i[1])
             else:
                 daily[i[0]]=i[1]
-        seconds = [t.time().hour*3600 + t.time().minute*60 + t.time().second for t in daily.itervalues()]
+        seconds = [daily[t].time().hour*3600 + daily[t].time().minute*60 + daily[t].time().second - 86400 * (t - daily[t].date()).days for t in daily.viewkeys()]
         if daily:
             av = sum(seconds)/len(seconds)
+            av = av%86400
             return datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
         else:
             return None
