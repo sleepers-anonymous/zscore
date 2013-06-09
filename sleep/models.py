@@ -151,6 +151,10 @@ class SleeperProfile(models.Model):
         """Returns idealSleep as a timedelta"""
         return datetime.timedelta(hours=float(self.idealSleep))
 
+    def getFloatIdealSleep(self):
+        """Rtunes idealSleep as a float"""
+        return float(self.idealSleep)
+
     def getUserTZ(self):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
@@ -330,6 +334,7 @@ class Sleeper(User):
 
     def movingStats(self,start=datetime.date.min,end=datetime.date.max):
         sleep = self.sleepPerDay(start,end)
+        ideal = int(self.sleeperprofile.getFloatIdealSleep()*3600)
         d = {}
         try:
             avg = sum(sleep)/len(sleep)
@@ -338,8 +343,10 @@ class Sleeper(User):
                 stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/(len(sleep)-1.5)) #subtracting 1.5 is correct according to wikipedia
                 d['stDev']=stDev
                 d['zScore']=avg-stDev
+                idealized = max(ideal, avg)
+                d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
         except:
-            pass
+            pass 
         try:
             offset = 60*60.
             avgRecip = 1/(sum(map(lambda x: 1/(offset+x),sleep))/len(sleep))-offset
@@ -350,7 +357,7 @@ class Sleeper(User):
             d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip']:
+        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:
@@ -369,6 +376,7 @@ class Sleeper(User):
 
     def decayStats(self,end=datetime.date.max,hl=4):
         sleep = self.sleepPerDay(datetime.date.min,end)
+        ideal = int(self.sleeperprofile.getFloatIdealSleep()*3600)
         d = {}
         try:
             avg = self.decaying(sleep,hl)
@@ -376,6 +384,8 @@ class Sleeper(User):
             stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl,True))
             d['stDev']=stDev
             d['zScore']=avg-stDev
+            idealized = max(ideal, avg)
+            d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
         except:
             pass
         try:
@@ -388,7 +398,7 @@ class Sleeper(User):
             d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip']:
+        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:

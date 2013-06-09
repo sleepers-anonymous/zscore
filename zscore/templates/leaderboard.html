@@ -18,6 +18,7 @@
         <td><a href="?sort=avgLog">avgLog</a></td>
         <td><a href="?sort=avgRecip">avgRecip</a></td>
         <td><a href="?sort=stDev">stDev</a></td>
+        <td><a href="?sort=idealDev">idealDev</a></td>
     </tr>
   {% for s in top %}
   <tr {% if s.opcode == "me" %} style="background-color:#DEF2FF" {% endif %}>
@@ -29,6 +30,7 @@
     <td> {{s.avgLog|printHHMM}} </td>
     <td> {{s.avgRecip|printHHMM}} </td>
     <td> {{s.stDev|printHHMM}} </td>
+    <td> {{s.idealDev|printHHMM}}</td>
   </tr>
   {% endfor %}
 </table>

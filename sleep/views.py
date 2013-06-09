@@ -82,7 +82,7 @@ def leaderboardLegacy(request,sortBy):
     return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
 
 def leaderboard(request):
-    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev']:
+    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
