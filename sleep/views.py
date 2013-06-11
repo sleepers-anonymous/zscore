@@ -24,6 +24,19 @@ def mysleep(request):
     return HttpResponse(render_to_string('sleep/mysleep.html',{},context_instance=RequestContext(request)))
 
 @login_required
+def editOrCreateAllnighter(request, allNighter = None, success=False):
+    context = {'success': success}
+    if allNighter: #We're editing an allnighter
+        try:
+            a = Allnighter.objects.get(pk=allNighter)
+            if a.user != request.user: raise PermissionDenied
+            context['allnighter'] = a
+        except Allnighter.MultipleObjectsReturned: return HttpResponseBadRequest('')
+        except Allnighter.DoesNotExist: raise Http404
+        if request.method == 'POST':
+            pass
+
+@login_required
 def editOrCreateSleep(request,sleep = None,success=False):
     context = {'success': success}
     prof = request.user.sleeperprofile
