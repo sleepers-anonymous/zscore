@@ -116,6 +116,8 @@ class Allnighter(models.Model):
         allnighterq = self.user.allnighter_set.filter(date=self.date).exclude(pk = self.pk)
         if allnighterq.count() != 0 :raise ValidationError({NON_FIELD_ERRORS: ["You have already entered an allnighter for %s" % self.date]})
 
+    def __unicode__(self):
+        return "All-nighter on " + self.date.strftime("%x")
 
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
@@ -146,6 +148,12 @@ class SleeperProfile(models.Model):
 
     idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
     #Decimalfield restricts to two decimal places, float would not.
+
+    idealWakeupWeekend = models.TimeField(default = datetime.time(9))
+    idealWakeupWeekday = models.TimeField(default = datetime.time(8))
+
+    idealSleepTimeWeekend = models.TimeField(default = datetime.time(0))
+    idealSleepTimeWeekday = models.TimeField(default = datetime.time(11))
 
     def getIdealSleep(self):
         """Returns idealSleep as a timedelta"""
