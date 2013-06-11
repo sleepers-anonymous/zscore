@@ -116,6 +116,8 @@ class Allnighter(models.Model):
         allnighterq = self.user.allnighter_set.filter(date=self.date).exclude(pk = self.pk)
         if allnighterq.count() != 0 :raise ValidationError({NON_FIELD_ERRORS: ["You have already entered an allnighter for %s" % self.date]})
 
+    def __unicode__(self):
+        return "All-nighter on " + self.date.strftime("%x")
 
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
