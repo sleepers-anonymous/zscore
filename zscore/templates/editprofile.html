@@ -6,11 +6,21 @@
     <h4>General settings</h4>
     <table>
     <tr><td><label for="id_use12HourTime">Use 12 hour time:</label></td> <td>{{form.use12HourTime}} </td><td> {{form.user12HourTime.errors}}</td></tr>
-    <tr><td><label for="id_idealSleep">Ideal sleep length (hours)</label></td><td>{{form.idealSleep}}</td><td>{{form.idealSleep.errors}}</td></tr>
     <tr><td><label for="id_timezone">Timezone</label></td><td>{{form.timezone}}</td><td>{{form.timezone.errors}}</td></tr>
     </table>
 
     <p><input type="submit" value="Save" /></p>
+
+    <h4>Ideal Sleep Times</h4>
+    <table>
+    <tr><td><label for="id_idealSleep">Ideal sleep length (hours)</label></td><td>{{form.idealSleep}}</td><td>{{form.idealSleep.errors}}</td></tr>
+    <tr><td><label for="id_idealWakeupWeekday">Ideal wake up time (weekday):</label></td><td>{{form.idealWakeupWeekday}}</td><td>{{form.idealWakeupWeekday.errors}}</td></tr>
+    <tr><td><label for="id_idealWakeupWeekend">Ideal wake up time (weekend):</label></td><td>{{form.idealWakeupWeekend}}</td><td>{{form.idealWakeupWeekend.errors}}</td></tr>
+    </table>
+
+    <p><input type="submit" value="Save" /></p>
+
+
     <h4>Privacy settings</h4>
     <table>
     <tr><td><label for="id_privacy">Privacy to anonymous users:</label></td><td> {{ form.privacy }}</td><td> {{ form.privacy.errors }} </td></tr>
