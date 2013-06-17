@@ -16,29 +16,11 @@ class SleeperProfileForm(forms.ModelForm):
         fields = ['privacy',
                 'privacyLoggedIn','privacyFriends', 'use12HourTime', 'idealSleep', 'timezone', 'idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekend', 'idealSleepTimeWeekday']
 
-    def __init__(self, fmt, *args, **kwargs):
-        self.fmt = fmt
-        super(SleepForm, self).__init__(*args, **kwargs)
+#    def __init__(self, fmt, *args, **kwargs):
+#        self.fmt = fmt
+#        super(SleepForm, self).__init__(*args, **kwargs)
 
     
-    def clean(self):
-        def adderror(self, k, error):
-            pass
-        cleaned_data = super(SleepForm, self).clean()
-        if "timezone" in cleaned_data:
-            tz = pytz.timezone(cleaned_data["timezone"])
-            for k in ['idealWakeupWeekend','idealWakeupWeekday', 'idealSleepTimeWeekend', 'idealSleepTimeWeekday']:
-                #manually convert the strf-ed time to a datetime.datetime so we can make sure to do it in the right timezone
-                try:
-                    dt = datetime.datetime.strptime(cleaned_data[k],self.fmt)
-                    cleaned_data[k]=tz.localize(dt)
-                except ValueError:
-                    self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.time(23, 59, 59).strftime(self.fmt)])
-                    del cleaned_data[k]
-        if cleaned_data["privacy"] > cleaned_data["privacyLoggedIn"]:
-            pass
-        return cleaned_data
-
 class CreepSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
