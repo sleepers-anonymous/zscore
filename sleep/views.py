@@ -181,13 +181,15 @@ def creep(request,username=None, asOther=None):
 @login_required
 def editProfile(request):
     p = request.user.sleeperprofile
+    if p.use12HourTime: fmt = "%I:%M %p %x"
+    else: fmt = "%H:%M %x"
     if request.method == 'POST':
-        form = SleeperProfileForm(request.POST, instance=p)
+        form = SleeperProfileForm(request.POST, fmt, instance=p)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/editprofile/')
     else:
-        form = SleeperProfileForm(instance=p)
+        form = SleeperProfileForm(fmt, instance=p)
     return HttpResponse(render_to_string('editprofile.html', {'form': form},context_instance=RequestContext(request)))
 
 @login_required
