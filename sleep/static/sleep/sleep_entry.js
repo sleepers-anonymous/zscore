@@ -195,8 +195,19 @@ function drawSleepBox(sleep_pk, $td1, $td2, drawStartIcon, drawEndIcon)
 	.css("margin-left", 1).addClass("sleep-box")
 	.addClass("sleep-id-" + sleep_pk);
     // Add the mouse event handlers to prevent flicker
-    falseFunc = function() { return false; };
-    $sleep_box.mousedown(falseFunc).mousemove(falseFunc);
+    // TODO(gurtej): Convert the sleep boxes into overlays which resize when hovered over
+    // correctly
+    $sleep_box.mouseup(function() {
+	$td2.mouseup();
+	return false;
+    });
+    $sleep_box.mousemove(function() {
+	$td2.mousemove();
+	return false;
+    });
+    $sleep_box.mousedown(function() {
+	return false;
+    });
     // Add the tentative class if it's a tentative box (changes the color)
     if (sleep_pk == "tentative") $sleep_box.addClass("tentative");
 
