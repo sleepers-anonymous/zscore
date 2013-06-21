@@ -66,6 +66,10 @@ function getValidEndTime(startTime, endTime)
 }
 function mouseDown(startTime, endTime)
 {
+    // Make all content unselectable, so we don't get annoying test selection
+    // issues
+    $(".global-wrapper").addClass("unselectable");
+
     // If we aren't in the middle of creating a sleep,
     // initiate a new one.
     if (mouseState == 0 || mouseState == 1)
@@ -97,6 +101,9 @@ function mouseDown(startTime, endTime)
 }
 function mouseUp(startTime, endTime)
 {
+    // Make all content reselectable
+    $(".global-wrapper").removeClass("unselectable");
+
     // Only if we were previously dragging, complete this sleep
     if (mouseState == 2)
     {

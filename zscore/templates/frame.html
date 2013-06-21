@@ -26,24 +26,26 @@
     {% block meta %}{% endblock %}
   </head>
   <body>
-    {% block navbar %}
-    <div class="navigation-bar">
-      <a href="/"><b>zScore</b></a><sup>[alpha]</sup>
-      <a href="/mysleep/">my sleep</a>
-      <a href="/leaderboard/">leaderboard</a>
-      <a href="/creep/">creep</a>
-      <a href="http://goo.gl/l2Dkb">feedback</a>
-      {% if request.user.is_staff %}
-      <a href="/admin/">admin</a>
-      {% endif %}
-      <a href="/faq/">FAQ</a>
-      {% if request.user.is_authenticated %}
-      logged in as {% displayUser request.user.username %} (<a href="/editprofile/">edit profile</a> <a href="/friends/">friends{% displayFriendRequests request.user %}</a> <a href="/accounts/logout">log out</a>)
-      {% else %}
-      <a href="/accounts/login">log in</a> <a href="/accounts/create">register</a> <br/>
-      {% endif %}
+    <div class="global-wrapper">
+      {% block navbar %}
+      <div class="navigation-bar">
+	<a href="/"><b>zScore</b></a><sup>[alpha]</sup>
+	<a href="/mysleep/">my sleep</a>
+	<a href="/leaderboard/">leaderboard</a>
+	<a href="/creep/">creep</a>
+	<a href="http://goo.gl/l2Dkb">feedback</a>
+	{% if request.user.is_staff %}
+	<a href="/admin/">admin</a>
+	{% endif %}
+	<a href="/faq/">FAQ</a>
+	{% if request.user.is_authenticated %}
+	logged in as {% displayUser request.user.username %} (<a href="/editprofile/">edit profile</a> <a href="/friends/">friends{% displayFriendRequests request.user %}</a> <a href="/accounts/logout">log out</a>)
+	{% else %}
+	<a href="/accounts/login">log in</a> <a href="/accounts/create">register</a> <br/>
+	{% endif %}
+      </div>
+      {% endblock %}
+      {% block content %}{% endblock %}
     </div>
-    {% endblock %}
-    {% block content %}{% endblock %}
   </body>
 </html>
