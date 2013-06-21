@@ -194,6 +194,9 @@ function drawSleepBox(sleep_pk, $td1, $td2, drawStartIcon, drawEndIcon)
     var $sleep_box = $("<div></div>").css("padding-right", width+19).css("margin-right", -width-21)
 	.css("margin-left", 1).addClass("sleep-box")
 	.addClass("sleep-id-" + sleep_pk);
+    // Add the mouse event handlers to prevent flicker
+    falseFunc = function() { return false; };
+    $sleep_box.mousedown(falseFunc).mouseup(falseFunc).mousemove(falseFunc);
     // Add the tentative class if it's a tentative box (changes the color)
     if (sleep_pk == "tentative") $sleep_box.addClass("tentative");
 
