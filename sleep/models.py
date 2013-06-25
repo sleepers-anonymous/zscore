@@ -303,7 +303,7 @@ class Sleeper(User):
             yield d
             d += datetime.timedelta(1)
 
-    def sleepWakeTime(self,t='end',start=datetime.date.today(),end=datetime.date.today()):
+    def sleepWakeTime(self,t='end',start=datetime.date.today(),end=datetime.date.today(), stdev = False):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
         if t=='end':
             f=Sleep.end_local_time
@@ -322,23 +322,25 @@ class Sleeper(User):
                 daily[i[0]]=i[1]
         seconds = [daily[t].time().hour*3600 + daily[t].time().minute*60 + daily[t].time().second - 86400 * (t - daily[t].date()).days for t in daily.viewkeys()]
         if daily:
-            av = sum(seconds)/len(seconds)
+            av = 1.0*sum(seconds)/len(seconds)
+            if stdev: stdev = (sum([(av - s)**2 for s in seconds])/(len(seconds)-1.5))**0.5
             av = av%86400
-            return datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
+            sleepav =  datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
+            return (sleepav, datetime.timedelta(seconds=stdev)) if stdev else sleepav
         else:
             return None
 
-    def goToSleepTime(self, date=datetime.date.today()):
-        return self.sleepWakeTime('start',date,date)
+    def goToSleepTime(self, date=datetime.date.today(), stdev = False):
+        return self.sleepWakeTime('start',date,date, stdev=stdev)
 
-    def avgGoToSleepTime(self, start = datetime.date.min, end=datetime.date.max):
-        return self.sleepWakeTime('start',start,end)
+    def avgGoToSleepTime(self, start = datetime.date.min, end=datetime.date.max, stdev = False):
+        return self.sleepWakeTime('start',start,end, stdev = stdev)
 
-    def wakeUpTime(self, date=datetime.date.today()):
-        return self.sleepWakeTime('end',date,date)
+    def wakeUpTime(self, date=datetime.date.today(), stdev = False):
+        return self.sleepWakeTime('end',date,date, stdev = stdev)
 
-    def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max):
-        return self.sleepWakeTime('end',start,end)
+    def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max, stdev = False):
+        return self.sleepWakeTime('end',start,end, stdev = stdev)
 
     def movingStats(self,start=datetime.date.min,end=datetime.date.max):
         sleep = self.sleepPerDay(start,end)
