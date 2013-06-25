@@ -66,6 +66,10 @@ function getValidEndTime(startTime, endTime)
 }
 function mouseDown(startTime, endTime)
 {
+    // Make all content unselectable, so we don't get annoying test selection
+    // issues
+    $(".global-wrapper").addClass("unselectable");
+
     // If we aren't in the middle of creating a sleep,
     // initiate a new one.
     if (mouseState == 0 || mouseState == 1)
@@ -97,6 +101,9 @@ function mouseDown(startTime, endTime)
 }
 function mouseUp(startTime, endTime)
 {
+    // Make all content reselectable
+    $(".global-wrapper").removeClass("unselectable");
+
     // Only if we were previously dragging, complete this sleep
     if (mouseState == 2)
     {
@@ -187,6 +194,20 @@ function drawSleepBox(sleep_pk, $td1, $td2, drawStartIcon, drawEndIcon)
     var $sleep_box = $("<div></div>").css("padding-right", width+19).css("margin-right", -width-21)
 	.css("margin-left", 1).addClass("sleep-box")
 	.addClass("sleep-id-" + sleep_pk);
+    // Add the mouse event handlers to prevent flicker
+    // TODO(gurtej): Convert the sleep boxes into overlays which resize when hovered over
+    // correctly
+    $sleep_box.mouseup(function() {
+	$td2.mouseup();
+	return false;
+    });
+    $sleep_box.mousemove(function() {
+	$td2.mousemove();
+	return false;
+    });
+    $sleep_box.mousedown(function() {
+	return false;
+    });
     // Add the tentative class if it's a tentative box (changes the color)
     if (sleep_pk == "tentative") $sleep_box.addClass("tentative");
 
