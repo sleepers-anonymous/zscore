@@ -55,31 +55,31 @@ def graphTimeOfDayBars(user):
     return context
     
 @register.inclusion_tag('inclusion/graph_sleep_times.html')
-def graphSleepTimes():
+def graphSleepTimes(user = None):
     res = 10
     labels = [""] * (24 * 60 / res)
     for i in range(24):
         labels[i*60/res]=str(i)+":00"
-    graphData = Sleep.objects.sleepTimes(res=res)
+    graphData = Sleep.objects.sleepTimes(res=res, user = user) if user != None else Sleep.objects.sleepTimes(res=res)
     return { 'graphData' : graphData, 'labels' : labels }
 
 @register.inclusion_tag('inclusion/graph_sleep_start_end_times.html')
-def graphSleepStartEndTimes():
+def graphSleepStartEndTimes(user = None):
     res = 60
     labels = [""] * (24 * 60 / res)
     for i in range(24):
         labels[i*60/res]=str(i)+":00"
-    start,end = Sleep.objects.sleepStartEndTimes(res=res)
+    start,end = Sleep.objects.sleepStartEndTimes(res=res, user=user) if user != None else Sleep.objects.sleepStartEndTimes(res=res)
     return { 'startData' : start, 'endData' : end, 'labels' : labels }
 
 @register.inclusion_tag('inclusion/graph_sleep_lengths.html')
-def graphSleepLengths():
+def graphSleepLengths(user = None):
     res = 60
     hours = 16
     labels = [""] * (hours * 60 / res) + ["16:00+"]
     for i in range(hours):
         labels[i*60/res]=str(i)+":00"
-    lengths = Sleep.objects.sleepLengths(res=res)
+    lengths = Sleep.objects.sleepLengths(res=res, user=user) if user != None else Sleep.objects.sleepLengths(res=res)
     graphData = lengths[:(hours * 60 / res)]
     graphData.append(sum(lengths[(hours*60/res):]))
     return { 'graphData': graphData, 'labels' : labels }

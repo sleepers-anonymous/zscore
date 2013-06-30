@@ -12,12 +12,12 @@ from zscore import settings
 TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 
 class SleepManager(models.Manager):
-    def totalSleep(self):
-        sleeps =  Sleep.objects.all()
+    def totalSleep(self, user=None):
+        sleeps =  Sleep.objects.all() if user == None else Sleep.objects.filter(user=user)
         return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
 
-    def sleepTimes(self,res=1):
-        sleeps = Sleep.objects.all()
+    def sleepTimes(self,res=1, user = None):
+        sleeps = Sleep.objects.all() if user == None else Sleep.objects.filter(user=user)
         atTime = [0] * (24 * 60 / res) 
         for sleep in sleeps:
             tz = pytz.timezone(sleep.timezone)
@@ -37,8 +37,8 @@ class SleepManager(models.Manager):
                     atTime[i]+=1
         return atTime
 
-    def sleepStartEndTimes(self,res=10):
-        sleeps = Sleep.objects.all()
+    def sleepStartEndTimes(self,res=10, user = None):
+        sleeps = Sleep.objects.all() if user ==None else Sleep.objects.filter(user=user)
         startAtTime = [0] * (24 * 60 / res)
         endAtTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
@@ -49,8 +49,8 @@ class SleepManager(models.Manager):
             endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
         return (startAtTime,endAtTime)
 
-    def sleepLengths(self,res=10):
-        sleeps = Sleep.objects.all()
+    def sleepLengths(self,res=10, user = None):
+        sleeps = Sleep.objects.all() if user == None else Sleep.objects.filter(user=user)
         lengths = map(lambda x: x.length().total_seconds() / (60*res),sleeps)
         packed = [0] * int(max(lengths)+1)
         for length in lengths:
