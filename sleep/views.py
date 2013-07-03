@@ -94,6 +94,10 @@ def editOrCreateSleep(request,sleep = None,success=False):
 def leaderboardLegacy(request,sortBy):
     return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
 
+@login_required
+def graph(request):
+    return HttpResponse(render_to_string('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request)))
+
 def leaderboard(request):
     if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
         sortBy='zScore'
@@ -108,6 +112,7 @@ def leaderboard(request):
             'lastDayWinner' : lastDayWinner,
             'total' : Sleep.objects.totalSleep(),
             'number' : Sleep.objects.all().values_list('user').distinct().count(),
+            'leaderboard_valid': len(ss),
             }
     return HttpResponse(render_to_string('leaderboard.html',context,context_instance=RequestContext(request)))
 
@@ -163,9 +168,9 @@ def creep(request,username=None, asOther=None):
                 priv = p.PRIVACY_PUBLIC
                 context["isself"] =True
             elif request.user in p.friends.all():
-                priv = p.privacyFriends
+                priv = max(p.privacyFriends, p.privacy, p.privacyLoggedIn)
             else:
-                priv = p.privacyLoggedIn
+                priv = max(p.privacyLoggedIn, p.privacy)
             if asOther:
                 otherD = {"friends":p.privacyFriends, "user": p.privacyLoggedIn,"anon": p.privacy}
                 if asOther in otherD: priv = min(priv, otherD[asOther])

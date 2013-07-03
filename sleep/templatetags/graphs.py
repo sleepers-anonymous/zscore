@@ -4,10 +4,10 @@ import datetime
 register = template.Library()
 
 @register.inclusion_tag('inclusion/graph_per_day.html')
-def graphPerDay(user, full=None):
+def graphPerDay(user, interval=None):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    if full == None: s = datetime.date.today() - datetime.timedelta(14)
-    elif full == "full": s = datetime.date.min
+    if interval == None: s = datetime.date.min
+    else: s = datetime.date.today() - datetime.timedelta(interval)
     return { 'graphData' : sleeper.sleepPerDay(start = s, packDates=True,hours=True) }
 
 @register.inclusion_tag('inclusion/graph_time_of_day_bars.html')

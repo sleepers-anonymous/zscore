@@ -12,7 +12,7 @@
 		{%else%} {%if sleeptime %} In the last week, you went to sleep at {{sleeptime}} on average {%endif%}{% endif  %}
     {% sleepStatsTable request.user %}
     <br/>
-    {% graphPerDay request.user %}
+    {% graphPerDay request.user 14 %}
     <br/>
     <br/>
     {% graphTimeOfDayBars request.user %}

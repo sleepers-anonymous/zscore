@@ -39,7 +39,7 @@ Congratulations to {% displayUser lastDayWinner.user.displayName %} for sleeping
 
 
 <h3>Notes</h3>
-The leaderboard shows users with at least 3 days of sleep, including at least one of the last 5 days.  <i>It now ranks by exponentially-weighted decaying scores</i>, that is, today is weighted at 1, yesterday at some factor &lambda;, the day before that at &lambda;<sup>2</sup>, and so on.  Hidden users do not count towards rank.  The number of users at the top counts all users with at least 1 day of sleep.
+The leaderboard shows users with at least 3 days of sleep, including at least one of the last 5 days. <i>It now ranks by exponentially-weighted decaying scores</i>, that is, today is weighted at 1, yesterday at some factor &lambda;, the day before that at &lambda;<sup>2</sup>, and so on.  Hidden users do not count towards rank.  The number of users at the top counts all users with at least 1 day of sleep.
 <h3>Total user sleep</h3>
 {% graphSleepTimes %}
 <br/>
