@@ -12,7 +12,9 @@ def graphPerDay(user, interval=None):
     else:
         s = datetime.date.today() - datetime.timedelta(interval)
         a = 400
-    return { 'graphData' : sleeper.sleepPerDay(start = s, packDates=True,hours=True) , "side": a}
+    graphData = sleeper.sleepPerDay(start = s, packDates=True,hours=True)
+    side = min(1000, max(400, len(graphData)//7*200))
+    return { 'graphData' : graphData , "side": side}
 
 @register.inclusion_tag('inclusion/graph_time_of_day_bars.html')
 def graphTimeOfDayBars(user, interval = None):
