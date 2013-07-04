@@ -8,8 +8,8 @@
 <div style="border: 1px solid black">
     <h3> My Stats </h3>
     Total sleep: {{total|printDHM}} ({{lastDay|printHHMM}} in the last 24 hours)<br/>
-		{% if wakeup %}  In the last week, you woke up at {{wakeup}} on average{% if sleeptime %} and went to sleep at {{sleeptime}}.{%endif%}<br /> 
-		{%else%} {%if sleeptime %} In the last week, you went to sleep at {{sleeptime}} on average {%endif%}{% endif  %}
+		{% if wakeup %}  In the last week, you woke up at {{wakeup}} on average{% if wakeup_dev %} (stdev {{wakeup_dev|printHHMM}}){% endif %}{% if sleeptime %} and went to sleep at {{sleeptime}}{% if sleeptime_dev %} (stdev {{sleeptime_dev|printHHMM}}){% endif %}.{%endif%}<br /> 
+		{%else%} {%if sleeptime %} In the last week, you went to sleep at {{sleeptime}} on average{% if sleeptime_dev %} (stdev {{sleeptime_dev|printHHMM}}){%endif%}{%endif%}{% endif  %}
     {% sleepStatsTable request.user %}
     <br/>
     {% graphPerDay request.user 14 %}

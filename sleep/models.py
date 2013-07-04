@@ -338,7 +338,9 @@ class Sleeper(User):
         seconds = [daily[t].time().hour*3600 + daily[t].time().minute*60 + daily[t].time().second - 86400 * (t - daily[t].date()).days for t in daily.viewkeys()]
         if daily:
             av = 1.0*sum(seconds)/len(seconds)
-            if stdev: stdev = (sum([(av - s)**2 for s in seconds])/(len(seconds)-1.5))**0.5
+            if stdev:
+                if len(daily) > 2: stdev = (sum([(av - s)**2 for s in seconds])/(len(seconds)-1.5))**0.5
+                else: stdev = False
             av = av%86400
             sleepav =  datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
             return (sleepav, datetime.timedelta(seconds=stdev)) if stdev else sleepav
