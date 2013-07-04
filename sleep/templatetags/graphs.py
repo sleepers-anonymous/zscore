@@ -8,7 +8,7 @@ def graphPerDay(user, interval=None):
     sleeper = Sleeper.objects.get(pk=user.pk)
     if interval == None:
         s = datetime.date.min
-        a = 600
+        a = 800
     else:
         s = datetime.date.today() - datetime.timedelta(interval)
         a = 400
