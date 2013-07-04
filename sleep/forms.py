@@ -23,7 +23,13 @@ class AllNighterForm(forms.ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
-        super(AllNighterForm, self).__init(*args, **kwargs)
+        super(AllNighterForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super(AllNighterForm,self).clean()
+        s = self.user.sleep_set.filter(date=cleaned_data["date"])
+        if len(s) > 0: raise ValidationError({NON_FIELD_ERRORS: ["You have sleeps entered for " + str(cleaned_data["date"]) + "!"]})
+        return cleaned_data
 
 class SleepForm(forms.ModelForm):
     start_time = forms.CharField(max_length=30)
@@ -39,6 +45,7 @@ class SleepForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(SleepForm,self).clean()
+        a = self.user.allnighter_set.filter(date=cleaned_data["date"])
         if 'timezone' in cleaned_data and 'start_time' in cleaned_data and 'end_time' in cleaned_data:
             tz = pytz.timezone(cleaned_data['timezone'])
             for k in ['start_time','end_time']:
@@ -49,5 +56,6 @@ class SleepForm(forms.ModelForm):
                 except ValueError:
                     self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.datetime(1999, 12, 31, 23, 59, 59).strftime(self.fmt)])
                     del cleaned_data[k]
+            if len(a) > 0 : raise ValidationError({NON_FIELD_ERRORS: ["You have an allnighter entered for " + str(cleaned_data["date"]) + "!"]})
             if "start_time" in cleaned_data and "end_time" in cleaned_data and cleaned_data["start_time"] >= cleaned_data["end_time"]: raise ValidationError({NON_FIELD_ERRORS: ["End time must be later than start time!"]})
         return cleaned_data

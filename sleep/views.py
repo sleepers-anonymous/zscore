@@ -26,7 +26,10 @@ def mysleep(request):
 @login_required
 def editOrCreateAllnighter(request, allNighter = None, success=False):
     context = {'success': success}
+    prof = request.user.sleeperprofile
+    defaulttz = prof.timezone
     if allNighter: #We're editing an allnighter
+        context = {"editing": True}
         try:
             a = Allnighter.objects.get(pk=allNighter)
             if a.user != request.user: raise PermissionDenied
@@ -34,7 +37,29 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
         except Allnighter.MultipleObjectsReturned: return HttpResponseBadRequest('')
         except Allnighter.DoesNotExist: raise Http404
         if request.method == 'POST':
-            pass
+            form = AllNighterForm(request.user, request.POST, instance = a)
+        else:
+            form = AllNighterForm(request.user, instance=a, initial={"date": a.date})
+        context["date"] = a.date.strftime("%x")
+    else: #we're creating a new allnighter
+        if request.method == "POST":
+            form = AllNighterForm(request.user, request.POST, instance = Allnighter(user=request.user))
+        else:
+            today = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
+            form = AllNighterForm(request.user, initial={"date": str(today.date())})
+    if request.method == "POST":
+        if form.is_valid():
+            new = form.save(commit=False)
+            if allNighter == None:
+                new.user = request.user
+                new.save()
+                form = AllNighterForm(request.user, instance=new)
+                return HttpResponseRedirect('/sleep/allnighter/success/')
+            else:
+                new.save()
+                return HttpResponseRedirect('/mysleep/')
+    context['form']=form
+    return HttpResponse(render_to_string('editallnighter.html', context, context_instance=RequestContext(request)))
 
 @login_required
 def editOrCreateSleep(request,sleep = None,success=False):
