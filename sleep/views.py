@@ -367,6 +367,18 @@ def deleteSleep(request):
     return HttpResponseBadRequest('')
 
 @login_required
+def deleteAllnighter(request):
+    if 'id' in request.POST:
+        i = request.POST['id']
+        a = request.user.allnighter_set.objects.filter(pk=i)
+        if len(a) == 0: raise Http404
+        a = a[0]
+        print "hi"
+        a.delete()
+        return HttpResponse('')
+    return HttpResponseBadRequest('')
+
+@login_required
 def getSleepsJSON(request):
     u = request.user
     sleeps = list(Sleep.objects.filter(user=u))

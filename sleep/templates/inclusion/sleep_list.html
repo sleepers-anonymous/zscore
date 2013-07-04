@@ -13,6 +13,14 @@ function deleteSleep(id) {
     location.reload();
   });
 };
+
+function deleteAllnighter(id) {
+		$.post("/sleep/delete/allnighter/", {
+						"id":id
+		}, function() {
+		location.reload();
+		});
+};
 </script>
 
 <div class="sleep-list" style="border: 1px solid black">
@@ -27,6 +35,16 @@ function deleteSleep(id) {
 	</tr>
 	{% if sleep.comments %} <tr><td>&nbsp;</td><td>{{sleep.comments|truncatewords:20}}</td><td>&nbsp;</td></tr>{% endif %}
     {% endfor %}
-  </table>
+</table>
+
+		<h3>My Allnighters ({{numallnighters}} on {{anumdates}} days)</h3>
+		<table width=100%>
+				{% for a in allnighters %}
+				<tr id="allnighter-entry-id-{{allnighter.pk}}">
+						<td><a href="javascript:void[0];" class="sleep-delete-button" onclick="deleteAllnighter({{a.pk}});">x</a></td><td>{{a.date}}</td><td><a href="/sleep/editallnighter/{{a.pk}}/">[edit]</a></td>
+				</tr>
+				{% if a.comments %} <tr><td>&nbsp;</td><td>{{a.comments|truncatewords:20}}</td><td>&nbsp;</td></tr>{% endif%}
+		{% endfor %}
+</table>
 </div>
 {% endif %}

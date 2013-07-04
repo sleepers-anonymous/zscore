@@ -33,11 +33,17 @@ def sleepStatsTable(user):
 def sleepListView(context, renderContent='html'):
     user = context['request'].user
     sleeps = Sleep.objects.filter(user=user).order_by('-start_time', '-end_time')[:20]
+    allnighters = Allnighter.objects.filter(user=user).order_by('-date')[:5]
     numdates = Sleep.objects.filter(user=user).values('date').distinct().count()
     numsleeps = Sleep.objects.filter(user=user).count()
+    anumdates = Allnighter.objects.filter(user=user).values('date').distinct().count()
+    numallnighters = Allnighter.objects.filter(user=user).count()
     return {'sleeps': sleeps,
             'numdates': numdates,
             'numsleeps': numsleeps,
+            'allnighters': allnighters,
+            'anumdates': anumdates,
+            'numallnighters': numallnighters,
             'renderContent': renderContent}
 
 @register.inclusion_tag('inclusion/sleep_entry.html', takes_context=True)
