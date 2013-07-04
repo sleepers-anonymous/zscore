@@ -134,7 +134,7 @@ def graph(request, username = None):
                 priv = max(p.privacyFriends, p.privacy, p.privacyLoggedIn)
             else:
                 priv = max(p.privacyLoggedIn, p.privacy)
-            if priv<p.PRIVACY_PUBLIC:
+            if priv<p.PRIVACY_GRAPHS:
                 return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
         except:
             return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))

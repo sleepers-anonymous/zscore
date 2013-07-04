@@ -127,12 +127,14 @@ class SleeperProfile(models.Model):
     PRIVACY_NORMAL = 0
     PRIVACY_STATS = 50
     PRIVACY_PUBLIC = 100
+    PRIVACY_GRAPHS = 150
     PRIVACY_CHOICES = (
             (PRIVACY_HIDDEN, 'Hidden'),
             (PRIVACY_REDACTED, 'Redacted'),
             (PRIVACY_NORMAL, 'Normal'),
             (PRIVACY_STATS, 'Stats Public'),
             (PRIVACY_PUBLIC, 'Sleep Public'),
+            (PRIVACY_GRAPHS, 'Graphs Public'),
             )
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to anonymous users')
     privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to logged-in users')
