@@ -8,7 +8,7 @@ import datetime
 class SleeperProfileForm(forms.ModelForm):
     class Meta:
         model = SleeperProfile
-        fields = ['privacy','privacyLoggedIn','privacyFriends', 'use12HourTime', 'idealSleep', 'timezone', 'idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekend', 'idealSleepTimeWeekday']
+        fields = ['privacy','privacyLoggedIn','privacyFriends', 'use12HourTime', 'idealSleep', 'timezone']
 
 class CreepSearchForm(forms.Form):
     username = forms.CharField(max_length=30)

@@ -237,6 +237,7 @@ def editProfile(request):
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/editprofile/')
+        else: print form.errors
     else:
         form = SleeperProfileForm(instance=p)
     return HttpResponse(render_to_string('editprofile.html', {'form': form},context_instance=RequestContext(request)))
