@@ -128,12 +128,7 @@ def graph(request, username = None):
         try:
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
-            if user.is_anonymous(): priv = p.privacy
-            elif request.user.pk == user.pk: priv = p.PRIVACY_GRAPHS
-            elif request.user in p.friends.all():
-                priv = max(p.privacyFriends, p.privacy, p.privacyLoggedIn)
-            else:
-                priv = max(p.privacyLoggedIn, p.privacy)
+            priv = p.getPermissions(request.user)
             if priv<p.PRIVACY_GRAPHS:
                 return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
         except:
@@ -208,18 +203,8 @@ def creep(request,username=None, asOther=None):
         try:
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
-            if user.is_anonymous():
-                priv = p.privacy
-            elif request.user.pk == user.pk:
-                priv = p.PRIVACY_GRAPHS
-                context["isself"] =True
-            elif request.user in p.friends.all():
-                priv = max(p.privacyFriends, p.privacy, p.privacyLoggedIn)
-            else:
-                priv = max(p.privacyLoggedIn, p.privacy)
-            if asOther:
-                otherD = {"friends":p.privacyFriends, "user": p.privacyLoggedIn,"anon": p.privacy}
-                if asOther in otherD: priv = min(priv, otherD[asOther])
+            priv = p.getPermissions(request.user, asOther)
+            if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True
             if priv<=p.PRIVACY_NORMAL:
                 return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
         except:

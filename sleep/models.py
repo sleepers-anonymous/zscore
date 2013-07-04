@@ -128,6 +128,7 @@ class SleeperProfile(models.Model):
     PRIVACY_STATS = 50
     PRIVACY_PUBLIC = 100
     PRIVACY_GRAPHS = 150
+    PRIVACY_MAX = 150
     PRIVACY_CHOICES = (
             (PRIVACY_HIDDEN, 'Hidden'),
             (PRIVACY_REDACTED, 'Redacted'),
@@ -169,15 +170,14 @@ class SleeperProfile(models.Model):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
 
-    def getPermissions(self, otherUser, asOther == None):
+    def getPermissions(self, otherUser, asOther = None):
         """Returns the permissions an other user should have for me"""
-        if otherUser.is_anonymous(): priv =  self.privacy
-        elif otherUser == self.user: priv = self.PRIVACY_GRAPHS #Maximum possible privacy!
-        elif otherUser in self.friends.all(): priv =  max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
-        else: priv =  max(self.privacy, self.privacyLoggedIn)
-        if asOther:
-            return min(getattr(self, {"friends":"privacyFriends", "user":"privacyLoggedIn", "anon": "privacy"}[asOther]), priv)
-        else: return priv
+        if otherUser.is_anonymous(): return  self.privacy
+        if otherUser.pk == self.user.pk:
+            otherD = {"friends":"privacyFriends", "user":"privacyLoggedIn", "anon": "privacy"}
+            return getattr(self, otherD[asOther], self.PRIVACY_MAX) if asOther in otherD else self.PRIVACY_MAX
+        if otherUser in self.friends.all(): return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
+        return max(self.privacy, self.privacyLoggedIn)
 
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
