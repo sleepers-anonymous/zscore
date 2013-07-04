@@ -59,7 +59,7 @@ def sleepEntryView(context,renderContent='html'):
 
 @register.inclusion_tag('inclusion/sleep_view_table.html')
 def sleepViewTable(request, **kwargs):
-    """Prints a tablified list of sleeps: Options: start, end, user, showcomments, showedit, and reverse"""
+    """Prints a tablified list of sleeps: Options: start, end, user, showcomments, showedit, and reverse, fulldate, showTZ"""
     settings = {
             "start": datetime.date.min,
             "end": datetime.date.max,
@@ -68,7 +68,7 @@ def sleepViewTable(request, **kwargs):
             "showedit": False,
             "reverse": True,
             "fulldate": False,
-            "fullTZ": False,
+            "showTZ": 0, #0 for no TZ, 1 for short TZ, 2 for full TZ
             "number":None,
             }
     settings.update(kwargs)
@@ -92,7 +92,8 @@ def sleepViewTable(request, **kwargs):
             d = {"start_time": sleep.start_local_time().strftime(fmt[0]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
         else:
             d = {"start_time": sleep.start_local_time().strftime(fmt[1]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
-        if settings["showcomments"]: d["comments"] = sleep.comments
+        if settings["showcomments"]:
+            if sleep.comments != "": d["comments"] = sleep.comments
         sleeps.append(d)
     context = {"sleeps": sleeps}
     return context
