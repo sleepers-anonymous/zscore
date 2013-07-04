@@ -172,7 +172,7 @@ class SleeperProfile(models.Model):
 
     def getPermissions(self, otherUser, asOther = None):
         """Returns the permissions an other user should have for me"""
-        if otherUser.is_anonymous(): return  self.privacy
+        if otherUser == None or otherUser.is_anonymous(): return  self.privacy
         if otherUser.pk == self.user.pk:
             otherD = {"friends":"privacyFriends", "user":"privacyLoggedIn", "anon": "privacy"}
             return getattr(self, otherD[asOther], self.PRIVACY_MAX) if asOther in otherD else self.PRIVACY_MAX
