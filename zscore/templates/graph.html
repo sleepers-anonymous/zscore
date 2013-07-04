@@ -5,7 +5,7 @@
 {% load sleep_tags %}
 {% load graphs %}
 {% load tz %}
-<h1> Graphs</h1>
+<h1> Graphs for {{user}}</h1>
 {% if sleeps %} 
 {% graphPerDay user %}
 <br />
@@ -15,11 +15,11 @@
 <br />
 {% graphSleepStartEndTimes user %}
 <br/>
-<i>Green is when you go to sleep, red is you they wake up.</i>
+<i>Green is when you go to sleep, red is when you wake up.</i>
 <br/>
 {% graphSleepLengths user %}
 <br />
-<i>Histogram of sleep lenghts for you</i>
+<i>Histogram of sleep lengths for you</i>
 <br />
 {% else %}
 <i>Enter at least one sleep to see pretty pictures!</i>
