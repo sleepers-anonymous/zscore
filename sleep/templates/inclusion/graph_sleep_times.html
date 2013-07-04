@@ -1,6 +1,6 @@
-<canvas id="sleepChart" width="610" height="400"></canvas>
+<canvas id="sleepTimeChart" width="610" height="400"></canvas>
 <script>
-var chartData = {
+var graphSleepTimeData = {
   labels : [
     {% for i in labels %}
       "{{i}}",
@@ -28,5 +28,5 @@ var chartOptions = {
     scaleLineColor : "rgba(0,0,0,0)",
 }
 
-var sleepChart = new Chart(document.getElementById("sleepChart").getContext("2d")).Line(chartData,chartOptions);
+var sleepTimeChart = new Chart(document.getElementById("sleepTimeChart").getContext("2d")).Line(graphSleepTimeData,chartOptions);
 </script>
