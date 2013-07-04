@@ -279,21 +279,24 @@ class Sleeper(User):
     def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False):
         if start==datetime.date.min and end==datetime.date.max:
             sleeps = self.sleep_set.values('date','start_time','end_time')
+            allnighters = self.allnighter_set.values('date')
         else:
             sleeps = self.sleep_set.filter(date__gte=start,date__lte=end).values('date','start_time','end_time')
+            allnighters = self.allnighter_set.filter(date__gte=start,date__lte=end).values('date')
         if sleeps:
+            allnighters=map(lambda x: x['date'],allnighters)
             dates=map(lambda x: x['date'], sleeps)
-            first = min(dates)
-            last = max(dates)
+            first = min(itertools.chain(dates,allnighters))
+            last = max(itertools.chain(dates,allnighters))
             n = (last-first).days + 1
             dateRange = [first + datetime.timedelta(i) for i in range(0,n)]
             byDays = [sum([(s['end_time']-s['start_time']).total_seconds() for s in filter(lambda x: x['date']==d,sleeps)]) for d in dateRange]
             if hours:
                 byDays = map(lambda x: x/3600,byDays)
             if packDates:
-                return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i]} for i in range(0,n)]
+                return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i]} for i in range(0,n) if byDays[i]>0 or first + datetime.timedelta(i) in allnighters]
             else:
-                return byDays
+                return [byDays[i] for i in range(0,n) if byDays[i]>0 or first+datetime.timedelta(i) in allnighters]
         else:
             return []
 
