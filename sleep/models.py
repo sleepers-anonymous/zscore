@@ -169,6 +169,13 @@ class SleeperProfile(models.Model):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
 
+    def getPermissions(self, otherUser):
+        """Returns the permissions an other user should have for me"""
+        if otherUser.is_anonymous(): return self.privacy
+        elif otherUser == self.user: return self.PRIVACY_GRAPHS
+        elif otherUser in self.friends.all(): return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
+        else: return max(self.privacy, self.privacyLoggedIn)
+
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
 
