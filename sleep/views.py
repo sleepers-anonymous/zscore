@@ -179,7 +179,7 @@ def creep(request,username=None, asOther=None):
                 count = users.count()
                 if count==1:
                     return HttpResponseRedirect('/creep/%s/' % users[0].username)
-                else: 
+                else:
                     context = {
                             'results' : users,
                             'count' : count,
