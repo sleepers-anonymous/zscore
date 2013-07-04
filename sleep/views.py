@@ -129,7 +129,7 @@ def graph(request, username = None):
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
             if user.is_anonymous(): priv = p.privacy
-            elif request.user.pk == user.pk: priv = p.PRIVACY_PUBLIC
+            elif request.user.pk == user.pk: priv = p.PRIVACY_GRAPHS
             elif request.user in p.friends.all():
                 priv = max(p.privacyFriends, p.privacy, p.privacyLoggedIn)
             else:
