@@ -19,7 +19,10 @@
   {% graphPerDay user 14 %}
   <br />
   {% graphTimeOfDayBars user 30 %}
-  <br /></td><td valign="top">
+  <br />
+  {% if graphs %}
+  View more graphs for {{user}} <a href="/graph/{{user}}/">here!</a><br />
+  {% endif %}</td><td valign="top">
   <h3>Sleep</h3>
   <table>
   {% for sleep in sleeps %}

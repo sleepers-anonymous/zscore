@@ -211,7 +211,7 @@ def creep(request,username=None, asOther=None):
             if user.is_anonymous():
                 priv = p.privacy
             elif request.user.pk == user.pk:
-                priv = p.PRIVACY_PUBLIC
+                priv = p.PRIVACY_GRAPHS
                 context["isself"] =True
             elif request.user in p.friends.all():
                 priv = max(p.privacyFriends, p.privacy, p.privacyLoggedIn)
@@ -227,6 +227,7 @@ def creep(request,username=None, asOther=None):
         context.update({'user' : user,'global' : user.decayStats()})
         if priv>=p.PRIVACY_PUBLIC:
             context['sleeps']=user.sleep_set.all().order_by('-end_time')
+        if priv>=p.PRIVACY_GRAPHS: context["graphs"] = True
         return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
 
 @login_required
