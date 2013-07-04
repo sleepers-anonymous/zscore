@@ -6,14 +6,18 @@ register = template.Library()
 @register.inclusion_tag('inclusion/graph_per_day.html')
 def graphPerDay(user, interval=None):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    if interval == None: s = datetime.date.min
-    else: s = datetime.date.today() - datetime.timedelta(interval)
-    return { 'graphData' : sleeper.sleepPerDay(start = s, packDates=True,hours=True) }
+    if interval == None:
+        s = datetime.date.min
+        a = 600
+    else:
+        s = datetime.date.today() - datetime.timedelta(interval)
+        a = 400
+    return { 'graphData' : sleeper.sleepPerDay(start = s, packDates=True,hours=True) , "side": a}
 
 @register.inclusion_tag('inclusion/graph_time_of_day_bars.html')
-def graphTimeOfDayBars(user):
+def graphTimeOfDayBars(user, interval = None):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    sleeps = sleeper.sleep_set.all()
+    sleeps = sleeper.sleep_set.all() if interval == None else sleeper.sleep_set.filter(start_time__gte=(datetime.date.today()-datetime.timedelta(interval)))
     if not sleeps:
         return { 'sleeps' : [] }
     first = min([s.start_time.astimezone(pytz.timezone(s.timezone)) for s in sleeps]).date()
@@ -43,7 +47,7 @@ def graphTimeOfDayBars(user):
             sleepsProcessed.append((startTime.hour * 15 + startTime.minute / 4., (d-first).days * 15, endTime.hour * 15 + endTime.minute / 4. - startTime.hour * 15 - startTime.minute / 4., 15))
 
     avgWakeUpTime = sleeper.avgWakeUpTime()
-
+    
     context = {
             'hassleep': True,
             'sleeps' : sleepsProcessed,
