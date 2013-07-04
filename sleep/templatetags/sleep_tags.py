@@ -12,11 +12,11 @@ def sleepStatsView(context, renderContent='html'):
     timestyle = "%I:%M %p" if sleeper.sleeperprofile.use12HourTime else "%H:%M"
     w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today(), stdev = True)
     if w != None:
-        if len(w) == 2: context['wakeup'], context['wakeup_dev'] = w[0].strftime(timestyle), w[1]
+        if type(w) == tuple: context['wakeup'], context['wakeup_dev'] = w[0].strftime(timestyle), w[1]
         else: context['wakeup'] = w[0].strftime(timestyle)
     sleeptime = sleeper.avgGoToSleepTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today(), stdev = True)
     if sleeptime != None:
-        if len(sleeptime) == 2: context["sleeptime"], context["sleeptime_dev"] = sleeptime[0].strftime(timestyle), sleeptime[1]
+        if type(sleeptime) == tuple: context["sleeptime"], context["sleeptime_dev"] = sleeptime[0].strftime(timestyle), sleeptime[1]
         else: context["sleeptime"] = sleeptime.strftime(timestyle)
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     context['lastDay'] = sleeper.timeSleptByTime(now-datetime.timedelta(1),now)
