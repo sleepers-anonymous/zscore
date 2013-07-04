@@ -84,18 +84,15 @@ def sleepViewTable(request, **kwargs):
             d = {"start_time": sleep.start_local_time().strftime(fmt[0]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
         else:
             d = {"start_time": sleep.start_local_time().strftime(fmt[1]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
-        if settings["showcomments"]:
-            d["comments"] = sleep.comments
+        if settings["showcomments"]: d["comments"] = sleep.comments
         sleeps.append(d)
     context = {"sleeps": sleeps}
     return context
 
 @register.simple_tag
 def displayUser(username):
-    if username != "[redacted]":
-        return '''<a href="/creep/%s/">%s</a>''' % (username , username)
-    else:
-        return username
+    if username != "[redacted]": return '''<a href="/creep/%s/">%s</a>''' % (username , username)
+    else: return username
 
 @register.inclusion_tag('inclusion/display_friend.html')
 def displayFriend(you,them,requested=False):
@@ -114,7 +111,5 @@ def displayFriend(you,them,requested=False):
 @register.simple_tag
 def displayFriendRequests(user):
     fr = FriendRequest.objects.filter(requestee=user,accepted=None)
-    if fr:
-        return " <b>(%s)</b>" % fr.count()
-    else:
-        return ""
+    if fr: return " <b>(%s)</b>" % fr.count()
+    else: return ""
