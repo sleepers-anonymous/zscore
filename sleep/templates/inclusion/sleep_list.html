@@ -36,7 +36,7 @@ function deleteAllnighter(id) {
 	{% if sleep.comments %} <tr><td>&nbsp;</td><td>{{sleep.comments|truncatewords:20}}</td><td>&nbsp;</td></tr>{% endif %}
     {% endfor %}
 </table>
-
+{% if allnighters %}
 		<h3>My Allnighters ({{numallnighters}} on {{anumdates}} days)</h3>
 		<table width=100%>
 				{% for a in allnighters %}
@@ -46,5 +46,6 @@ function deleteAllnighter(id) {
 				{% if a.comments %} <tr><td>&nbsp;</td><td>{{a.comments|truncatewords:20}}</td><td>&nbsp;</td></tr>{% endif%}
 		{% endfor %}
 </table>
+{% endif %}
 </div>
 {% endif %}
