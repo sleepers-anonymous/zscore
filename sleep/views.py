@@ -119,9 +119,30 @@ def editOrCreateSleep(request,sleep = None,success=False):
 def leaderboardLegacy(request,sortBy):
     return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
 
-@login_required
-def graph(request):
-    return HttpResponse(render_to_string('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request)))
+def graph(request, username = None):
+    if username == None:
+        if request.user.is_anonymous(): return HttpResponse(render_to_string('creepfailed.html', {}, context_instance=RequestContext(request)))
+        return HttpResponse(render_to_string('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request)))
+    else:
+        context = {}
+        try:
+            user=Sleeper.objects.get(username=username)
+            p = user.sleeperprofile
+            if user.is_anonymous(): priv = p.privacy
+            elif request.user.pk == user.pk: priv = p.PRIVACY_PUBLIC
+            elif request.user in p.friends.all():
+                priv = max(p.privacyFriends, p.privacy, p.privacyLoggedIn)
+            else:
+                priv = max(p.privacyLoggedIn, p.privacy)
+            if priv<p.PRIVACY_PUBLIC:
+                return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
+        except:
+            return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
+        context["user"] = user
+        context['sleeps']=user.sleep_set.all().order_by('-end_time')
+        return HttpResponse(render_to_string('graph.html',context,context_instance=RequestContext(request)))
+
+
 
 def leaderboard(request):
     if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
