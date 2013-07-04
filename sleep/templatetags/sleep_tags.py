@@ -13,7 +13,7 @@ def sleepStatsView(context, renderContent='html'):
     w =  sleeper.avgWakeUpTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today(), stdev = True)
     if w != None:
         if type(w) == tuple: context['wakeup'], context['wakeup_dev'] = w[0].strftime(timestyle), w[1]
-        else: context['wakeup'] = w[0].strftime(timestyle)
+        else: context['wakeup'] = w.strftime(timestyle)
     sleeptime = sleeper.avgGoToSleepTime(datetime.date.today()-datetime.timedelta(7), datetime.date.today(), stdev = True)
     if sleeptime != None:
         if type(sleeptime) == tuple: context["sleeptime"], context["sleeptime_dev"] = sleeptime[0].strftime(timestyle), sleeptime[1]
