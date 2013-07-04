@@ -6,12 +6,8 @@ register = template.Library()
 @register.inclusion_tag('inclusion/graph_per_day.html')
 def graphPerDay(user, interval=None):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    if interval == None:
-        s = datetime.date.min
-        a = 800
-    else:
-        s = datetime.date.today() - datetime.timedelta(interval)
-        a = 400
+    if interval == None: s = datetime.date.min
+    else: s = datetime.date.today() - datetime.timedelta(interval)
     graphData = sleeper.sleepPerDay(start = s, packDates=True,hours=True)
     side = min(1000, max(400, len(graphData)//7*200))
     return { 'graphData' : graphData , "side": side}
