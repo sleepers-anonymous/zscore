@@ -68,13 +68,21 @@ def sleepViewTable(request, **kwargs):
             "showedit": False,
             "reverse": True,
             "fulldate": False,
+            "fullTZ": False,
             "number":None,
             }
     settings.update(kwargs)
     sleepq = settings["user"].sleep_set.filter(start_time__gte=settings["start"], end_time__lte=settings["end"])
-    if settings["reverse"]: sleepq = sleepq.order_by('-start_time', '-end_time')
-    else: sleepq = sleepq.order_by('start_time', 'end_time')
-    if settings["number"] != None: sleepq = sleepq[:settings["number"]]
+    allnighterq = settings["user"].allnighter_set.filter(date__gte=settings["start"], end_time__lte=settings["end"])
+    if settings["reverse"]:
+        sleepq = sleepq.order_by('-start_time', '-end_time')
+        allnighterq = allnighterq.order_by('-start_time', '-end_time')
+    else:
+        sleepq = sleepq.order_by('start_time', 'end_time')
+        allnighterq = allnighterq.order_by('start_time', 'end_time')
+    if settings["number"] != None:
+        sleepq = sleepq[:settings["number"]]
+        allnighter = allnighterq[:settings["number"]]
     prof = request.user.sleeperprofile
     fmt = ("%I:%M %p", "%I:%M %p %x") if prof.use12HourTime else ("%H:%M", "%H:%M %x")
     dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%D"
