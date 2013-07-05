@@ -6,9 +6,12 @@
 {% load graphs %}
 {% load tz %}
 <h1> Graphs for {{user}}</h1>
-{% if sleeps %} 
+{% if sleeps %}
+<br />
 {% graphPerDay user %}
 <br />
+{% graphTimeOfDayBars user %}
+<br/>
 {% graphSleepTimes user %}
 <br/>
 <i>Sleep time histogram</i>
