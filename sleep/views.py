@@ -66,22 +66,18 @@ def editOrCreateSleep(request,sleep = None,success=False):
     context = {'success': success}
     prof = request.user.sleeperprofile
     defaulttz = prof.timezone
-    if prof.use12HourTime:
-        fmt = "%I:%M %p %x"
-    else:
-        fmt = "%H:%M %x"
+    if prof.use12HourTime: fmt = "%I:%M %p %x"
+    else: fmt = "%H:%M %x"
     if sleep: # we're editing a sleep
         try:
             s = Sleep.objects.get(pk=sleep)
-            if s.user != request.user:
-                raise PermissionDenied
+            if s.user != request.user: raise PermissionDenied
             context['sleep'] = s
         except Sleep.MultipleObjectsReturned:
             return HttpResponseBadRequest('')
         except Sleep.DoesNotExist:
             raise Http404
-        if request.method == 'POST':
-            form = SleepForm(request.user, fmt, request.POST, instance=s)
+        if request.method == 'POST': form = SleepForm(request.user, fmt, request.POST, instance=s)
         else:
             initial = {
                     "start_time" : s.start_local_time().strftime(fmt),
@@ -201,13 +197,20 @@ def creep(request,username=None):
 @login_required
 def editProfile(request):
     p = request.user.sleeperprofile
+    if p.use12HourTime: fmt = "%I:%M %p"
+    else: fmt = "%H:%M"
     if request.method == 'POST':
-        form = SleeperProfileForm(request.POST, instance=p)
+        form = SleeperProfileForm(fmt, request.POST, instance=p)
+        context = {"form":form}
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/editprofile/?success=True')
     else:
-        form = SleeperProfileForm(instance=p)
+        initial = {"idealWakeupWeekend": p.idealWakeupWeekend.strftime(fmt),
+                "idealWakeupWeekday": p.idealWakeupWeekday.strftime(fmt),
+                "idealSleepTimeWeekend": p.idealSleepTimeWeekend.strftime(fmt),
+                "idealSleepTimeWeekday": p.idealSleepTimeWeekday.strftime(fmt),}
+        form = SleeperProfileForm(fmt, instance=p, initial = initial)
         context = {"form":form}
         if "success" in request.GET and request.GET["success"] == "True": context["success"] = True
     return render_to_response('editprofile.html', context ,context_instance=RequestContext(request))

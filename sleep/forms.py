@@ -6,9 +6,29 @@ import pytz
 import datetime
 
 class SleeperProfileForm(forms.ModelForm):
+    idealWakeupWeekend = forms.CharField(max_length=30)
+    idealWakeupWeekday = forms.CharField(max_length=30)
+
+    idealSleepTimeWeekend = forms.CharField(max_length=30)
+    idealSleepTimeWeekday = forms.CharField(max_length=30)
+    
     class Meta:
         model = SleeperProfile
-        fields = ['privacy','privacyLoggedIn','privacyFriends', 'use12HourTime', 'idealSleep', 'timezone']
+        fields = ['privacy','privacyLoggedIn','privacyFriends', 'use12HourTime', 'idealSleep', 'timezone', 'idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekday', 'idealSleepTimeWeekend']
+
+    def __init__(self, fmt, *args, **kwargs):
+        self.fmt = fmt
+        super(SleeperProfileForm, self).__init__(*args,**kwargs)
+
+    def clean(self):
+        cleaned_data = super(SleeperProfileForm, self).clean()
+        for k in ['idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekday', 'idealSleepTimeWeekend']:
+            try:
+                cleaned_data[k] = datetime.datetime.strptime(cleaned_data[k], self.fmt).time()
+            except ValueError:
+                self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.time(23,59,59).strftime(self.fmt)])
+                del cleaned_data[k]
+        return cleaned_data
 
 class CreepSearchForm(forms.Form):
     username = forms.CharField(max_length=30)

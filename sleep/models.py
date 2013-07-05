@@ -119,6 +119,9 @@ class Allnighter(models.Model):
     def __unicode__(self):
         return "All-nighter on " + self.date.strftime("%x")
 
+class SchoolOrWorkPlace(models.Model):
+    name = models.CharField(max_length=255)
+
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default
@@ -156,7 +159,7 @@ class SleeperProfile(models.Model):
     idealWakeupWeekday = models.TimeField(default = datetime.time(8))
 
     idealSleepTimeWeekend = models.TimeField(default = datetime.time(0))
-    idealSleepTimeWeekday = models.TimeField(default = datetime.time(11))
+    idealSleepTimeWeekday = models.TimeField(default = datetime.time(23))
 
     def getIdealSleep(self):
         """Returns idealSleep as a timedelta"""
@@ -348,7 +351,7 @@ class Sleeper(User):
                 idealized = max(ideal, avg)
                 d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
         except:
-            pass 
+            pass
         try:
             offset = 60*60.
             avgRecip = 1/(sum(map(lambda x: 1/(offset+x),sleep))/len(sleep))-offset
@@ -407,6 +410,4 @@ class Sleeper(User):
                 d[k]=datetime.timedelta(0,d[k])
         return d
 
-class SchoolOrWorkPlace(models.Model):
-    name = models.CharField(max_length=255)
 
