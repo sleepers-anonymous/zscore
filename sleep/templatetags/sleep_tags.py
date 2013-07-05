@@ -70,19 +70,20 @@ def sleepViewTable(request, **kwargs):
             "fulldate": False,
             "showTZ": 0, #0 for no TZ, 1 for short TZ, 2 for full TZ
             "number":None,
+            "showallnighters": True
             }
     settings.update(kwargs)
     sleepq = settings["user"].sleep_set.filter(start_time__gte=settings["start"], end_time__lte=settings["end"])
-    allnighterq = settings["user"].allnighter_set.filter(date__gte=settings["start"], end_time__lte=settings["end"])
+    if settings["showallnighters"]: allnighterq = settings["user"].allnighter_set.filter(date__gte=settings["start"], end_time__lte=settings["end"])
     if settings["reverse"]:
         sleepq = sleepq.order_by('-start_time', '-end_time')
-        allnighterq = allnighterq.order_by('-start_time', '-end_time')
+        if settings["showallnighters"]: allnighterq = allnighterq.order_by('-start_time', '-end_time')
     else:
         sleepq = sleepq.order_by('start_time', 'end_time')
-        allnighterq = allnighterq.order_by('start_time', 'end_time')
+        if settings["showallnighters"]: allnighterq = allnighterq.order_by('start_time', 'end_time')
     if settings["number"] != None:
         sleepq = sleepq[:settings["number"]]
-        allnighter = allnighterq[:settings["number"]]
+        if settings["showallnighters"]: allnighterq = allnighterq[:settings["number"]]
     prof = request.user.sleeperprofile
     fmt = ("%I:%M %p", "%I:%M %p %x") if prof.use12HourTime else ("%H:%M", "%H:%M %x")
     dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%D"
@@ -94,6 +95,8 @@ def sleepViewTable(request, **kwargs):
             d = {"start_time": sleep.start_local_time().strftime(fmt[1]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
         if settings["showcomments"]:
             if sleep.comments != "": d["comments"] = sleep.comments
+        if settings["showTZ"] == 1: d["TZ"] = sleep.getTZShortName()
+        elif settings["showTZ"] == 2: d["TZ"] = sleep.timezone
         sleeps.append(d)
     context = {"sleeps": sleeps}
     return context
