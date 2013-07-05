@@ -121,7 +121,7 @@ def leaderboardLegacy(request,sortBy):
 
 def graph(request, username = None):
     if username == None:
-        if request.user.is_anonymous(): return HttpResponse(render_to_string('creepfailed.html', {}, context_instance=RequestContext(request)))
+        if request.user.is_anonymous(): return HttpResponseRedirect('/accounts/login/?next=' + request.path)
         return HttpResponse(render_to_string('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request)))
     else:
         context = {}
