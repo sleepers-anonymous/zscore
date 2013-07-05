@@ -119,25 +119,9 @@ def editOrCreateSleep(request,sleep = None,success=False):
 def leaderboardLegacy(request,sortBy):
     return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
 
-def graph(request, username = None):
-    if username == None:
-        if request.user.is_anonymous(): return HttpResponseRedirect('/accounts/login/?next=' + request.path)
-        return HttpResponse(render_to_string('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request)))
-    else:
-        context = {}
-        try:
-            user=Sleeper.objects.get(username=username)
-            p = user.sleeperprofile
-            priv = p.getPermissions(request.user)
-            if priv<p.PRIVACY_GRAPHS:
-                return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
-        except:
-            return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
-        context["user"] = user
-        context['sleeps']=user.sleep_set.all().order_by('-end_time')
-        return HttpResponse(render_to_string('graph.html',context,context_instance=RequestContext(request)))
-
-
+@login_required
+def graph(request):
+    return HttpResponse(render_to_string('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request)))
 
 def leaderboard(request):
     if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
@@ -157,7 +141,7 @@ def leaderboard(request):
             }
     return HttpResponse(render_to_string('leaderboard.html',context,context_instance=RequestContext(request)))
 
-def creep(request,username=None, asOther=None):
+def creep(request,username=None):
     if not username:
         if request.user.is_anonymous():
             creepable=Sleeper.objects.filter(sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS)
@@ -203,7 +187,7 @@ def creep(request,username=None, asOther=None):
         try:
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
-            priv = p.getPermissions(request.user, asOther)
+            priv = p.getPermissions(request.user, request.GET.get("as", None))
             if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True
             if priv<=p.PRIVACY_NORMAL:
                 return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
@@ -212,7 +196,9 @@ def creep(request,username=None, asOther=None):
         context.update({'user' : user,'global' : user.decayStats()})
         if priv>=p.PRIVACY_PUBLIC:
             context['sleeps']=user.sleep_set.all().order_by('-end_time')
-        if priv>=p.PRIVACY_GRAPHS: context["graphs"] = True
+        if priv>=p.PRIVACY_GRAPHS:
+            if "type" in request.GET and request.GET["type"] == "graph": return HttpResponse(render_to_string('graph.html',context,context_instance=RequestContext(request)))
+            context["graphs"] = True
         return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
 
 @login_required

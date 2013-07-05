@@ -8,7 +8,7 @@
 
 <h1>Creep on {{user}}</h1>
 
-{% if isself %}<p>View yourself as <a href="/creep/{{user|lower}}/friends/">a friend</a>, <a href="/creep/{{user|lower}}/user">a zScore user</a>, or <a href="/creep/{{user|lower}}/anon/">random creeper on the internet</a> would see you!</p>
+{% if isself %}<p>View yourself as <a href="/creep/{{user}}/?as=friends/">a friend</a>, <a href="/creep/{{user}}/?as=user">a zScore user</a>, or <a href="/creep/{{user}}/?as=anon/">random creeper on the internet</a> would see you!</p>
 {% endif %}
 <table width=100%><tr><td valign = "top">
 <h3>Stats</h3>
@@ -21,7 +21,7 @@
   {% graphTimeOfDayBars user 30 %}
   <br />
   {% if graphs %}
-  View more graphs for {{user}} <a href="/graph/{{user}}/">here!</a><br />
+  View more graphs for {{user}} <a href="/creep/{{user}}/?type=graph">here!</a><br />
   {% endif %}</td><td valign="top">
   <h3>Sleep</h3>
   <table>
