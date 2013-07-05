@@ -2,7 +2,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import *
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.core import serializers
 from django.db.models import Q
 from django.core.exceptions import *
@@ -21,7 +21,7 @@ def faq(request):
 
 @login_required
 def mysleep(request):
-    return HttpResponse(render_to_string('sleep/mysleep.html',{},context_instance=RequestContext(request)))
+    return render_to_response('sleep/mysleep.html',{},context_instance=RequestContext(request))
 
 @login_required
 def editOrCreateAllnighter(request, allNighter = None, success=False):
@@ -59,7 +59,7 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
                 new.save()
                 return HttpResponseRedirect('/mysleep/')
     context['form']=form
-    return HttpResponse(render_to_string('editallnighter.html', context, context_instance=RequestContext(request)))
+    return render_to_response('editallnighter.html', context, context_instance=RequestContext(request))
 
 @login_required
 def editOrCreateSleep(request,sleep = None,success=False):
@@ -114,14 +114,14 @@ def editOrCreateSleep(request,sleep = None,success=False):
                 new.save()
                 return HttpResponseRedirect('/mysleep/')
     context['form']=form
-    return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
+    return render_to_response('editsleep.html', context, context_instance=RequestContext(request))
 
 def leaderboardLegacy(request,sortBy):
     return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
 
 @login_required
 def graph(request):
-    return HttpResponse(render_to_string('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request)))
+    return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
 
 def leaderboard(request):
     if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
@@ -139,7 +139,7 @@ def leaderboard(request):
             'number' : Sleep.objects.all().values_list('user').distinct().count(),
             'leaderboard_valid': len(ss),
             }
-    return HttpResponse(render_to_string('leaderboard.html',context,context_instance=RequestContext(request)))
+    return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
 
 def creep(request,username=None):
     if not username:
@@ -161,8 +161,7 @@ def creep(request,username=None):
             if form.is_valid():
                 users = creepable.filter(username__icontains=form.cleaned_data['username']).distinct()
                 count = users.count()
-                if count==1:
-                    return HttpResponseRedirect('/creep/%s/' % users[0].username)
+                if count==1: return HttpResponseRedirect('/creep/%s/' % users[0].username)
                 else:
                     context = {
                             'results' : users,
@@ -172,7 +171,7 @@ def creep(request,username=None):
                             'total' : total,
                             'followed' : followed,
                             }
-                    return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
+                    return render_to_response('creepsearch.html',context,context_instance=RequestContext(request))
         else:
             form = CreepSearchForm()
         context = {
@@ -181,7 +180,7 @@ def creep(request,username=None):
                 'total' : total,
                 'followed' : followed,
                 }
-        return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
+        return render_to_response('creepsearch.html',context,context_instance=RequestContext(request))
     else:
         context = {}
         try:
@@ -189,17 +188,15 @@ def creep(request,username=None):
             p = user.sleeperprofile
             priv = p.getPermissions(request.user, request.GET.get("as", None))
             if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True
-            if priv<=p.PRIVACY_NORMAL:
-                return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
+            if priv<=p.PRIVACY_NORMAL: return render_to_response('creepfailed.html',{},context_instance=RequestContext(request))
         except:
-            return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
+            return render_to_response('creepfailed.html',{},context_instance=RequestContext(request))
         context.update({'user' : user,'global' : user.decayStats()})
-        if priv>=p.PRIVACY_PUBLIC:
-            context['sleeps']=user.sleep_set.all().order_by('-end_time')
+        if priv>=p.PRIVACY_PUBLIC: context['sleeps']=user.sleep_set.all().order_by('-end_time')
         if priv>=p.PRIVACY_GRAPHS:
-            if "type" in request.GET and request.GET["type"] == "graph": return HttpResponse(render_to_string('graph.html',context,context_instance=RequestContext(request)))
+            if "type" in request.GET and request.GET["type"] == "graph": return render_to_response('graph.html',context,context_instance=RequestContext(request))
             context["graphs"] = True
-        return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
+        return render_to_response('creep.html',context,context_instance=RequestContext(request))
 
 @login_required
 def editProfile(request):
@@ -209,10 +206,9 @@ def editProfile(request):
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/editprofile/')
-        else: print form.errors
     else:
         form = SleeperProfileForm(instance=p)
-    return HttpResponse(render_to_string('editprofile.html', {'form': form},context_instance=RequestContext(request)))
+    return render_to_response('editprofile.html', {'form': form},context_instance=RequestContext(request))
 
 @login_required
 def friends(request):
@@ -232,7 +228,7 @@ def friends(request):
                     'friendfollow' : friendfollow,
                     'requests' : requests,
                     }
-            return HttpResponse(render_to_string('friends.html',context,context_instance=RequestContext(request)))
+            return render_to_response('friends.html',context,context_instance=RequestContext(request))
     else:
         form = FriendSearchForm()
     context = {
@@ -241,7 +237,7 @@ def friends(request):
             'friendfollow' : friendfollow,
             'requests' : requests,
             }
-    return HttpResponse(render_to_string('friends.html',context,context_instance=RequestContext(request)))
+    return render_to_response('friends.html',context,context_instance=RequestContext(request))
             
 @login_required
 def requestFriend(request):
