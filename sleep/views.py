@@ -205,10 +205,12 @@ def editProfile(request):
         form = SleeperProfileForm(request.POST, instance=p)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/editprofile/')
+            return HttpResponseRedirect('/editprofile/?success=True')
     else:
         form = SleeperProfileForm(instance=p)
-    return render_to_response('editprofile.html', {'form': form},context_instance=RequestContext(request))
+        context = {"form":form}
+        if "success" in request.GET and request.GET["success"] == "True": context["success"] = True
+    return render_to_response('editprofile.html', context ,context_instance=RequestContext(request))
 
 @login_required
 def friends(request):

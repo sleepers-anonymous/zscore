@@ -1,9 +1,12 @@
 {% extends 'frame.html' %}
 {% block content %}
 <form action="/editprofile/" method="post">{% csrf_token %}
+    <h4>General settings</h4>
+    
     {{ form.non_field_errors }}
 
-    <h4>General settings</h4>
+    {% if success %}Form successfully saved!{% endif %}
+    
     <table>
     <tr><td><label for="id_use12HourTime">Use 12 hour time:</label></td> <td>{{form.use12HourTime}} </td><td> {{form.user12HourTime.errors}}</td></tr>
     <tr><td><label for="id_idealSleep">Ideal sleep length (hours)</label></td><td>{{form.idealSleep}}</td><td>{{form.idealSleep.errors}}</td></tr>
