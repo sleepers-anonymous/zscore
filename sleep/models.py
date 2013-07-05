@@ -18,7 +18,7 @@ class SleepManager(models.Manager):
 
     def sleepTimes(self,res=1, user = None):
         sleeps = Sleep.objects.all() if user == None else Sleep.objects.filter(user=user)
-        atTime = [0] * (24 * 60 / res) 
+        atTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
             tz = pytz.timezone(sleep.timezone)
             startDate = sleep.start_time.astimezone(tz).date()
@@ -190,29 +190,17 @@ class SleeperManager(models.Manager):
         for sleeper in sleepers:
             if len(sleeper.sleepPerDay())>2 and sleeper.sleepPerDay(packDates=True)[-1]['date'] >= datetime.date.today()-datetime.timedelta(5):
                 p = sleeper.sleeperprofile
-                if user is None:
-                    priv = p.PRIVACY_HIDDEN
-                elif user is 'all':
-                    priv = p.PRIVACY_PUBLIC
-                elif user.is_anonymous():
-                    priv = p.privacy
-                elif user.pk==sleeper.pk:
-                    priv = p.PRIVACY_PUBLIC
-                else:
-                    priv = p.privacyLoggedIn
+                if user is 'all': priv = p.PRIVACY_PUBLIC
+                else: priv = p.getPermissions(user)
 
-                if priv<=p.PRIVACY_REDACTED:
-                    sleeper.displayName="[redacted]"
-                else:
-                    sleeper.displayName=sleeper.username
+                if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
+                else: sleeper.displayName=sleeper.username
                 if priv>p.PRIVACY_HIDDEN:
                     d=sleeper.decayStats()
                     d['user']=sleeper
                     if 'is_authenticated' in dir(user) and user.is_authenticated():
-                        if user.pk==sleeper.pk:
-                            d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
-                    else:
-                        d['opcode'] = None
+                        if user.pk==sleeper.pk: d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
+                    else: d['opcode'] = None
                     scored.append(d)
             else:
                 if 'is_authenticated' in dir(user) and user.is_authenticated() and user.pk == sleeper.pk:
@@ -235,33 +223,20 @@ class SleeperManager(models.Manager):
         scored=[]
         for sleeper in sleepers:
             p = sleeper.sleeperprofile
-            if user is None:
-                priv = p.PRIVACY_HIDDEN
-            elif user is 'all':
-                priv = p.PRIVACY_PUBLIC
-            elif user.is_anonymous():
-                priv = p.privacy
-            elif user.pk==sleeper.pk:
-                priv = p.PRIVACY_PUBLIC
-            else:
-                priv = p.privacyLoggedIn
+            if user is 'all': priv = p.PRIVACY_PUBLIC
+            else: priv = p.getPermissions(user)
 
-            if priv<=p.PRIVACY_REDACTED:
-                sleeper.displayName="[redacted]"
-            else:
-                sleeper.displayName=sleeper.username
+            if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
+            else: sleeper.displayName=sleeper.username
             if priv>p.PRIVACY_HIDDEN:
                 d={'time':sleeper.timeSleptByTime(start,end)}
                 d['user']=sleeper
                 if 'is_authenticated' in dir(user) and user.is_authenticated():
-                    if user.pk==sleeper.pk:
-                        d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
-                else:
-                    d['opcode'] = None
+                    if user.pk==sleeper.pk: d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
+                else: d['opcode'] = None
                 scored.append(d)
         scored.sort(key=lambda x: -x['time'])
-        for i in xrange(len(scored)):
-            scored[i]['rank']=i+1
+        for i in xrange(len(scored)): scored[i]['rank']=i+1
         return scored
 
 class FriendRequest(models.Model):
