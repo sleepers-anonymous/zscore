@@ -5,10 +5,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, render_to_response
 from django.core import serializers
 from django.db.models import Q
+from django.db import IntegrityError
 from django.core.exceptions import *
 
 from sleep.models import *
 from sleep.forms import *
+
+from zscore import settings
 
 import datetime
 import pytz
@@ -210,7 +213,7 @@ def editProfile(request):
             for k in form.errors.viewkeys():
                 if "ideal" in k:
                     context["page"] = 2
-                    break 
+                    break
     else:
         initial = {"idealWakeupWeekend": p.idealWakeupWeekend.strftime(fmt),
                 "idealWakeupWeekday": p.idealWakeupWeekday.strftime(fmt),
@@ -352,6 +355,33 @@ def createSleep(request):
     # Create the Sleep instance
     Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments=comments, date=date,timezone=timezone)
     return HttpResponse('')
+
+@login_required
+def createPartialSleep(request):
+    timezone = request.user.sleeperprofile.timezone
+    start = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now()).astimezone(pytz.timezone(timezone))
+    try:
+        p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
+        p.save()
+        return HttpResponse('')
+    except IntegrityError:
+        return HttpResponseBadRequest('')
+
+@login_required
+def finishPartialSleep(request):
+    timezone = request.user.sleeperprofile.timezone
+    pytztimezone = pytz.timezone(timezone)
+    try:
+        p = request.user.partialsleep
+        start = p.start_time.astimezone(pytztimezone)
+        end = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now()).astimezone(pytz.timezone(timezone))
+        date = end.date()
+        s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
+        s.save()
+        p.delete()
+        return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
+    except PartialSleep.DoesNotExist:
+        return HttpResponseBadRequest('')
 
 @login_required
 def deleteSleep(request):
