@@ -137,10 +137,10 @@ def leaderboard(request):
     ss = Sleeper.objects.sorted_sleepers(sortBy,request.user)
     top = [ s for s in ss if s['rank']<=10 or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    lastWeekWinner = Sleeper.objects.bestByTime(now-datetime.timedelta(7),now,request.user)[0]
+    recentWinner = Sleeper.objects.bestByTime(now-datetime.timedelta(3),now,request.user)[0]
     context = {
             'top' : top,
-            'lastWeekWinner' : lastWeekWinner,
+            'recentWinner' : recentWinner,
             'total' : Sleep.objects.totalSleep(),
             'number' : Sleep.objects.all().values_list('user').distinct().count(),
             'leaderboard_valid': len(ss),
