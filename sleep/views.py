@@ -17,7 +17,13 @@ import datetime
 import pytz
 
 def home(request):
-    return render(request, 'index.html')
+    context = {}
+    try:
+        p = request.user.partialsleep
+        context["Partial"] = '<a style="text-decoration:none;" href="/sleep/finishPartial"><input type="submit" value="Waking Up!" /></a>'
+    except PartialSleep.DoesNotExist:
+        context["Partial"] = '<a style="text-decoration:none;" href="/sleep/createPartial"><input type="submit" value="Going to Sleep!" /></a>'
+    return render_to_response('index.html', context, context_instance=RequestContext(request))
 
 def faq(request):
     return render(request, 'faq.html')
@@ -363,7 +369,7 @@ def createPartialSleep(request):
     try:
         p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
         p.save()
-        return HttpResponse('')
+        return HttpResponseRedirect("/")
     except IntegrityError:
         return HttpResponseBadRequest('')
 
