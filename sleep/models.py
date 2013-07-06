@@ -192,14 +192,26 @@ class SleeperProfile(models.Model):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
 
-    def getPermissions(self, otherUser, asOther = None):
-        """Returns the permissions an other user should have for me"""
-        if otherUser == None or otherUser.is_anonymous(): return  self.privacy
-        if otherUser.pk == self.user.pk:
-            otherD = {"friends":"privacyFriends", "user":"privacyLoggedIn", "anon": "privacy"}
-            return getattr(self, otherD[asOther], self.PRIVACY_MAX) if asOther in otherD else self.PRIVACY_MAX
-        if otherUser in self.friends.all(): return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
-        return max(self.privacy, self.privacyLoggedIn)
+    def getPermissions(self, otherUser):
+        """Returns the permissions an other user should have for me.
+        
+        Pass either a user, or a string, like "friends", "user", "anon", if the user should be allowed to override.
+        """
+        otherD = {
+                "friends": "privacyFriends",
+                "user":"privacyLoggedIn",
+                "anon": "privacy",
+                }
+        if otherUser in otherD: #we've passed one of the given strings; the code calling us should check that we're allowed to do this.
+            return getattr(self, otherD[otherUser])
+        elif otherUser == None or otherUser.is_anonymous():
+            return self.privacy
+        elif otherUser.pk == self.user.pk:
+            return self.PRIVACY_MAX
+        elif otherUser in self.friends.all():
+            return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
+        else:
+            return max(self.privacy, self.privacyLoggedIn)
 
     def getEmailHash(self):
         if self.useGravatar:

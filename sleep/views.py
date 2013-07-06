@@ -193,7 +193,10 @@ def creep(request,username=None):
         try:
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
-            priv = p.getPermissions(request.user, request.GET.get("as", None))
+            if p.user_id == request.user.id and "as" in request.GET:
+                priv = p.getPermissions(request.GET['as'])
+            else:
+                priv = p.getPermissions(request.user)
             if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True
             if priv<=p.PRIVACY_NORMAL: return render_to_response('creepfailed.html',{},context_instance=RequestContext(request))
         except:
