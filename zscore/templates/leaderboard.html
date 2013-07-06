@@ -4,6 +4,7 @@
 {% load datetime_utils %}
 {% load sleep_tags %}
 {% load graphs %}
+{% load gravatar %}
 <h1> Leaderboard </h1>
 
 {{number}} zScore users have slept a total of {{total|printDHM}}!
@@ -11,7 +12,7 @@
 <table>
     <tr>
         <td>Rank</td>
-        <td>Username</td>
+        <td colspan="2">Username</td>
         <td><a href="?sort=zScore">zScore</a></td>
         <td><a href="?sort=avg">avg</a></td>
         <td><a href="?sort=avgSqrt">avgSqrt</a></td>
@@ -23,6 +24,7 @@
   {% for s in top %}
   <tr {% if s.opcode == "me" %} style="background-color:#DEF2FF" {% endif %}>
     <td> {{s.rank}} </td>
+    <td> {% gravatar request.user s.user 20 %}
     <td> {% displayUser s.user.displayName %} </td>
     <td> {{s.zScore|printHHMM}} </td>
     <td> {{s.avg|printHHMM}} </td>
