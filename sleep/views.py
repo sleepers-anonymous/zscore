@@ -18,11 +18,13 @@ import pytz
 
 def home(request):
     context = {}
-    try:
-        p = request.user.partialsleep
-        context["Partial"] = '<a style="text-decoration:none;" href="/sleep/finishPartial"><input type="submit" value="Waking Up!" /></a>'
-    except PartialSleep.DoesNotExist:
-        context["Partial"] = '<a style="text-decoration:none;" href="/sleep/createPartial"><input type="submit" value="Going to Sleep!" /></a>'
+    if p.is_authenticated:
+        try:
+            p = request.user.partialsleep
+            context["Partial"] = '<a style="text-decoration:none;" href="/sleep/finishPartial"><input type="submit" value="Waking Up!" /></a>'
+        except PartialSleep.DoesNotExist:
+            context["Partial"] = '<a style="text-decoration:none;" href="/sleep/createPartial"><input type="submit" value="Going to Sleep!" /></a>'
+    else: context["Partial"] = None
     return render_to_response('index.html', context, context_instance=RequestContext(request))
 
 def faq(request):
