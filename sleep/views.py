@@ -131,7 +131,7 @@ def graph(request):
     return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
 
 def leaderboard(request):
-    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
+    if 'sort' not in request.GET or request.GET['sort'] not in ['zPScore','posStDev','zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
@@ -193,7 +193,10 @@ def creep(request,username=None):
         try:
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
-            priv = p.getPermissions(request.user, request.GET.get("as", None))
+            if p.user_id == request.user.id and "as" in request.GET:
+                priv = p.getPermissions(request.GET['as'])
+            else:
+                priv = p.getPermissions(request.user)
             if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True
             if priv<=p.PRIVACY_NORMAL: return render_to_response('creepfailed.html',{},context_instance=RequestContext(request))
         except:

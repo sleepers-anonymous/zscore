@@ -192,14 +192,26 @@ class SleeperProfile(models.Model):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
 
-    def getPermissions(self, otherUser, asOther = None):
-        """Returns the permissions an other user should have for me"""
-        if otherUser == None or otherUser.is_anonymous(): return  self.privacy
-        if otherUser.pk == self.user.pk:
-            otherD = {"friends":"privacyFriends", "user":"privacyLoggedIn", "anon": "privacy"}
-            return getattr(self, otherD[asOther], self.PRIVACY_MAX) if asOther in otherD else self.PRIVACY_MAX
-        if otherUser in self.friends.all(): return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
-        return max(self.privacy, self.privacyLoggedIn)
+    def getPermissions(self, otherUser):
+        """Returns the permissions an other user should have for me.
+        
+        Pass either a user, or a string, like "friends", "user", "anon", if the user should be allowed to override.
+        """
+        otherD = {
+                "friends": "privacyFriends",
+                "user":"privacyLoggedIn",
+                "anon": "privacy",
+                }
+        if otherUser in otherD: #we've passed one of the given strings; the code calling us should check that we're allowed to do this.
+            return getattr(self, otherD[otherUser])
+        elif otherUser == None or otherUser.is_anonymous():
+            return self.privacy
+        elif otherUser.pk == self.user.pk:
+            return self.PRIVACY_MAX
+        elif otherUser in self.friends.all():
+            return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
+        else:
+            return max(self.privacy, self.privacyLoggedIn)
 
     def getEmailHash(self):
         if self.useGravatar:
@@ -293,19 +305,19 @@ class Sleeper(User):
 
     def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False):
         if start==datetime.date.min and end==datetime.date.max:
-            sleeps = self.sleep_set.values('date','start_time','end_time')
-            allnighters = self.allnighter_set.values('date')
+            sleeps = self.sleep_set.all()
+            allnighters = self.allnighter_set.all()
         else:
-            sleeps = self.sleep_set.filter(date__gte=start,date__lte=end).values('date','start_time','end_time')
-            allnighters = self.allnighter_set.filter(date__gte=start,date__lte=end).values('date')
+            sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
+            allnighters = self.allnighter_set.filter(date__gte=start,date__lte=end)
         if sleeps:
-            allnighters=map(lambda x: x['date'],allnighters)
-            dates=map(lambda x: x['date'], sleeps)
+            allnighters=map(lambda x: x.date,allnighters)
+            dates=map(lambda x: x.date, sleeps)
             first = min(itertools.chain(dates,allnighters))
             last = max(itertools.chain(dates,allnighters))
             n = (last-first).days + 1
             dateRange = [first + datetime.timedelta(i) for i in range(0,n)]
-            byDays = [sum([(s['end_time']-s['start_time']).total_seconds() for s in filter(lambda x: x['date']==d,sleeps)]) for d in dateRange]
+            byDays = [sum([s.length().total_seconds() for s in filter(lambda x: x.date==d,sleeps)]) for d in dateRange]
             if hours:
                 byDays = map(lambda x: x/3600,byDays)
             if packDates:
@@ -368,8 +380,11 @@ class Sleeper(User):
             d['avg']=avg
             if len(sleep)>2:
                 stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/(len(sleep)-1.5)) #subtracting 1.5 is correct according to wikipedia
+                posStDev = math.sqrt(sum(map(lambda x: min(0,x-avg)**2, sleep))/(len(sleep)-1.5)) #subtracting 1.5 is correct according to wikipedia
                 d['stDev']=stDev
+                d['posStDev']=posStDev
                 d['zScore']=avg-stDev
+                d['zPScore']=avg-posStDev
                 idealized = max(ideal, avg)
                 d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
         except:
@@ -384,7 +399,7 @@ class Sleeper(User):
             d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
+        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:
@@ -409,8 +424,11 @@ class Sleeper(User):
             avg = self.decaying(sleep,hl)
             d['avg']=avg
             stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl,True))
+            posStDev = math.sqrt(self.decaying(map(lambda x: min(0,x-avg)**2,sleep),hl,True))
             d['stDev']=stDev
+            d['posStDev']=posStDev
             d['zScore']=avg-stDev
+            d['zPScore']=avg-posStDev
             idealized = max(ideal, avg)
             d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
         except:
@@ -425,7 +443,7 @@ class Sleeper(User):
             d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
+        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:

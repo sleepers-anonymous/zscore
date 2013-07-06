@@ -29,21 +29,33 @@ def printDHHMM(value):
     m,s=divmod(s,60)
     if d:
         return "%s%d days, %d:%02d" % (sign,d,h,m)
-    return "%s:%02d" % (sign,h,m)
+    return "%s%d:%02d" % (sign,h,m)
 
 @register.filter(name='printDHM')
 def printDHM(value):
     '''takes a datetime.timedelta and prints it as D day(s), H hour(s), and M minute(s)'''
+    return printYDHM(value,False)
+
+@register.filter(name='printYDHM')
+def printYDHM(value,useYear=True):
+    '''takes a datetime.timedelta and prints it as Y year(s), D day(s), H hour(s), and M minute(s)'''
     s=int(value.total_seconds())
     if s<0: #so we round towards zero rather than towards -Infinity
         sign="negative "
         s=-s
     else:
         sign=""
+    if useYear:
+        y,s=divmod(s,31566240)
     d,s=divmod(s,86400)
     h,s=divmod(s,3600)
     m,s=divmod(s,60)
     parts=[]
+    if useYear:
+        if y==1:
+            parts.append("1 year")
+        elif y>1:
+            parts.append(str(y)+" years")
     if d==1:
         parts.append("1 day")
     elif d>1:
@@ -60,8 +72,6 @@ def printDHM(value):
         return "none"
     elif len(parts)==1:
         return sign+parts[0]
-    elif len(parts)==2:
-        return sign+parts[0]+" and "+parts[1]
-    elif len(parts)==3:
-        return sign+parts[0]+", "+parts[1]+", and "+parts[2]
+    else:
+        return sign+", ".join(parts[:-1])+" and "+parts[-1]
 
