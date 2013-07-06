@@ -59,6 +59,19 @@ class SleepManager(models.Manager):
                 packed[int(length)]+=1
         return packed
 
+class PartialSleep(models.Model):
+    user = models.OneToOneField(User)
+    start_time = models.DateTimeField()
+    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
+
+    def __unicode__(self):
+        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
+        return "Partial sleep beginning at %s" % self.start_local_time().strftime(tformat)
+
+    def start_local_time(self):
+        tz = pytz.timezone(self.timezone)
+        return self.start_time.astimezone(tz)
+
 class Sleep(models.Model):
     objects = SleepManager()
 
@@ -70,7 +83,7 @@ class Sleep(models.Model):
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
     def __unicode__(self):
-        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x" 
+        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
         return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
 
     def length(self):
