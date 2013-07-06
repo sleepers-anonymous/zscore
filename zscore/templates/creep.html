@@ -4,6 +4,7 @@
 {% load datetime_utils %}
 {% load graphs %}
 {% load sleep_tags %}
+{% load gravatar %}
 {% load tz %}
 
 <h1>Creep on {{user}}</h1>
@@ -23,6 +24,8 @@
   {% if graphs %}
   View more graphs for {{user}} <a href="/creep/{{user}}/?type=graph">here!</a><br />
   {% endif %}</td><td valign="top">
+
+  {% gravatar request.user user 100 %}
   <h3>Sleep</h3>
   <table>
   {% for sleep in sleeps %}
