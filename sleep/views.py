@@ -73,6 +73,7 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
 @login_required
 def editOrCreateSleep(request,sleep = None,success=False):
     context = {'success': success}
+    if "from" in request.GET and request.GET["from"] == "partial": context["fromPartial"] = True
     prof = request.user.sleeperprofile
     defaulttz = prof.timezone
     if prof.use12HourTime: fmt = "%I:%M %p %x"
