@@ -76,6 +76,10 @@ class Sleep(models.Model):
     def length(self):
         return self.end_time - self.start_time
 
+    def score(self, nightValue = 1.0):
+        p = self.user.sleeperprofile
+        pass
+
     def validate_unique(self, exclude=None):
         overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
         if overlaps:
@@ -312,15 +316,12 @@ class Sleeper(User):
         elif t=='start':
             f=Sleep.start_local_time
             g = max
-        else:
-            return None
+        else: return None
         datestimes = [(s.date, f(s)) for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
         daily={}
         for i in datestimes:
-            if i[0] in daily:
-                daily[i[0]]=g(daily[i[0]],i[1])
-            else:
-                daily[i[0]]=i[1]
+            if i[0] in daily: daily[i[0]]=g(daily[i[0]],i[1])
+            else: daily[i[0]]=i[1]
         seconds = [daily[t].time().hour*3600 + daily[t].time().minute*60 + daily[t].time().second - 86400 * (t - daily[t].date()).days for t in daily.viewkeys()]
         if daily:
             av = 1.0*sum(seconds)/len(seconds)
