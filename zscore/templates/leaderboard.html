@@ -14,11 +14,13 @@
         <td>Rank</td>
         <td colspan="2">Username</td>
         <td><a href="?sort=zScore">zScore</a></td>
+        <td><a href="?sort=zPScore">zPScore</a></td>
         <td><a href="?sort=avg">avg</a></td>
         <td><a href="?sort=avgSqrt">avgSqrt</a></td>
         <td><a href="?sort=avgLog">avgLog</a></td>
         <td><a href="?sort=avgRecip">avgRecip</a></td>
         <td><a href="?sort=stDev">stDev</a></td>
+        <td><a href="?sort=posStDev">posStDev</a></td>
         <td><a href="?sort=idealDev">idealDev</a></td>
     </tr>
   {% for s in top %}
@@ -27,11 +29,13 @@
     <td> {% gravatar request.user s.user 20 %}
     <td> {% displayUser s.user.displayName %} </td>
     <td> {{s.zScore|printHHMM}} </td>
+    <td> {{s.zPScore|printHHMM}} </td>
     <td> {{s.avg|printHHMM}} </td>
     <td> {{s.avgSqrt|printHHMM}} </td>
     <td> {{s.avgLog|printHHMM}} </td>
     <td> {{s.avgRecip|printHHMM}} </td>
     <td> {{s.stDev|printHHMM}} </td>
+    <td> {{s.posStDev|printHHMM}} </td>
     <td> {{s.idealDev|printHHMM}}</td>
   </tr>
   {% endfor %}

@@ -368,8 +368,11 @@ class Sleeper(User):
             d['avg']=avg
             if len(sleep)>2:
                 stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/(len(sleep)-1.5)) #subtracting 1.5 is correct according to wikipedia
+                posStDev = math.sqrt(sum(map(lambda x: min(0,x-avg)**2, sleep))/(len(sleep)-1.5)) #subtracting 1.5 is correct according to wikipedia
                 d['stDev']=stDev
+                d['posStDev']=posStDev
                 d['zScore']=avg-stDev
+                d['zPScore']=avg-posStDev
                 idealized = max(ideal, avg)
                 d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
         except:
@@ -384,7 +387,7 @@ class Sleeper(User):
             d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
+        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:
@@ -409,8 +412,11 @@ class Sleeper(User):
             avg = self.decaying(sleep,hl)
             d['avg']=avg
             stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl,True))
+            posStDev = math.sqrt(self.decaying(map(lambda x: min(0,x-avg)**2,sleep),hl,True))
             d['stDev']=stDev
+            d['posStDev']=posStDev
             d['zScore']=avg-stDev
+            d['zPScore']=avg-posStDev
             idealized = max(ideal, avg)
             d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
         except:
@@ -425,7 +431,7 @@ class Sleeper(User):
             d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
+        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:
