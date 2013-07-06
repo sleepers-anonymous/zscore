@@ -21,7 +21,7 @@ def home(request):
     if request.user.is_authenticated():
         try:
             p = request.user.partialsleep
-            context["Partial"] = '<a style="text-decoration:none;" href="/sleep/finishPartial"><input type="submit" value="Waking Up!" /></a>'
+            context["Partial"] = '<a style="text-decoration:none;" href="/sleep/finishPartial"><input type="submit" value="Waking Up!" /></a><br /><a style="text-decoration:none;" href="/sleep/deletePartial"><input type="submit" value="Never mind! I\'m not asleep!" /></a>'
         except PartialSleep.DoesNotExist:
             context["Partial"] = '<a style="text-decoration:none;" href="/sleep/createPartial"><input type="submit" value="Going to Sleep!" /></a>'
     return render_to_response('index.html', context, context_instance=RequestContext(request))
@@ -391,6 +391,15 @@ def finishPartialSleep(request):
         s.save()
         p.delete()
         return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
+    except PartialSleep.DoesNotExist:
+        return HttpResponseBadRequest('')
+
+@login_required
+def deletePartialSleep(request):
+    try:
+        p= request.user.partialsleep
+        p.delete()
+        return HttpResponseRedirect("/")
     except PartialSleep.DoesNotExist:
         return HttpResponseBadRequest('')
 
