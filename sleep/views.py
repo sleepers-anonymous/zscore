@@ -18,7 +18,7 @@ import pytz
 
 def home(request):
     context = {}
-    if p.is_authenticated():
+    if request.user.is_authenticated():
         try:
             p = request.user.partialsleep
             context["Partial"] = '<a style="text-decoration:none;" href="/sleep/finishPartial"><input type="submit" value="Waking Up!" /></a>'
