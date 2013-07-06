@@ -1,4 +1,7 @@
+{% load gravatar %}
+
 <tr>
+		<td>{% gravatar you them 20 %}</td>
     <td><a href="/creep/{{them.username}}">{{them.username}}</a></td>
     {% if friends %}
     <td><a class="remove-friend-button" onclick="removeFriend({{them.id}},this)" href="javascript:void(0);">remove</a></td>

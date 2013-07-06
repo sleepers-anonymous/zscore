@@ -15,7 +15,7 @@
         Found {{count}} users.<br/>
         <table>
             {% for user in results %}
-                {% displayFriend request.user user %}
+            {% displayFriend request.user user %}
             {% endfor %}
         </table>
     {% else %}
@@ -45,4 +45,4 @@
     Add friends or follow other users above!
 {% endif %}
 
-{% endblock %}        
+{% endblock %}
