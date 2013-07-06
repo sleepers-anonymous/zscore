@@ -29,7 +29,7 @@ def printDHHMM(value):
     m,s=divmod(s,60)
     if d:
         return "%s%d days, %d:%02d" % (sign,d,h,m)
-    return "%s:%02d" % (sign,h,m)
+    return "%s%d:%02d" % (sign,h,m)
 
 @register.filter(name='printDHM')
 def printDHM(value):
