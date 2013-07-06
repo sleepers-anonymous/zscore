@@ -51,6 +51,7 @@ $(function() {
                 <tr><td><label for="id_privacy">Privacy to anonymous users:</label></td><td> {{ form.privacy }}</td><td> {{ form.privacy.errors }} </td></tr>
                 <tr><td><label for="id_privacyLoggedIn">Privacy to logged-in users:</label></td><td>{{ form.privacyLoggedIn }}</td><td>{{ form.privacyLoggedIn.errors }}</td></tr> 
                 <tr><td><label for="id_privacyFriends">Privacy to friends:</label></td><td>{{ form.privacyFriends }}</td><td>{{ form.privacyFriends.errors }}</td></tr>
+                <tr><td><label for="id_useGravatar">Use Gravatar:</label></td><td>{{ form.useGravatar}}</td><td>{{ form.useGravatar.errors}} </td></tr>
             </table>
             <p>
             <b>About the privacy choices</b><br/>
@@ -61,6 +62,7 @@ $(function() {
                 <i>Sleep public:</i> your stats and all sleep times will be shown publicly on your creep page<br />
                 <i>Graphs public:</i> In addition to all the benefits from <i>Sleep Public</i>, your <a href="/graph">graphs</a> will be visible.
             </p>
+            <p>If you choose not to use your Gravatar, you will have the default no-Gravatar displayed instead, when we, you know, implement Gravatars.</p>
             <p><input type="submit" value="Save" /></p>
         </div>
 </div>
