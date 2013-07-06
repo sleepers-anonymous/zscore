@@ -6,6 +6,7 @@ import pytz
 import datetime
 import math
 import itertools
+import hashlib
 
 from zscore import settings
 
@@ -182,6 +183,12 @@ class SleeperProfile(models.Model):
             return getattr(self, otherD[asOther], self.PRIVACY_MAX) if asOther in otherD else self.PRIVACY_MAX
         if otherUser in self.friends.all(): return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
         return max(self.privacy, self.privacyLoggedIn)
+
+    def getEmailHash(self):
+        if self.useGravatar:
+            email = self.user.email.strip().lower()
+            return hashlib.md5(email).hexdigest()
+        else: return None
 
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
