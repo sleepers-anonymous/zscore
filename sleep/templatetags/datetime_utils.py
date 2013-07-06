@@ -15,6 +15,7 @@ def printHHMM(value):
     m,s=divmod(s,60)
     return "%s%d:%02d" % (sign,h,m)
 
+@register.filter(name='printDHHMM')
 def printDHHMM(value):
     '''takes a datetime.timedelta and prints it as D days, HH:MM'''
     s=int(value.total_seconds())
