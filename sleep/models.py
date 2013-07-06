@@ -438,4 +438,17 @@ class Sleeper(User):
                 d[k]=datetime.timedelta(0,d[k])
         return d
 
+class SleeperGroup(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    members = models.ManyToManyField(User,related_name='sleepergroups',blank=True,through='Membership')
 
+    def __unicode__(self):
+        return "SleeperGroup %s" % self.name
+
+class Membership(models.Model):
+    user=models.ForeignKey(User)
+    group=models.ForeignKey(SleeperGroup)
+    privacy=models.SmallIntegerField(choices=SleeperProfile.PRIVACY_CHOICES,default=SleeperProfile.PRIVACY_NORMAL,verbose_name='Privacy to members of the given group')
+
+    def __unicode__(self):
+        return "%s is a member of %s" % (self.user,self.group)
