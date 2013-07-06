@@ -149,6 +149,7 @@ class SleeperProfile(models.Model):
     use12HourTime = models.BooleanField(default=False)
 
     emailreminders = models.BooleanField(default=False)
+    useGravatar = models.BooleanField(default=False)
 
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
