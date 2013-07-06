@@ -205,6 +205,12 @@ def editProfile(request):
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/editprofile/?success=True')
+        else:
+            print form.errors.viewkeys()
+            for k in form.errors.viewkeys():
+                if "ideal" in k:
+                    context["page"] = 2
+                    break 
     else:
         initial = {"idealWakeupWeekend": p.idealWakeupWeekend.strftime(fmt),
                 "idealWakeupWeekday": p.idealWakeupWeekday.strftime(fmt),

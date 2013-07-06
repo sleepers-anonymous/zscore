@@ -1,43 +1,68 @@
 {% extends 'frame.html' %}
+
+
+{% block scripts %}
+{{block.super}}
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script>
+$(function() {
+    $( "#tabs" ).tabs();
+});
+</script>
+{% endblock %}
+
+
 {% block content %}
 <form action="/editprofile/" method="post">{% csrf_token %}
-    <h4>General settings</h4>
-    
-    {{ form.non_field_errors }}
 
-    {% if success %}Form successfully saved!{% endif %}
-    
-    <table>
-    <tr><td><label for="id_use12HourTime">Use 12 hour time:</label></td> <td>{{form.use12HourTime}} </td><td> {{form.user12HourTime.errors}}</td></tr>
-    <tr><td><label for="id_timezone">Timezone</label></td><td>{{form.timezone}}</td><td>{{form.timezone.errors}}</td></tr>
-    </table>
-    
-    <p><input type="submit" value="Save" /></p>
+    <div id="tabs">
+        <ul>
+            <li><a href="#tabs-general">General Settings</a></li>
+            <li {% if page == 2 %}class="ui-tabs-active"{%endif%}><a href="#tabs-ideal">Idealized Settings</a></li>
+            <li><a href="#tabs-privacy">Privacy Settings</a></li>
+        </ul>
 
-    <table>
-        <tr><td><label for="id_idealSleep">Ideal sleep length (hours)</label></td><td>{{form.idealSleep}}</td><td>{{form.idealSleep.errors}}</td></tr>
-        <tr><td><label for="id_idealWakeupWeekend">Ideal wakeup time (weekend)</label></td><td>{{form.idealWakeupWeekend}}</td><td>{{form.idealWakeupWeekend.errors}}</td></tr>
-        <tr><td><label for="id_idealSleepTimeWeekend">Ideal sleep time (weekend)</label></td><td>{{form.idealSleepTimeWeekend}}</td><td>{{form.idealSleepTimeWeekend.errors}}</td></tr>
-        <tr><td><label for="id_idealWakeupWeekday">Ideal wakeup time (weekday)</label></td><td>{{form.idealWakeupWeekday}}</td><td>{{form.idealWakeupWeekday.errors}}</td></tr>
-        <tr><td><label for="id_idealSleepTimeWeekday">Ideal sleep time (weekday)</label></td><td>{{form.idealSleepTimeWeekday}}</td><td>{{form.idealSleepTimeWeekday.errors}}</td></tr>
-    </table>
-    
-    <p><input type="submit" value="Save" /></p>
-    <h4>Privacy settings</h4>
-    <table>
-    <tr><td><label for="id_privacy">Privacy to anonymous users:</label></td><td> {{ form.privacy }}</td><td> {{ form.privacy.errors }} </td></tr>
-    <tr><td><label for="id_privacyLoggedIn">Privacy to logged-in users:</label></td><td>{{ form.privacyLoggedIn }}</td><td>{{ form.privacyLoggedIn.errors }}</td></tr> 
-    <tr><td><label for="id_privacyFriends">Privacy to friends:</label></td><td>{{ form.privacyFriends }}</td><td>{{ form.privacyFriends.errors }}</td></tr>
-    </table>
-    <p>
-    <b>About the privacy choices</b><br/>
-    <i>Hidden:</i> you will not be shown in the leaderboard at all<br/>
-    <i>Redacted:</i> you will be shown in the leaderboard (if in the top 10) with username [redacted]<br/>
-    <i>Normal:</i> you will be shown in the leaderboard (if in the top 10)<br/>
-    <i>Stats public:</i> your stats will be shown publicly on your creep page<br/>
-    <i>Sleep public:</i> your stats and all sleep times will be shown publicly on your creep page<br />
-    <i>Graphs public:</i> In addition to all the benefits from <i>Sleep Public</i>, your <a href="/graph">graphs</a> will be visible.
-    </p>
-    <p><input type="submit" value="Save" /></p>
+        <div id="tabs-general">
+
+            {{ form.non_field_errors}}
+            {% if success %}<p>Form successfully saved!</p>{% endif %}
+
+            <table>
+                <tr><td><label for="id_use12HourTime">Use 12 hour time:</label></td> <td>{{form.use12HourTime}} </td><td> {{form.user12HourTime.errors}}</td></tr>
+                <tr><td><label for="id_timezone">Timezone</label></td><td>{{form.timezone}}</td><td>{{form.timezone.errors}}</td></tr>
+            </table>
+            <p><input type="submit" value="Save" /></p>
+        </div>
+        <div id="tabs-ideal">
+            <table>
+                <tr><td><label for="id_idealSleep">Ideal sleep length (hours)</label></td><td>{{form.idealSleep}}</td><td>{{form.idealSleep.errors}}</td></tr>
+                <tr><td><label for="id_idealWakeupWeekend">Ideal wakeup time (weekend)</label></td><td>{{form.idealWakeupWeekend}}</td><td>{{form.idealWakeupWeekend.errors}}</td></tr>
+                <tr><td><label for="id_idealSleepTimeWeekend">Ideal sleep time (weekend)</label></td><td>{{form.idealSleepTimeWeekend}}</td><td>{{form.idealSleepTimeWeekend.errors}}</td></tr>
+                <tr><td><label for="id_idealWakeupWeekday">Ideal wakeup time (weekday)</label></td><td>{{form.idealWakeupWeekday}}</td><td>{{form.idealWakeupWeekday.errors}}</td></tr>
+                <tr><td><label for="id_idealSleepTimeWeekday">Ideal sleep time (weekday)</label></td><td>{{form.idealSleepTimeWeekday}}</td><td>{{form.idealSleepTimeWeekday.errors}}</td></tr>
+            </table>
+            <p><input type="submit" value="Save" /></p>
+        </div>
+
+        <div id="tabs-privacy">
+            <table>
+                <tr><td><label for="id_privacy">Privacy to anonymous users:</label></td><td> {{ form.privacy }}</td><td> {{ form.privacy.errors }} </td></tr>
+                <tr><td><label for="id_privacyLoggedIn">Privacy to logged-in users:</label></td><td>{{ form.privacyLoggedIn }}</td><td>{{ form.privacyLoggedIn.errors }}</td></tr> 
+                <tr><td><label for="id_privacyFriends">Privacy to friends:</label></td><td>{{ form.privacyFriends }}</td><td>{{ form.privacyFriends.errors }}</td></tr>
+            </table>
+            <p>
+            <b>About the privacy choices</b><br/>
+                <i>Hidden:</i> you will not be shown in the leaderboard at all<br/>
+                <i>Redacted:</i> you will be shown in the leaderboard (if in the top 10) with username [redacted]<br/>
+                <i>Normal:</i> you will be shown in the leaderboard (if in the top 10)<br/>
+                <i>Stats public:</i> your stats will be shown publicly on your creep page<br/>
+                <i>Sleep public:</i> your stats and all sleep times will be shown publicly on your creep page<br />
+                <i>Graphs public:</i> In addition to all the benefits from <i>Sleep Public</i>, your <a href="/graph">graphs</a> will be visible.
+            </p>
+            <p><input type="submit" value="Save" /></p>
+        </div>
+</div>
 </form>
 {%endblock %}
