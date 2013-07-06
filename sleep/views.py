@@ -73,6 +73,7 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
 @login_required
 def editOrCreateSleep(request,sleep = None,success=False):
     context = {'success': success}
+    if "from" in request.GET and request.GET["from"] == "partial": context["fromPartial"] = True
     prof = request.user.sleeperprofile
     defaulttz = prof.timezone
     if prof.use12HourTime: fmt = "%I:%M %p %x"
@@ -365,7 +366,7 @@ def createSleep(request):
 @login_required
 def createPartialSleep(request):
     timezone = request.user.sleeperprofile.timezone
-    start = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now()).astimezone(pytz.timezone(timezone))
+    start = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now().replace(microsecond=0)).astimezone(pytz.timezone(timezone))
     try:
         p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
         p.save()
@@ -380,7 +381,7 @@ def finishPartialSleep(request):
     try:
         p = request.user.partialsleep
         start = p.start_time.astimezone(pytztimezone)
-        end = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now()).astimezone(pytz.timezone(timezone))
+        end = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now().replace(microsecond=0)).astimezone(pytz.timezone(timezone))
         date = end.date()
         s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
         s.save()
