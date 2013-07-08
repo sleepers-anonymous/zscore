@@ -11,8 +11,6 @@ from django.core.exceptions import *
 from sleep.models import *
 from sleep.forms import *
 
-from zscore import settings
-
 import datetime
 import pytz
 
@@ -55,8 +53,14 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
         if request.method == "POST":
             form = AllNighterForm(request.user, request.POST, instance = Allnighter(user=request.user))
         else:
-            today = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
-            form = AllNighterForm(request.user, initial={"date": str(today.date())})
+            if "withdate" in request.GET:
+                try:
+                    defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d")
+                except:
+                    defaultdate = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                defaultdate = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
+            form = AllNighterForm(request.user, initial={"date": str(defaultdate.date())})
     if request.method == "POST":
         if form.is_valid():
             if "delete" in form.data and form.data["delete"] == "on":
