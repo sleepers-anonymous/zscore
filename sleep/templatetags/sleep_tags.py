@@ -134,8 +134,6 @@ def sleepViewTable(request, **kwargs):
     if settings["showallnighters"]:
         pass
 
-    
-
 @register.simple_tag
 def displayUser(username):
     if username != "[redacted]": return '''<a href="/creep/%s/">%s</a>''' % (username , username)

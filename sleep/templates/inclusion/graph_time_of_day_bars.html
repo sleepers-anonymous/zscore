@@ -22,10 +22,10 @@
     context.font = '9pt Arial';
     context.textAlign = 'center';
     {% for time in times %}
-      context.fillText('{{time}}', 80 + {{time}} * 15, 10);
+      context.fillText('{{time.1}}', 80 + {{time.0}} * 15, 10);
       context.beginPath();
-      context.moveTo(80+{{time}}*15,15);
-      context.lineTo(80+{{time}}*15,{{height}});
+      context.moveTo(80+{{time.0}}*15,15);
+      context.lineTo(80+{{time.0}}*15,{{height}});
       context.lineWidth = 1;
       context.strokeStyle = '#bbbbbb';
       context.stroke();
