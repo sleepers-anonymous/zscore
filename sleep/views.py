@@ -426,9 +426,10 @@ def deleteSleep(request):
 def deleteAllnighter(request):
     if 'id' in request.POST:
         i = request.POST['id']
-        a = request.user.allnighter_set.objects.filter(pk=i)
+        a = Allnighter.objects.filter(pk=i)
         if len(a) == 0: raise Http404
         a = a[0]
+        if a.user != request.user: raise PermissionDenied
         print "hi"
         a.delete()
         return HttpResponse('')
