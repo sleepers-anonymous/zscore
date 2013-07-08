@@ -81,6 +81,7 @@ class Sleep(models.Model):
     comments = models.TextField(blank=True)
     date = models.DateField()
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
+    sleepcycles = models.SmallIntegerField()
 
     def __unicode__(self):
         tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
@@ -121,6 +122,11 @@ class Sleep(models.Model):
     def getTZShortName(self):
         """Gets the short of a time zone"""
         return self.getSleepTZ().tzname(datetime.datetime(self.date.year, self.date.month, self.date.day))
+
+    def save(self):
+        seconds = self.length().total_seconds()
+        self.sleepcycles = seconds//5400
+        super(Sleep, self).save()
 
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
