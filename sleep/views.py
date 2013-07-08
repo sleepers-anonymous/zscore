@@ -370,7 +370,7 @@ def createSleep(request):
 @login_required
 def createPartialSleep(request):
     timezone = request.user.sleeperprofile.timezone
-    start = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now().replace(microsecond=0)).astimezone(pytz.timezone(timezone))
+    start = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
     try:
         p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
         p.save()
@@ -385,7 +385,7 @@ def finishPartialSleep(request):
     try:
         p = request.user.partialsleep
         start = p.start_time.astimezone(pytztimezone)
-        end = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now().replace(microsecond=0)).astimezone(pytz.timezone(timezone))
+        end = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
         date = end.date()
         s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
         s.save()
