@@ -59,6 +59,9 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
             form = AllNighterForm(request.user, initial={"date": str(today.date())})
     if request.method == "POST":
         if form.is_valid():
+            if "delete" in form.data and form.data["delete"] == "on":
+                if allNighter: a.delete()
+                return HttpResponseRedirect('/mysleep/')
             new = form.save(commit=False)
             if allNighter == None:
                 new.user = request.user
@@ -111,6 +114,9 @@ def editOrCreateSleep(request,sleep = None,success=False):
             form = SleepForm(request.user, fmt, initial=initial)
     if request.method == 'POST':
         if form.is_valid():
+            if "delete" in form.data and form.data["delete"] == "on":
+                if sleep: s.delete()
+                return HttpResponseRedirect('/mysleep/')
             new = form.save(commit=False)
             if sleep == None:
                 new.user = request.user
