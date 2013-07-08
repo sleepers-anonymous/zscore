@@ -1,5 +1,7 @@
 {% extends "frame.html" %}
 
+{% load sleep_tags %}
+
 {% block content %}
 <h1> Welcome to zScore! </h1>
 <p>
@@ -11,7 +13,7 @@ Welcome, {{request.user.username}}!<br/>
 Don't have an account? <a href="/accounts/create">Register</a>
 {% endif %}
 </p>
-{%if Partial %}{{Partial|safe}}{% endif %}
+{% displayPartialButton request.user %}
 <p>
 <a href="/mysleep">Enter sleep and see your stats</a>
 </p>

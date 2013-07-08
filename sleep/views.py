@@ -15,14 +15,7 @@ import datetime
 import pytz
 
 def home(request):
-    context = {}
-    if request.user.is_authenticated():
-        try:
-            p = request.user.partialsleep
-            context["Partial"] = '<a style="text-decoration:none;" href="/sleep/finishPartial"><input type="submit" value="Waking Up!" /></a><br /><a style="text-decoration:none;" href="/sleep/deletePartial"><input type="submit" value="Never mind! I\'m not asleep!" /></a>'
-        except PartialSleep.DoesNotExist:
-            context["Partial"] = '<a style="text-decoration:none;" href="/sleep/createPartial"><input type="submit" value="Going to Sleep!" /></a>'
-    return render_to_response('index.html', context, context_instance=RequestContext(request))
+    return render(request, 'index.html')
 
 def faq(request):
     return render(request, 'faq.html')
@@ -384,6 +377,7 @@ def createPartialSleep(request):
     try:
         p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
         p.save()
+        if "next" in request.GET: return HttpResponseRedirect(request.GET["next"])
         return HttpResponseRedirect("/")
     except IntegrityError:
         return HttpResponseBadRequest('')
@@ -409,6 +403,7 @@ def deletePartialSleep(request):
     try:
         p= request.user.partialsleep
         p.delete()
+        if "next" in request.GET: return HttpResponseRedirect(request.GET["next"])
         return HttpResponseRedirect("/")
     except PartialSleep.DoesNotExist:
         return HttpResponseBadRequest('')
