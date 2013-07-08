@@ -130,22 +130,11 @@ def sleepViewTable(request, **kwargs):
     if settings["number"] != None:
         sleepq = sleepq[:settings["number"]]
         if settings["showallnighters"]: allnighterq = allnighterq[:settings["number"]]
-    prof = request.user.sleeperprofile
-    fmt = ("%I:%M %p", "%I:%M %p %x") if prof.use12HourTime else ("%H:%M", "%H:%M %x")
-    dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%D"
-    sleeps = []
-    for sleep in sleepq:
-        if sleep.start_local_time().date() == sleep.end_local_time().date():
-            d = {"start_time": sleep.start_local_time().strftime(fmt[0]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
-        else:
-            d = {"start_time": sleep.start_local_time().strftime(fmt[1]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
-        if settings["showcomments"]:
-            if sleep.comments != "": d["comments"] = sleep.comments
-        if settings["showTZ"] == 1: d["TZ"] = sleep.getTZShortName()
-        elif settings["showTZ"] == 2: d["TZ"] = sleep.timezone
-        sleeps.append(d)
-    context = {"sleeps": sleeps}
-    return context
+    context = {"use12HourTime":request.user.sleeperprofile.use12HourTime, "showcomments": settings["showcomments"], "showedit":settings["showedit"], "fulldate": settings["fulldate"], "showTZ": settings["showTZ"]}
+    if settings["showallnighters"]:
+        pass
+
+    
 
 @register.simple_tag
 def displayUser(username):

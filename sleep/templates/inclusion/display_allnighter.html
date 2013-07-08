@@ -1,6 +1,6 @@
 <tr id="allnighter-entry-id-{{pk}}">
 		{% if showedit %}<td><a href="javascript:void[0];" class="sleep-delete-button" onclick="deleteAllnighter({{pk}});">x</a></td>{% endif %}
-		<td colspan=5><b>{{date}}</b></td>
+		<td><b>{{date}}</b></td><td colspan=4>Allnighter</td>
 		{% if showedit %}<td><a href="/sleep/editallnighter/{{pk}}">[edit]</a></td>{% endif %}
 </tr>
 {% if comments %}
