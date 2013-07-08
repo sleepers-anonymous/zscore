@@ -27,7 +27,9 @@ def printDHHMM(value):
     d,s=divmod(s,86400)
     h,s=divmod(s,3600)
     m,s=divmod(s,60)
-    if d:
+    if d==1:
+        return "%s%d day, %d:%02d" % (sign,d,h,m)
+    elif d>1:
         return "%s%d days, %d:%02d" % (sign,d,h,m)
     return "%s%d:%02d" % (sign,h,m)
 
