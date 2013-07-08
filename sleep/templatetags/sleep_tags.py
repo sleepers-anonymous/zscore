@@ -72,7 +72,7 @@ def displaySleep(sleep, **kwargs):
     settings.update(kwargs)
     fmt = ("%I:%M %p", "%I:%M %p %x") if settings["use12HourTime"] else ("%H:%M", "%H:%M %x")
     dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%B %e"
-    if sleep.start_local_time().date() == sleep.end_local_time().date() or sleep.start_local_time.date() == sleep.date: d = {"start_time": sleep.start_local_time().strftime(fmt[0])}
+    if sleep.start_local_time().date() == sleep.end_local_time().date() or sleep.start_local_time().date() == sleep.date: d = {"start_time": sleep.start_local_time().strftime(fmt[0])}
     else: d = {"start_time": sleep.start_local_time().strftime(fmt[1])}
     if sleep.end_local_time().date() == sleep.date: d["end_time"] = sleep.end_local_time().strftime(fmt[0])
     else: d["end_time"] = sleep.end_local_time().strftime(fmt[1])
