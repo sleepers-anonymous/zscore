@@ -5,6 +5,18 @@ import pytz
 register = template.Library()
 
 # Inclusion tags
+@register.inclusion_tag('inclusion/partial_sleep.html')
+def displayPartialButton(user, path = "/"):
+    if user.is_authenticated():
+        try:
+            p = user.partialsleep
+            context = {"hasPartial": 1}
+        except:
+            context = {"hasPartial": 2}
+    context["path"] = path
+    return context
+
+
 @register.inclusion_tag('inclusion/sleep_stats.html',takes_context=True)
 def sleepStatsView(context, renderContent='html'):
     user = context['request'].user

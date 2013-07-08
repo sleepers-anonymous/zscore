@@ -455,5 +455,3 @@ class Sleeper(User):
             else:
                 d[k]=datetime.timedelta(0,d[k])
         return d
-
-
