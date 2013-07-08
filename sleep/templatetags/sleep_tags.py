@@ -6,7 +6,7 @@ register = template.Library()
 
 # Inclusion tags
 @register.inclusion_tag('inclusion/partial_sleep.html')
-def displayPartialButton(user, path = "/"):
+def displayPartialButton(user, path = "/", size = 2.25):
     if user.is_authenticated():
         try:
             p = user.partialsleep
@@ -14,6 +14,7 @@ def displayPartialButton(user, path = "/"):
         except:
             context = {"hasPartial": 2}
     context["path"] = path
+    context["size"] = size
     return context
 
 
@@ -38,11 +39,11 @@ def sleepStatsView(context, renderContent='html'):
 
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
-    context = {}
     sleeper = Sleeper.objects.get(pk=user.pk)
-    context['global'] = sleeper.movingStats()
-    context['weekly'] = sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
-    context['decaying'] = sleeper.decayStats()
+    context = {'global': sleeper.movingStats(),
+            'weekly': sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today()),
+            'decaying': sleeper.decayStats(),
+    }
     return context
 
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)
