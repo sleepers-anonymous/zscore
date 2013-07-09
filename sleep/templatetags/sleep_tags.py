@@ -49,7 +49,7 @@ def sleepStatsTable(user):
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)
 def sleepListView(context, renderContent='html'):
     user = context['request'].user
-    sleeps = Sleep.objects.filter(user=user).order_by('-start_time', '-end_time')[:20]
+    sleeps = Sleep.objects.filter(user=user).order_by('-start_time', '-end_time')
     allnighters = Allnighter.objects.filter(user=user).order_by('-date')[:5]
     numdates = Sleep.objects.filter(user=user).values('date').distinct().count()
     numsleeps = Sleep.objects.filter(user=user).count()
