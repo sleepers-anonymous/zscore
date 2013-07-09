@@ -16,15 +16,17 @@ def graphPerDay(user, interval=None):
 def graphTimeOfDayBars(user, interval = None):
     sleeper = Sleeper.objects.get(pk=user.pk)
     sleeps = sleeper.sleep_set.all() if interval == None else sleeper.sleep_set.filter(start_time__gte=(datetime.date.today()-datetime.timedelta(interval)))
-    if not sleeps:
-        return { 'sleeps' : [] }
+    if not sleeps: return { 'sleeps' : [] }
     first = min([s.start_time.astimezone(pytz.timezone(s.timezone)) for s in sleeps]).date()
     last = max([s.end_time.astimezone(pytz.timezone(s.timezone)) for s in sleeps]).date()
     n = (last-first).days + 1
     dateRange = [first + datetime.timedelta(i) for i in range(n)]
     for i in range(n):
         dateRange[i] = (i,dateRange[i])
-    times = range(25)
+    if user.sleeperprofile.use12HourTime:
+        times = [(i,(i-1)%12+1) for i in xrange(25)]
+    else:
+        times = [(i,i) for i in xrange(25)]
     height = n*15+15
     
     sleepsProcessed = []

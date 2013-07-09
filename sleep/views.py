@@ -11,20 +11,11 @@ from django.core.exceptions import *
 from sleep.models import *
 from sleep.forms import *
 
-from zscore import settings
-
 import datetime
 import pytz
 
 def home(request):
-    context = {}
-    if request.user.is_authenticated():
-        try:
-            p = request.user.partialsleep
-            context["Partial"] = '<a style="text-decoration:none;" href="/sleep/finishPartial"><input type="submit" value="Waking Up!" /></a>'
-        except PartialSleep.DoesNotExist:
-            context["Partial"] = '<a style="text-decoration:none;" href="/sleep/createPartial"><input type="submit" value="Going to Sleep!" /></a>'
-    return render_to_response('index.html', context, context_instance=RequestContext(request))
+    return render(request, 'index.html')
 
 def faq(request):
     return render(request, 'faq.html')
@@ -55,10 +46,19 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
         if request.method == "POST":
             form = AllNighterForm(request.user, request.POST, instance = Allnighter(user=request.user))
         else:
-            today = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
-            form = AllNighterForm(request.user, initial={"date": str(today.date())})
+            if "withdate" in request.GET:
+                try:
+                    defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d")
+                except:
+                    defaultdate = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                defaultdate = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
+            form = AllNighterForm(request.user, initial={"date": str(defaultdate.date())})
     if request.method == "POST":
         if form.is_valid():
+            if "delete" in form.data and form.data["delete"] == "on":
+                if allNighter: a.delete()
+                return HttpResponseRedirect('/mysleep/')
             new = form.save(commit=False)
             if allNighter == None:
                 new.user = request.user
@@ -111,6 +111,9 @@ def editOrCreateSleep(request,sleep = None,success=False):
             form = SleepForm(request.user, fmt, initial=initial)
     if request.method == 'POST':
         if form.is_valid():
+            if "delete" in form.data and form.data["delete"] == "on":
+                if sleep: s.delete()
+                return HttpResponseRedirect('/mysleep/')
             new = form.save(commit=False)
             if sleep == None:
                 new.user = request.user
@@ -370,10 +373,11 @@ def createSleep(request):
 @login_required
 def createPartialSleep(request):
     timezone = request.user.sleeperprofile.timezone
-    start = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now().replace(microsecond=0)).astimezone(pytz.timezone(timezone))
+    start = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
     try:
         p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
         p.save()
+        if "next" in request.GET: return HttpResponseRedirect(request.GET["next"])
         return HttpResponseRedirect("/")
     except IntegrityError:
         return HttpResponseBadRequest('')
@@ -385,12 +389,22 @@ def finishPartialSleep(request):
     try:
         p = request.user.partialsleep
         start = p.start_time.astimezone(pytztimezone)
-        end = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.now().replace(microsecond=0)).astimezone(pytz.timezone(timezone))
+        end = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
         date = end.date()
         s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
         s.save()
         p.delete()
         return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
+    except PartialSleep.DoesNotExist:
+        return HttpResponseBadRequest('')
+
+@login_required
+def deletePartialSleep(request):
+    try:
+        p= request.user.partialsleep
+        p.delete()
+        if "next" in request.GET: return HttpResponseRedirect(request.GET["next"])
+        return HttpResponseRedirect("/")
     except PartialSleep.DoesNotExist:
         return HttpResponseBadRequest('')
 
@@ -412,9 +426,10 @@ def deleteSleep(request):
 def deleteAllnighter(request):
     if 'id' in request.POST:
         i = request.POST['id']
-        a = request.user.allnighter_set.objects.filter(pk=i)
+        a = Allnighter.objects.filter(pk=i)
         if len(a) == 0: raise Http404
         a = a[0]
+        if a.user != request.user: raise PermissionDenied
         print "hi"
         a.delete()
         return HttpResponse('')

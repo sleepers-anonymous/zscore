@@ -5,6 +5,19 @@ import pytz
 register = template.Library()
 
 # Inclusion tags
+@register.inclusion_tag('inclusion/partial_sleep.html')
+def displayPartialButton(user, path = "/", size = 2.25):
+    if user.is_authenticated():
+        try:
+            p = user.partialsleep
+            context = {"hasPartial": 1}
+        except:
+            context = {"hasPartial": 2}
+    context["path"] = path
+    context["size"] = size
+    return context
+
+
 @register.inclusion_tag('inclusion/sleep_stats.html',takes_context=True)
 def sleepStatsView(context, renderContent='html'):
     user = context['request'].user
@@ -26,11 +39,11 @@ def sleepStatsView(context, renderContent='html'):
 
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
-    context = {}
     sleeper = Sleeper.objects.get(pk=user.pk)
-    context['global'] = sleeper.movingStats()
-    context['weekly'] = sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today())
-    context['decaying'] = sleeper.decayStats()
+    context = {'global': sleeper.movingStats(),
+            'weekly': sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today()),
+            'decaying': sleeper.decayStats(),
+    }
     return context
 
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)
@@ -48,7 +61,9 @@ def sleepListView(context, renderContent='html'):
             'allnighters': allnighters,
             'anumdates': anumdates,
             'numallnighters': numallnighters,
-            'renderContent': renderContent}
+            'renderContent': renderContent,
+            'use12HourTime': user.sleeperprofile.use12HourTime,
+            }
 
 @register.inclusion_tag('inclusion/sleep_entry.html', takes_context=True)
 def sleepEntryView(context,renderContent='html'):
@@ -57,9 +72,53 @@ def sleepEntryView(context,renderContent='html'):
             'mytz': context['request'].user.sleeperprofile.timezone,
             }
 
+@register.inclusion_tag('inclusion/display_sleep.html')
+def displaySleep(sleep, **kwargs):
+    """Prints a tablified sleep. Options: showcomments, showedit, fulldate, showTZ, use12HourTime"""
+    settings = {
+            "showcomments": False,
+            "showedit": False,
+            "fulldate": False,
+            "showTZ": 0, #0 for no TZ, 1 for short TZ, 2 for full TZ
+            "use12HourTime": False,
+            }
+    settings.update(kwargs)
+    fmt = ("%I:%M %p", "%I:%M %p %x") if settings["use12HourTime"] else ("%H:%M", "%H:%M %x")
+    dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%B %e"
+    if sleep.start_local_time().date() == sleep.end_local_time().date() or sleep.start_local_time().date() == sleep.date: d = {"start_time": sleep.start_local_time().strftime(fmt[0])}
+    else: d = {"start_time": sleep.start_local_time().strftime(fmt[1])}
+    if sleep.end_local_time().date() == sleep.date: d["end_time"] = sleep.end_local_time().strftime(fmt[0])
+    else: d["end_time"] = sleep.end_local_time().strftime(fmt[1])
+    d["date"] = sleep.date.strftime(dfmt)
+    if settings["showcomments"]:
+        if sleep.comments != "": d["comments"] = sleep.comments
+    if settings["showTZ"] == 1: d["TZ"] = sleep.getTZShortName()
+    elif settings["showTZ"] == 2: d["TZ"] = sleep.timezone
+    d["length"] = sleep.length()
+    d["showedit"] = settings["showedit"]
+    d["pk"] = sleep.pk
+    return d
+
+@register.inclusion_tag('inclusion/display_allnighter.html')
+def displayAllNighter(allnighter, **kwargs):
+    """Prints a tablified allnighter. Options: showcomments, showedit, fulldate"""
+    settings = {
+            "showcomments": False,
+            "showedit": False,
+            "fulldate": False,
+            }
+    settings.update(kwargs)
+    dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%B %e"
+    d = {"date": allnighter.date.strftime(dfmt),
+        "pk": allnighter.pk,
+        "showedit":settings["showedit"]}
+    if settings["showcomments"]:
+        if allnighter.comments != "": d["comments"] = allnighter.comments
+    return d
+
 @register.inclusion_tag('inclusion/sleep_view_table.html')
 def sleepViewTable(request, **kwargs):
-    """Prints a tablified list of sleeps: Options: start, end, user, showcomments, showedit, and reverse, fulldate, showTZ"""
+    """Prints a tablified list of sleeps: Options: start, end, user, showcomments, showedit, reverse, fulldate, and showTZ"""
     settings = {
             "start": datetime.date.min,
             "end": datetime.date.max,
@@ -84,22 +143,9 @@ def sleepViewTable(request, **kwargs):
     if settings["number"] != None:
         sleepq = sleepq[:settings["number"]]
         if settings["showallnighters"]: allnighterq = allnighterq[:settings["number"]]
-    prof = request.user.sleeperprofile
-    fmt = ("%I:%M %p", "%I:%M %p %x") if prof.use12HourTime else ("%H:%M", "%H:%M %x")
-    dfmt = "%A, %B %e, %Y" if settings["fulldate"] else "%D"
-    sleeps = []
-    for sleep in sleepq:
-        if sleep.start_local_time().date() == sleep.end_local_time().date():
-            d = {"start_time": sleep.start_local_time().strftime(fmt[0]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
-        else:
-            d = {"start_time": sleep.start_local_time().strftime(fmt[1]), "end_time": sleep.end_local_time().strftime(fmt[1]), "date": sleep.date.strftime(dfmt)}
-        if settings["showcomments"]:
-            if sleep.comments != "": d["comments"] = sleep.comments
-        if settings["showTZ"] == 1: d["TZ"] = sleep.getTZShortName()
-        elif settings["showTZ"] == 2: d["TZ"] = sleep.timezone
-        sleeps.append(d)
-    context = {"sleeps": sleeps}
-    return context
+    context = {"use12HourTime":request.user.sleeperprofile.use12HourTime, "showcomments": settings["showcomments"], "showedit":settings["showedit"], "fulldate": settings["fulldate"], "showTZ": settings["showTZ"]}
+    if settings["showallnighters"]:
+        pass
 
 @register.simple_tag
 def displayUser(username):

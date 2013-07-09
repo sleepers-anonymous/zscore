@@ -1,11 +1,11 @@
 .sleep-table
 {
     border-collapse: collapse;
-    min-width: 1500px;
+    min-width: 1000px;
 }
 .sleep-table .corner
 {
-    width: 200px;
+    width: 150px;
 }
 .sleep-table .column-header
 {
@@ -14,7 +14,7 @@
 .sleep-table .row-header
 {
     border-left: 1px solid lightgray;
-    padding: 10px;
+    padding: 10px 5px;
     text-align: center;
 }
 .sleep-table tr:not(.header-row)

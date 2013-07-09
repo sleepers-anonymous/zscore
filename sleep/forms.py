@@ -38,6 +38,7 @@ class FriendSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
 class AllNighterForm(forms.ModelForm):
+    delete = forms.BooleanField(required=False)
     class Meta:
         model = Allnighter
         fields = ["date", "comments"]
@@ -55,6 +56,7 @@ class AllNighterForm(forms.ModelForm):
 class SleepForm(forms.ModelForm):
     start_time = forms.CharField(max_length=30)
     end_time = forms.CharField(max_length=30)
+    delete = forms.BooleanField(required=False)
     class Meta:
         model = Sleep
         fields = ['start_time','end_time', 'date', 'comments', 'timezone']
