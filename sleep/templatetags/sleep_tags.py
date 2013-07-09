@@ -13,6 +13,8 @@ def displayPartialButton(user, path = "/", size = 2.25):
             context = {"hasPartial": 1}
         except:
             context = {"hasPartial": 2}
+    else:
+        context = {}
     context["path"] = path
     context["size"] = size
     return context
