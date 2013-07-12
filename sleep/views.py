@@ -142,7 +142,7 @@ def createGroup(request):
             g=form.save()
             m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn)
             m.save()
-            return HttpResponseRedirect('/groups/')
+            return HttpResponseRedirect('/groups/manage/%s/' % g.id)
     else:
         form=GroupForm()
     return render_to_response('create_group.html', {'form': form}, context_instance=RequestContext(request))
