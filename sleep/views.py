@@ -126,27 +126,36 @@ def editOrCreateSleep(request,sleep = None,success=False):
     context['form']=form
     return render_to_response('editsleep.html', context, context_instance=RequestContext(request))
 
-def leaderboardLegacy(request,sortBy):
-    return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
-
 @login_required
 def graph(request):
     return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
 
-def leaderboard(request):
+def leaderboard(request,group=None):
     if 'sort' not in request.GET or request.GET['sort'] not in ['zPScore','posStDev','zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
-    ss = Sleeper.objects.sorted_sleepers(sortBy,request.user)
-    top = [ s for s in ss if s['rank']<=10 or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
+    if group is None:
+        lbSize=10
+    else:
+        group=SleeperGroup.objects.get(id=group)
+        nmembers = group.members.count()
+        lbSize=min(10,nmembers//2)
+    ss = Sleeper.objects.sorted_sleepers(sortBy=sortBy,user=request.user,group=group)
+    top = [ s for s in ss if s['rank']<=lbSize or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    recentWinner = Sleeper.objects.bestByTime(now-datetime.timedelta(3),now,request.user)[0]
+    recentWinner = Sleeper.objects.bestByTime(start=now-datetime.timedelta(3),end=now,user=request.user,group=group)[0]
+    if group:
+        allUsers = group.members.all()
+    else:
+        allUsers = Sleeper.objects.all()
+    number = allUsers.filter(sleep__isnull=False).distinct().count()
     context = {
+            'group' : group,
             'top' : top,
             'recentWinner' : recentWinner,
-            'total' : Sleep.objects.totalSleep(),
-            'number' : Sleep.objects.all().values_list('user').distinct().count(),
+            'total' : Sleep.objects.totalSleep(group=group),
+            'number' : number,
             'leaderboard_valid': len(ss),
             }
     return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
