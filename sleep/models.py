@@ -214,10 +214,16 @@ class SleeperProfile(models.Model):
             return self.privacy
         elif otherUser.pk == self.user.pk:
             return self.PRIVACY_MAX
-        elif otherUser in self.friends.all():
-            return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
-        else:
-            return max(self.privacy, self.privacyLoggedIn)
+
+        choices=[self.privacy,self.privacyLoggedIn]
+        if otherUser in self.friends.all():
+            choices.append(self.privacyFriends)
+        #we really want to be able to filter the queryset, but it's probably prefetched, so don't.  (See Django #17001.)  I think this is probably the most efficient even though it's not ideal.
+        myGs = list(self.user.memberships.all())
+        otherGs = list(otherUser.memberships.all())
+        bothGs = [m.privacy for m in myGs if m in otherGs]
+        choices.extend(bothGs)
+        return max(choices)
 
     def getEmailHash(self):
         if self.useGravatar:
