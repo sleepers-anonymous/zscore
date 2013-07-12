@@ -13,12 +13,26 @@ from zscore import settings
 TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 
 class SleepManager(models.Manager):
-    def totalSleep(self, user=None):
-        sleeps =  Sleep.objects.all() if user == None else Sleep.objects.filter(user=user)
+    def totalSleep(self, user=None,group=None):
+        if user is None and group is None:
+            sleeps = Sleep.objects.all()
+        elif user is None:
+            sleeps = Sleep.objects.filter(user__sleepergroups=group)
+        elif group is None:
+            sleeps = Sleep.objects.filter(user=user)
+        else:
+            raise ValueError, "Can't compute totalSleep with both a user and a group."
         return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
 
-    def sleepTimes(self,res=1, user = None):
-        sleeps = Sleep.objects.all() if user == None else Sleep.objects.filter(user=user)
+    def sleepTimes(self,res=1, user = None, group = None):
+        if user is None and group is None:
+            sleeps = Sleep.objects.all()
+        elif user is None:
+            sleeps = Sleep.objects.filter(user__sleepergroups=group)
+        elif group is None:
+            sleeps = Sleep.objects.filter(user=user)
+        else:
+            raise ValueError, "Can't compute sleepTimes with both a user and a group."
         atTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
             tz = pytz.timezone(sleep.timezone)
@@ -38,8 +52,15 @@ class SleepManager(models.Manager):
                     atTime[i]+=1
         return atTime
 
-    def sleepStartEndTimes(self,res=10, user = None):
-        sleeps = Sleep.objects.all() if user ==None else Sleep.objects.filter(user=user)
+    def sleepStartEndTimes(self,res=10, user = None,group=None):
+        if user is None and group is None:
+            sleeps = Sleep.objects.all()
+        elif user is None:
+            sleeps = Sleep.objects.filter(user__sleepergroups=group)
+        elif group is None:
+            sleeps = Sleep.objects.filter(user=user)
+        else:
+            raise ValueError, "Can't compute sleepStartEndTimes with both a user and a group."
         startAtTime = [0] * (24 * 60 / res)
         endAtTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
@@ -50,8 +71,15 @@ class SleepManager(models.Manager):
             endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
         return (startAtTime,endAtTime)
 
-    def sleepLengths(self,res=10, user = None):
-        sleeps = Sleep.objects.all() if user == None else Sleep.objects.filter(user=user)
+    def sleepLengths(self,res=10, user = None,group=None):
+        if user is None and group is None:
+            sleeps = Sleep.objects.all()
+        elif user is None:
+            sleeps = Sleep.objects.filter(user__sleepergroups=group)
+        elif group is None:
+            sleeps = Sleep.objects.filter(user=user)
+        else:
+            raise ValueError, "Can't compute sleepStartEndTimes with both a user and a group."
         lengths = map(lambda x: x.length().total_seconds() / (60*res),sleeps)
         packed = [0] * int(max(lengths)+1)
         for length in lengths:
@@ -229,10 +257,16 @@ class SleeperProfile(models.Model):
             return self.privacy
         elif otherUser.pk == self.user.pk:
             return self.PRIVACY_MAX
-        elif otherUser in self.friends.all():
-            return max(self.privacy, self.privacyLoggedIn, self.privacyFriends)
-        else:
-            return max(self.privacy, self.privacyLoggedIn)
+
+        choices=[self.privacy,self.privacyLoggedIn]
+        if otherUser in self.friends.all():
+            choices.append(self.privacyFriends)
+        #we really want to be able to filter the queryset, but it's probably prefetched, so don't.  (See Django #17001.)  I think this is probably the most efficient even though it's not ideal.
+        myGs = list(self.user.membership_set.all())
+        otherGIDs = map(lambda x: x.id, otherUser.sleepergroups.all())
+        bothGs = [m.privacy for m in myGs if m.group_id in otherGIDs]
+        choices.extend(bothGs)
+        return max(choices)
 
     def getEmailHash(self):
         if self.useGravatar:
@@ -244,8 +278,12 @@ class SleeperProfile(models.Model):
         return "SleeperProfile for user %s" % self.user
 
 class SleeperManager(models.Manager):
-    def sorted_sleepers(self,sortBy='zScore',user=None):
-        sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile','allnighter_set')
+    def sorted_sleepers(self,sortBy='zScore',user=None,group=None):
+        if group is None:
+            sleepers = Sleeper.objects.all()
+        else:
+            sleepers = Sleeper.objects.filter(sleepergroups=group)
+        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set')
         scored=[]
         extra=[]
         for sleeper in sleepers:
@@ -279,8 +317,12 @@ class SleeperManager(models.Manager):
             scored[i]['rank']=i+1
         return scored+extra
 
-    def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None):
-        sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile','allnighter_set')
+    def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None):
+        if group is None:
+            sleepers = Sleeper.objects.all()
+        else:
+            sleepers = Sleeper.objects.filter(sleepergroups=group)
+        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set')
         scored=[]
         for sleeper in sleepers:
             p = sleeper.sleeperprofile
@@ -470,3 +512,18 @@ class Sleeper(User):
             else:
                 d[k]=datetime.timedelta(0,d[k])
         return d
+
+class SleeperGroup(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    members = models.ManyToManyField(User,related_name='sleepergroups',blank=True,through='Membership')
+
+    def __unicode__(self):
+        return "SleeperGroup %s" % self.name
+
+class Membership(models.Model):
+    user=models.ForeignKey(User)
+    group=models.ForeignKey(SleeperGroup)
+    privacy=models.SmallIntegerField(choices=SleeperProfile.PRIVACY_CHOICES,default=SleeperProfile.PRIVACY_NORMAL,verbose_name='Privacy to members of the given group')
+
+    def __unicode__(self):
+        return "%s is a member of %s" % (self.user,self.group)

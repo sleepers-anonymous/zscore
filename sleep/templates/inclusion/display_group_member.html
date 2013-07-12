@@ -1,0 +1,11 @@
+{% load gravatar %}
+
+<tr>
+    <td>{% gravatar request.user user 20 %}</td>
+    <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
+    {% if member %}
+    <td><a class="remove-member-button" onclick="removeMember({{group.id}},{{user.id}},this)" href="javascript:void(0);">remove</a></td>
+    {% else %}
+    <td><a class="add-member-button" onclick="addMember({{group.id}},{{user.id}},this)" href="javascript:void(0);">add</a></td>
+    {% endif %}
+</tr>

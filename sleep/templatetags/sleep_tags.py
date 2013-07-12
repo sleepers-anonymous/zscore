@@ -179,6 +179,19 @@ def displayUser(username):
     if username != "[redacted]": return '''<a href="/creep/%s/">%s</a>''' % (username , username)
     else: return username
 
+@register.inclusion_tag('inclusion/display_my_group.html')
+def displayMyGroup(group):
+    return {'group' : group}
+
+@register.inclusion_tag('inclusion/display_group_member.html',takes_context=True)
+def displayGroupMember(context,group,user):
+    context.update({
+            'group' : group,
+            'user' : user,
+            'member' : user in group.members.all(),
+            })
+    return context
+
 @register.inclusion_tag('inclusion/display_friend.html')
 def displayFriend(you,them,requested=False):
     prof = you.sleeperprofile
