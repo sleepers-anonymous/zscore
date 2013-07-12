@@ -2,6 +2,8 @@ from django import template
 from sleep.models import *
 import datetime
 import pytz
+import numpy
+from numpy.fft import rfft
 register = template.Library()
 
 # Inclusion tags
@@ -46,6 +48,29 @@ def sleepStatsTable(user):
             'weekly': sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today()),
             'decaying': sleeper.decayStats(),
     }
+    return context
+
+@register.inclusion_tag('inclusion/fourier_stats.html')
+def fourierStats(user,length=None):
+    sleeper = Sleeper.objects.get(pk=user.pk)
+    now=pytz.utc.localize(datetime.datetime.utcnow())
+    if length is None:
+        start=datetime.date.min
+        end=datetime.date.max
+    else:
+        start=now-datetime.timedelta(length)
+        end=now
+    sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
+    if len(sleepPerDay)>3:
+        ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]
+        topModes = reversed(list(numpy.argsort(ft[1:])))
+        topModesPacked = [{'length' : len(sleepPerDay)/(i+1.), 'size': ft[i+1]} for i in topModes]
+        context = {
+                'ft' : ft,
+                'topModes' : topModesPacked,
+                }
+    else:
+        context = {}
     return context
 
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)
