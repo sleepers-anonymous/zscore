@@ -215,7 +215,10 @@ def leaderboard(request,group=None):
     if group is None:
         lbSize=10
     else:
-        group=SleeperGroup.objects.get(id=group)
+        gs = SleeperGroup.objects.filter(id=group)
+        if gs.count()!=1:
+            raise Http404
+        group = gs[0]
         if request.user not in group.members.all():
             raise PermissionDenied
         nmembers = group.members.count()
