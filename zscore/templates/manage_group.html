@@ -1,0 +1,31 @@
+{% extends 'frame.html' %}
+
+{% load sleep_tags %}
+
+{% block content %}
+<h1>Manage {{group.name}}</h1>
+See the group <a href="/leaderboard/{{group.id}}/">leaderboard</a>!
+
+<h3>Members</h3>
+<table>
+    {% for member in members %}
+        {% displayGroupMember group member %}
+    {% endfor %}
+</table>
+
+<h3>Add members</h3>
+<form method="post">{% csrf_token %}
+    {{form.as_p}}
+    <p><input type="submit" value="Add" /></p>
+</form>
+{% if results %}
+    <table>
+    {% for user in results %}
+        {% displayGroupMember group user %}
+    {% endfor %}
+    </table>
+{% else %}
+    No users found.
+{% endif %}
+
+{% endblock %}

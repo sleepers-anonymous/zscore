@@ -248,8 +248,8 @@ class SleeperProfile(models.Model):
             choices.append(self.privacyFriends)
         #we really want to be able to filter the queryset, but it's probably prefetched, so don't.  (See Django #17001.)  I think this is probably the most efficient even though it's not ideal.
         myGs = list(self.user.membership_set.all())
-        otherGs = list(otherUser.membership_set.all())
-        bothGs = [m.privacy for m in myGs if m in otherGs]
+        otherGIDs = map(lambda x: x.id, otherUser.sleepergroups.all())
+        bothGs = [m.privacy for m in myGs if m.group_id in otherGIDs]
         choices.extend(bothGs)
         return max(choices)
 

@@ -1,0 +1,20 @@
+{% extends "frame.html" %}
+
+{% load sleep_tags %}
+
+{% block content %}
+<h1>Groups</h1>
+
+
+{% if groups %}
+<h3>My Groups</h3>
+<table>
+{% for group in groups %}
+    {% displayMyGroup group %}
+{% endfor %}
+</table>
+{% else %}
+Join groups to see them here!
+{% endif %}
+
+{% endblock %}

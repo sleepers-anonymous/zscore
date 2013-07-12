@@ -1,9 +1,14 @@
 from django import forms
-from sleep.models import SleeperProfile, Sleep, Allnighter
+from sleep.models import *
 from django.core.exceptions import *
 
 import pytz
 import datetime
+
+class GroupForm(forms.ModelForm):
+    class Meta:
+        model=SleeperGroup
+        fields = ['name']
 
 class SleeperProfileForm(forms.ModelForm):
     idealWakeupWeekend = forms.CharField(max_length=30)
@@ -31,10 +36,7 @@ class SleeperProfileForm(forms.ModelForm):
                 del cleaned_data[k]
         return cleaned_data
 
-class CreepSearchForm(forms.Form):
-    username = forms.CharField(max_length=30)
-
-class FriendSearchForm(forms.Form):
+class SleeperSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
 class AllNighterForm(forms.ModelForm):

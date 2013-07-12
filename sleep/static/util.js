@@ -73,3 +73,20 @@ function hideRequest(id,link) {
     link.innerHTML="hidden";
   });
 };
+function addMember(gid,uid,link) {
+  $.post("/groups/add/", {
+      "group" : gid,
+      "user" : uid
+  }, function() {
+    link.innerHTML="added";
+  });
+};
+function removeMember(gid,uid,link) {
+  $.post("/groups/remove/", {
+      "group" : gid,
+      "user" : uid
+  }, function() {
+    link.innerHTML="removed";
+  });
+};
+

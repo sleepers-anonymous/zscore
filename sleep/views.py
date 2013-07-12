@@ -130,6 +130,83 @@ def editOrCreateSleep(request,sleep = None,success=False):
 def graph(request):
     return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
 
+@login_required
+def groups(request):
+    return render_to_response('groups.html', {'groups': request.user.sleepergroups.all()}, context_instance=RequestContext(request))
+
+@login_required
+def createGroup(request):
+    if request.method == 'POST':
+        form = GroupForm(request.POST)
+        if form.is_valid():
+            g=form.save()
+            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn)
+            m.save()
+            return HttpResponseRedirect('/groups/')
+    else:
+        form=GroupForm()
+    return render_to_response('create_group.html', {'form': form}, context_instance=RequestContext(request))
+
+@login_required
+def addMember(request):
+    if 'group' in request.POST and 'user' in request.POST:
+        gid = request.POST['group']
+        uid = request.POST['user']
+        gs = SleeperGroup.objects.filter(id=gid)
+        if len(gs)!=1 or request.user not in gs[0].members.all():
+            raise Http404
+        us = Sleeper.objects.filter(id=uid)
+        if len(us)!=1:
+            raise Http404
+        g=gs[0]
+        u=us[0]
+        if u not in g.members.all():
+            m=Membership(group=g,user=u,privacy=u.sleeperprofile.privacyLoggedIn)
+            m.save()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def removeMember(request):
+    if 'group' in request.POST and 'user' in request.POST:
+        gid = request.POST['group']
+        uid = request.POST['user']
+        gs = SleeperGroup.objects.filter(id=gid)
+        if len(gs)!=1 or request.user not in gs[0].members.all():
+            raise Http404
+        us = Sleeper.objects.filter(id=uid)
+        if len(us)!=1:
+            raise Http404
+        g=gs[0]
+        u=us[0]
+        for m in Membership.objects.filter(user=u,group=g):
+            m.delete()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def manageGroup(request,gid):
+    gs=SleeperGroup.objects.filter(id=gid)
+    if len(gs)!=1:
+        raise Http404
+    g=gs[0]
+    if request.user not in g.members.all():
+        raise PermissionDenied
+    context={'group':g}
+    if request.method == 'POST':
+        form=SleeperSearchForm(request.POST)
+        if form.is_valid():
+            us=User.objects.filter(username__icontains=form.cleaned_data['username'])
+            context['results']=us
+            context['count']=us.count()
+    else:
+        form = SleeperSearchForm()
+    context['form']=form
+    context['members']=g.members.all()
+    return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
+
 def leaderboard(request,group=None):
     if 'sort' not in request.GET or request.GET['sort'] not in ['zPScore','posStDev','zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
         sortBy='zScore'
@@ -139,6 +216,8 @@ def leaderboard(request,group=None):
         lbSize=10
     else:
         group=SleeperGroup.objects.get(id=group)
+        if request.user not in group.members.all():
+            raise PermissionDenied
         nmembers = group.members.count()
         lbSize=min(10,nmembers//2)
     ss = Sleeper.objects.sorted_sleepers(sortBy=sortBy,user=request.user,group=group)
@@ -176,7 +255,7 @@ def creep(request,username=None):
             followed = request.user.sleeperprofile.follows.order_by('username')
         total=creepable.distinct().count()
         if request.method == 'POST':
-            form=CreepSearchForm(request.POST)
+            form=SleeperSearchForm(request.POST)
             if form.is_valid():
                 users = creepable.filter(username__icontains=form.cleaned_data['username']).distinct()
                 count = users.count()
@@ -192,7 +271,7 @@ def creep(request,username=None):
                             }
                     return render_to_response('creepsearch.html',context,context_instance=RequestContext(request))
         else:
-            form = CreepSearchForm()
+            form = SleeperSearchForm()
         context = {
                 'form' : form,
                 'new' : True,
@@ -253,7 +332,7 @@ def friends(request):
     friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username')
     requests = request.user.requests.filter(friendrequest__accepted=None).order_by('user__username')
     if request.method == 'POST':
-        form=FriendSearchForm(request.POST)
+        form=SleeperSearchForm(request.POST)
         if form.is_valid():
             users = User.objects.filter(username__icontains=form.cleaned_data['username']).exclude(pk=request.user.pk).distinct()
             count = users.count()
@@ -267,7 +346,7 @@ def friends(request):
                     }
             return render_to_response('friends.html',context,context_instance=RequestContext(request))
     else:
-        form = FriendSearchForm()
+        form = SleeperSearchForm()
     context = {
             'form' : form,
             'new' : True,
