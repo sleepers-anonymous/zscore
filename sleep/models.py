@@ -83,6 +83,8 @@ class Sleep(models.Model):
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
     sleepcycles = models.SmallIntegerField()
 
+    quality = models.SmallIntegerField(choices=((0,"0 - awful"), (1,"1"),(2,"2"),(3,"3 - meh"),(4,"4"),(5,"5 - awesome")),default=4)
+
     def __unicode__(self):
         tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
         return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
@@ -167,10 +169,23 @@ class SleeperProfile(models.Model):
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to anonymous users')
     privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to logged-in users')
     privacyFriends = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to friends')
+
     friends = models.ManyToManyField(User,related_name='friends+',blank=True)
     follows = models.ManyToManyField(User,related_name='follows+',blank=True)
     requested = models.ManyToManyField(User,related_name='requests',blank=True,through='FriendRequest')
+    
     use12HourTime = models.BooleanField(default=False)
+
+    FORCE_MOBILE = 2
+    DETECT_MOBILE = 1
+    FORCE_NONMOBILE = 0
+    MOBILE_CHOICES = (
+            (FORCE_NONMOBILE, "Force Nonmobile"),
+            (DETECT_MOBILE, "Detect Mobile"),
+            (FORCE_MOBILE, "Force Mobile"),
+            )
+
+    mobile = models.SmallIntegerField(choices=MOBILE_CHOICES, default=DETECT_MOBILE, verbose_name="Use mobile interface?")
 
     emailreminders = models.BooleanField(default=False)
     useGravatar = models.BooleanField(default=True)

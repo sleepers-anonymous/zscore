@@ -6,13 +6,13 @@
 .sleep-stats-view
 {
     float: left;
-    width: 45%;
+    width: 55%;
     clear: left;
     margin: 2%;
 }
 .sleep-list-view
 {
     float: right;
-    width: 45%;
+    width: 35%;
     margin: 2%;
 }
