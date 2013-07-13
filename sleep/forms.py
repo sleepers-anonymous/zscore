@@ -36,6 +36,11 @@ class SleeperProfileForm(forms.ModelForm):
                 del cleaned_data[k]
         return cleaned_data
 
+class MembershipForm(forms.ModelForm):
+    class Meta:
+        model = Membership
+        fields = ['privacy']
+
 class SleeperSearchForm(forms.Form):
     username = forms.CharField(max_length=30)
 
