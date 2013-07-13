@@ -66,7 +66,7 @@ class SleepForm(forms.ModelForm):
     delete = forms.BooleanField(required=False)
     class Meta:
         model = Sleep
-        fields = ['start_time','end_time', 'date', 'comments', 'timezone']
+        fields = ['start_time','end_time', 'date', 'comments', 'timezone', 'quality']
 
     def __init__(self, user, fmt, *args, **kwargs):
         self.fmt = fmt
