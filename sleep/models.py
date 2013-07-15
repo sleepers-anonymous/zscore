@@ -528,6 +528,7 @@ class Sleeper(User):
 class SleeperGroup(models.Model):
     name = models.CharField(max_length=255, unique=True)
     members = models.ManyToManyField(User,related_name='sleepergroups',blank=True,through='Membership')
+    defunctMembers = models.ManyToManyField(User, related_name='defunct+', blank=True)
     description = models.TextField(blank=True)
 
     def __unicode__(self):
