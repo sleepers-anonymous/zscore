@@ -576,12 +576,10 @@ class Membership(models.Model):
 
     MEMBER = 0
     ADMIN = 50
-    OWNER = 100
 
     ROLE_CHOICES = (
             (MEMBER, "member"),
             (ADMIN, "administrator"),
-            (OWNER, "owner"),
             )
 
     role = models.SmallIntegerField(choices=ROLE_CHOICES,default=MEMBER)
