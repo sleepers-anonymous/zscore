@@ -221,10 +221,18 @@ def manageGroup(request,gid):
         if searchForm.is_valid():
             us=User.objects.filter(username__icontains=searchForm.cleaned_data['username'])
             context['results']=us
+            context['showResults'] = True
             context['count']=us.count()
     else:
         searchForm = SleeperSearchForm()
+    if request.method == 'POST' and "GroupForm" in request.POST:
+        groupForm = GroupForm(request.POST, instance=g)
+        if groupForm.is_valid():
+            groupForm.save()
+    else:
+        groupForm = GroupForm(instance=g)
     context['searchForm']=searchForm
+    context['groupForm']=groupForm
     context['members']=g.members.all()
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
@@ -335,7 +343,6 @@ def editProfile(request):
             form.save()
             return HttpResponseRedirect('/editprofile/?success=True')
         else:
-            print form.errors.viewkeys()
             for k in form.errors.viewkeys():
                 if "ideal" in k:
                     context["page"] = 2
