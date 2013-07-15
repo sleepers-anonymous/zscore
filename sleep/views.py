@@ -216,15 +216,15 @@ def manageGroup(request,gid):
     if request.user not in g.members.all():
         raise PermissionDenied
     context={'group':g}
-    if request.method == 'POST':
-        form=SleeperSearchForm(request.POST)
-        if form.is_valid():
-            us=User.objects.filter(username__icontains=form.cleaned_data['username'])
+    if request.method == 'POST' and "SleeperSearchForm" in request.POST:
+        searchForm=SleeperSearchForm(request.POST)
+        if searchForm.is_valid():
+            us=User.objects.filter(username__icontains=searchForm.cleaned_data['username'])
             context['results']=us
             context['count']=us.count()
     else:
-        form = SleeperSearchForm()
-    context['form']=form
+        searchForm = SleeperSearchForm()
+    context['searchForm']=searchForm
     context['members']=g.members.all()
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 

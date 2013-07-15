@@ -16,8 +16,8 @@
 
 <h3>Add members</h3>
 <form method="post">{% csrf_token %}
-    {{form.as_p}}
-    <p><input type="submit" value="Add" /></p>
+    {{searchForm.as_p}}
+    <p><input type="submit" value="Add" name="SleeperSearchForm"/></p>
 </form>
 {% if results %}
     <table>
