@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
-class Email(forms.EmailField): 
+class Email(forms.EmailField):
     def clean(self, value):
         super(Email, self).clean(value)
         try:
