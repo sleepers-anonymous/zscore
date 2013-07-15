@@ -4,7 +4,8 @@
 
 {% block content %}
 <h1>Manage {{group.name}}</h1>
-See the group <a href="/leaderboard/{{group.id}}/">leaderboard</a>!
+<p><i>{{group.description}}</i></p>
+<p>See the group <a href="/leaderboard/{{group.id}}/">leaderboard</a>!</p>
 
 <h3>Members</h3>
 <table>
@@ -26,6 +27,6 @@ See the group <a href="/leaderboard/{{group.id}}/">leaderboard</a>!
     </table>
 {% else %}
     No users found.
-{% endif %}
+    {% endif %}
 
 {% endblock %}

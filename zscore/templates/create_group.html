@@ -6,7 +6,9 @@
 <h1>Create Group</h1>
 
 <form method="post">{% csrf_token %}
-    {{form.as_p}}
+    <table>
+        {{form.as_table}}
+    </table>
     <input type="submit" value="Create" />
 </form>
 
