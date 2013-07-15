@@ -153,10 +153,10 @@ class Sleep(models.Model):
         """Gets the short of a time zone"""
         return self.getSleepTZ().tzname(datetime.datetime(self.date.year, self.date.month, self.date.day))
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         seconds = self.length().total_seconds()
         self.sleepcycles = seconds//5400
-        super(Sleep, self).save(**kwargs)
+        super(Sleep, self).save(*args,**kwargs)
 
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
