@@ -73,12 +73,12 @@ function hideRequest(id,link) {
     link.innerHTML="hidden";
   });
 };
-function addMember(gid,uid,link) {
-  $.post("/groups/add/", {
+function inviteMember(gid,uid,link) {
+  $.post("/groups/invite/", {
       "group" : gid,
       "user" : uid
   }, function() {
-    link.innerHTML="added";
+    link.innerHTML="invited";
   });
 };
 function removeMember(gid,uid,link) {
@@ -87,6 +87,24 @@ function removeMember(gid,uid,link) {
       "user" : uid
   }, function() {
     link.innerHTML="removed";
+  });
+};
+
+function acceptInvite(id,link) {
+  $.post("/groups/accept/", {
+      "id" : id,
+      "accepted" : "True", 
+  }, function() {
+    link.innerHTML="accepted";
+  });
+};
+
+function rejectInvite(id,link) {
+  $.post("/groups/accept/", {
+      "id" : id,
+      "accepted" : "False", 
+  }, function() {
+    link.innerHTML="rejected";
   });
 };
 

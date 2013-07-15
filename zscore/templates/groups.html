@@ -5,6 +5,15 @@
 {% block content %}
 <h1>Groups</h1>
 
+{% if invites %}
+<h3>My Invites</h3>
+<table>
+    {% for invite in invites %}
+        {% displayInvite invite %}
+    {% endfor %}
+</table>
+{% endif %}
+
 
 {% if groups %}
 <h3>My Groups</h3>

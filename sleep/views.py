@@ -132,7 +132,11 @@ def graph(request):
 
 @login_required
 def groups(request):
-    return render_to_response('groups.html', {'groups': request.user.sleepergroups.all()}, context_instance=RequestContext(request))
+    context = {
+            'groups' : request.user.sleepergroups.all(),
+            'invites' : request.user.groupinvite_set.filter(accepted=None),
+            }
+    return render_to_response('groups.html', context, context_instance=RequestContext(request))
 
 @login_required
 def createGroup(request):
@@ -148,7 +152,26 @@ def createGroup(request):
     return render_to_response('create_group.html', {'form': form}, context_instance=RequestContext(request))
 
 @login_required
-def addMember(request):
+def acceptInvite(request):
+    if 'id' in request.POST and 'accepted' in request.POST:
+        invites = GroupInvite.objects.filter(id=request.POST['id'],accepted=None)
+        if len(invites)!=1:
+            raise Http404
+        invite = invites[0]
+        if request.user.id is not invite.user_id:
+            raise PermissionDenied
+        if request.POST['accepted']=="True":
+            invite.accept()
+        else:
+            invite.reject()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+
+
+@login_required
+def inviteMember(request):
     if 'group' in request.POST and 'user' in request.POST:
         gid = request.POST['group']
         uid = request.POST['user']
@@ -160,9 +183,7 @@ def addMember(request):
             raise Http404
         g=gs[0]
         u=us[0]
-        if u not in g.members.all():
-            m=Membership(group=g,user=u,privacy=u.sleeperprofile.privacyLoggedIn)
-            m.save()
+        g.invite(u,request.user)
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
