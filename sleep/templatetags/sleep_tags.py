@@ -13,7 +13,7 @@ def displayPartialButton(user, path = "/", size = 2.25):
         try:
             p = user.partialsleep
             context = {"hasPartial": 1}
-        except:
+        except PartialSleep.DoesNotExist:
             context = {"hasPartial": 2}
     else:
         context = {}
@@ -33,8 +33,9 @@ def isAsleep(context, you, them):
         try:
             partial = them.partialsleep
             newcontext =  {"asleep": "probably asleep"}
-        except:
-            newcontext =  {"asleep": "probably awake"}
+        except PartialSleep.DoesNotExist:
+            if p.isLikelyAsleep(): newcontext = {"asleep": "likely asleep"}
+            else: newcontext =  {"asleep": "probably awake"}
         newcontext["user"] = them
         return newcontext
     else:

@@ -256,6 +256,26 @@ class SleeperProfile(models.Model):
         """Returns a datetime.date object corresponding to the date the user thinks it is"""
         return pytz.utc.localize(datetime.datetime.utcnow()).astimezone(self.getUserTZ()).date()
 
+    def getIdealSleepInterval(self, date, timezone=None):
+        """Returns (idealSleepTime,idealWakeTime) for a user on a specific date, localized"""
+        if timezone == None: timezone = self.getUserTZ()
+        naiveIdeal = (self.idealSleepTimeWeekend, self.idealWakeupWeekend) if date.weekday() > 5 else (self.idealSleepTimeWeekday, self.idealWakeupWeekday)
+        if naiveIdeal[0] > naiveIdeal[1]: #If my SleepTime "appears" to be greater than my Wakeup time....
+            naiveIdeal = (datetime.datetime.combine(date-datetime.timedelta(1), naiveIdeal[0]), datetime.datetime.combine(date, naiveIdeal[1]))
+        else:
+            naiveIdeal = (datetime.datetime.combine(date, naiveIdeal[0]), datetime.datetime.combine(date, naiveIdeal[1]))
+        localizedIdeal = (timezone.localize(naiveIdeal[0]), timezone.localize(naiveIdeal[1]))
+        return localizedIdeal
+
+    def isLikelyAsleep(self):
+        today = self.today()
+        today_interval = self.getIdealSleepInterval(today)
+        now = pytz.utc.localize(datetime.datetime.utcnow())
+        if today_interval[0] <= now <= today_interval[1]: return True
+        tomorrow_interval = self.getIdealSleepInterval(today + datetime.timedelta(1))
+        if tomorrow_interval[0] <= now <= tomorrow_interval[1]: return True
+        return False
+
     def getPermissions(self, otherUser):
         """Returns the permissions an other user should have for me.
         

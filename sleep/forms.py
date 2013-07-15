@@ -8,7 +8,7 @@ import datetime
 class GroupForm(forms.ModelForm):
     class Meta:
         model=SleeperGroup
-        fields = ['name']
+        fields = ['name', 'description']
 
 class SleeperProfileForm(forms.ModelForm):
     idealWakeupWeekend = forms.CharField(max_length=30)
