@@ -252,6 +252,10 @@ class SleeperProfile(models.Model):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
 
+    def today(self):
+        """Returns a datetime.date object corresponding to the date the user thinks it is"""
+        return pytz.utc.localize(datetime.datetime.utcnow()).astimezone(self.getUserTZ()).date()
+
     def getPermissions(self, otherUser):
         """Returns the permissions an other user should have for me.
         
@@ -563,7 +567,7 @@ class Membership(models.Model):
     role = models.SmallIntegerField(choices=ROLE_CHOICES,default=MEMBER)
 
     def __unicode__(self):
-        return "%s is a member of %s" % (self.user,self.group)
+        return "%s is a(n) %s of %s" % (self.user,self.get_role_display(),self.group)
 
 class GroupInvite(models.Model):
     user=models.ForeignKey(User)
