@@ -148,7 +148,7 @@ def createGroup(request):
     return render_to_response('create_group.html', {'form': form}, context_instance=RequestContext(request))
 
 @login_required
-def addMember(request):
+def inviteMember(request):
     if 'group' in request.POST and 'user' in request.POST:
         gid = request.POST['group']
         uid = request.POST['user']
@@ -160,9 +160,7 @@ def addMember(request):
             raise Http404
         g=gs[0]
         u=us[0]
-        if u not in g.members.all():
-            m=Membership(group=g,user=u,privacy=u.sleeperprofile.privacyLoggedIn)
-            m.save()
+        g.invite(u,request.user)
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')

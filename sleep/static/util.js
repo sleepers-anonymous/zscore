@@ -73,12 +73,12 @@ function hideRequest(id,link) {
     link.innerHTML="hidden";
   });
 };
-function addMember(gid,uid,link) {
-  $.post("/groups/add/", {
+function inviteMember(gid,uid,link) {
+  $.post("/groups/invite/", {
       "group" : gid,
       "user" : uid
   }, function() {
-    link.innerHTML="added";
+    link.innerHTML="invited";
   });
 };
 function removeMember(gid,uid,link) {
