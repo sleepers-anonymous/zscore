@@ -185,7 +185,6 @@ class SleeperProfile(models.Model):
     PRIVACY_STATS = 50
     PRIVACY_PUBLIC = 100
     PRIVACY_GRAPHS = 150
-    PRIVACY_UBER = 200
     PRIVACY_MAX = 200
     PRIVACY_CHOICES = (
             (PRIVACY_HIDDEN, 'Hidden'),
@@ -194,7 +193,7 @@ class SleeperProfile(models.Model):
             (PRIVACY_STATS, 'Stats Public'),
             (PRIVACY_PUBLIC, 'Sleep Public'),
             (PRIVACY_GRAPHS, 'Graphs Public'),
-            (PRIVACY_UBER, 'Everything Public'),
+            (PRIVACY_MAX, 'Everything Public'),
             )
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to anonymous users')
     privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to logged-in users')
@@ -550,6 +549,18 @@ class Membership(models.Model):
     user=models.ForeignKey(User)
     group=models.ForeignKey(SleeperGroup)
     privacy=models.SmallIntegerField(choices=SleeperProfile.PRIVACY_CHOICES,default=SleeperProfile.PRIVACY_NORMAL,verbose_name='Privacy to members of the given group')
+
+    MEMBER = 0
+    ADMIN = 50
+    OWNER = 100
+
+    ROLE_CHOICES = (
+            (MEMBER, "member"),
+            (ADMIN, "administrator"),
+            (OWNER, "owner"),
+            )
+
+    role = models.SmallIntegerField(choices=ROLE_CHOICES,default=MEMBER)
 
     def __unicode__(self):
         return "%s is a member of %s" % (self.user,self.group)
