@@ -203,6 +203,16 @@ class SleeperProfile(models.Model):
     friends = models.ManyToManyField(User,related_name='friends+',blank=True)
     follows = models.ManyToManyField(User,related_name='follows+',blank=True)
     requested = models.ManyToManyField(User,related_name='requests',blank=True,through='FriendRequest')
+
+    AUTO_ACCEPT_ALL = 100
+    AUTO_ACCEPT_FRIENDS = 50
+    AUTO_ACCEPT_NONE = 0
+    AUTO_ACCEPT_CHOICES = (
+            (AUTO_ACCEPT_ALL, 'Everyone'),
+            (AUTO_ACCEPT_FRIENDS, 'Friends'),
+            (AUTO_ACCEPT_NONE, 'No one'),
+            )
+    autoAcceptGroups = models.SmallIntegerField(choices=AUTO_ACCEPT_CHOICES, default=AUTO_ACCEPT_FRIENDS, verbose_name="People from whom you will automatically accept group invites.")
     
     use12HourTime = models.BooleanField(default=False)
 
@@ -518,6 +528,7 @@ class Sleeper(User):
 class SleeperGroup(models.Model):
     name = models.CharField(max_length=255, unique=True)
     members = models.ManyToManyField(User,related_name='sleepergroups',blank=True,through='Membership')
+    description = models.TextField()
 
     def __unicode__(self):
         return "SleeperGroup %s" % self.name
@@ -529,3 +540,8 @@ class Membership(models.Model):
 
     def __unicode__(self):
         return "%s is a member of %s" % (self.user,self.group)
+
+class GroupInvite(models.Model):
+    user=models.ForeignKey(User)
+    group=models.ForeignKey(SleeperGroup)
+    accepted=models.NullBooleanField()
