@@ -528,10 +528,22 @@ class Sleeper(User):
 class SleeperGroup(models.Model):
     name = models.CharField(max_length=255, unique=True)
     members = models.ManyToManyField(User,related_name='sleepergroups',blank=True,through='Membership')
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     def __unicode__(self):
         return "SleeperGroup %s" % self.name
+
+    def invite(self,sleeper,inviter):
+        if self.members.filter(id=sleeper.id).exists(): #if they're a member of the group
+            return
+        if GroupInvite.objects.filter(user=sleeper,group=self,accepted=None).exists(): # if they're already invited
+            return
+        autoAccept = sleeper.sleeperprofile.autoAcceptGroups
+        i=GroupInvite(user=sleeper,group=self,accepted=None)
+        i.save()
+        if (autoAccept >= SleeperProfile.AUTO_ACCEPT_ALL or autoAccept >= SleeperProfile.AUTO_ACCEPT_FRIENDS and sleeper.sleeperprofile.friends.filter(id=inviter.id).exists()) and not GroupInvite.objects.filter(user=sleeper,group=self,accepted=False): # if they will auto-accept the request
+            i.accept()
+
 
 class Membership(models.Model):
     user=models.ForeignKey(User)
@@ -545,3 +557,18 @@ class GroupInvite(models.Model):
     user=models.ForeignKey(User)
     group=models.ForeignKey(SleeperGroup)
     accepted=models.NullBooleanField()
+
+    def __unicode__(self):
+        return "%s was invited to %s" % (self.user, self.group)
+
+    def accept(self,privacy=None):
+        if privacy is None:
+            privacy=self.user.sleeperprofile.privacyLoggedIn
+        m=Membership(user=self.user,group=self.group,privacy=privacy)
+        m.save()
+        self.accepted=True
+        self.save()
+    
+    def reject(self):
+        self.accepted=False
+        self.save()
