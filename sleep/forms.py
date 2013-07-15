@@ -11,25 +11,6 @@ class GroupForm(forms.ModelForm):
         fields = ['name']
 
 class SleeperProfileForm(forms.ModelForm):
-<<<<<<< HEAD
-    idealWakeupWeekend = forms.Charfield(max_length=30)
-    idealWakeupWeekday = forms.Charfield(max_length=30)
-    idealSleepTimeWeekend = forms.Charfield(max_length=30)
-    idealSleepTimeWeekday = forms.Charfield(max_length=30)
-
-    class Meta:
-        model = SleeperProfile
-        fields = ['privacy',
-                'privacyLoggedIn','privacyFriends', 'use12HourTime', 'idealSleep', 'timezone', 'idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekend', 'idealSleepTimeWeekday']
-
-#    def __init__(self, fmt, *args, **kwargs):
-#        self.fmt = fmt
-#        super(SleepForm, self).__init__(*args, **kwargs)
-
-    
-class CreepSearchForm(forms.Form):
-    username = forms.CharField(max_length=30)
-=======
     idealWakeupWeekend = forms.CharField(max_length=30)
     idealWakeupWeekday = forms.CharField(max_length=30)
 
@@ -44,7 +25,6 @@ class CreepSearchForm(forms.Form):
     def __init__(self, fmt, *args, **kwargs):
         self.fmt = fmt
         super(SleeperProfileForm, self).__init__(*args,**kwargs)
->>>>>>> master
 
     def clean(self):
         cleaned_data = super(SleeperProfileForm, self).clean()
@@ -107,10 +87,6 @@ class SleepForm(forms.ModelForm):
                 except ValueError:
                     self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.datetime(1999, 12, 31, 23, 59, 59).strftime(self.fmt)])
                     del cleaned_data[k]
-<<<<<<< HEAD
-            if cleaned_data["start_time"] >= cleaned_data["end_time"]: raise ValidationError({NON_FIELD_ERRORS: ["End time must be later than start time!"]})
-=======
             if len(a) > 0 : raise ValidationError({NON_FIELD_ERRORS: ["You have an allnighter entered for " + str(cleaned_data["date"]) + "!"]})
             if "start_time" in cleaned_data and "end_time" in cleaned_data and cleaned_data["start_time"] >= cleaned_data["end_time"]: raise ValidationError({NON_FIELD_ERRORS: ["End time must be later than start time!"]})
->>>>>>> master
         return cleaned_data
