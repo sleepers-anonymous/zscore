@@ -1,0 +1,19 @@
+{% load datetime_utils %}
+
+<tr id="sleep-entry-id-{{pk}}">
+		{% if showedit %}<td><a href="javascript:void(0);" class="sleep-delete-button" onclick="deleteSleep({{pk}});">x</a></td>{% endif %}
+		<td><b>{{date}}</b></td>
+		<td>{{start_time}}</td>
+		<td>to</td>
+		<td>{{end_time}}</td>
+		<td>({{length|printHHMM}})</td>
+		{% if TZ %}<td><i>{{TZ}}</i></td>{% endif %}
+		{% if showedit %}<td><a href="/sleep/edit/{{pk}}/">[edit]</a></td>{% endif %}
+</tr>
+{% if comments %}
+<tr>
+		{% if showedit %}<td>&nbsp;</td>{% endif %}
+		<td colspan="5">{{comments|truncatewords:20}}</td>
+		{% if showedit %}<td>&nbsp;</td>{% endif %}
+</tr>
+{% endif %}

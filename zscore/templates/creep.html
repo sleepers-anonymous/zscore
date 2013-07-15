@@ -4,11 +4,12 @@
 {% load datetime_utils %}
 {% load graphs %}
 {% load sleep_tags %}
+{% load gravatar %}
 {% load tz %}
 
 <h1>Creep on {{user}}</h1>
 
-{% if isself %}<p>View yourself as <a href="/creep/{{user|lower}}/friends/">a friend</a>, <a href="/creep/{{user|lower}}/user">a zScore user</a>, or <a href="/creep/{{user|lower}}/anon/">random creeper on the internet</a> would see you!</p>
+{% if isself %}<p>View yourself as <a href="/creep/{{user}}/?as=friends">a friend</a>, <a href="/creep/{{user}}/?as=user">a zScore user</a>, or <a href="/creep/{{user}}/?as=anon">random creeper on the internet</a> would see you!</p>
 {% endif %}
 <table width=100%><tr><td valign = "top">
 <h3>Stats</h3>
@@ -16,16 +17,19 @@
 
 {% if sleeps %}
   <br />
-  {% graphPerDay user %}
+  {% graphPerDay user 14 %}
   <br />
-  {% graphTimeOfDayBars user %}
-  <br /></td><td valign="top">
+  {% graphTimeOfDayBars user 30 %}
+  <br />
+  {% if graphs %}
+  View more graphs for {{user}} <a href="/creep/{{user}}/?type=graph">here!</a><br />
+  {% endif %}</td><td valign="top">
+
+  {% gravatar request.user user 250 %}
   <h3>Sleep</h3>
   <table>
   {% for sleep in sleeps %}
-  {% timezone sleep.timezone %}
-  <tr><td>{{sleep.start_time}}</td><td> to</td><td> {{sleep.end_time}}</td><td> ({{sleep.length|printHHMM}})</td></tr>
-  {% endtimezone %}
+  {% displaySleep sleep %}
   {% endfor %}
   </table>
   <br/>

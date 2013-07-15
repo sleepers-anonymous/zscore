@@ -2,6 +2,8 @@
 
 {% else %}
 {% load tz %}
+{% load sleep_tags %}
+{% load datetime_utils %}
 <script type="text/javascript">
 function deleteSleep(id) {
   $.post("/sleep/delete/", {
@@ -13,20 +15,30 @@ function deleteSleep(id) {
     location.reload();
   });
 };
+
+function deleteAllnighter(id) {
+		$.post("/sleep/delete/allnighter/", {
+						"id":id
+		}, function() {
+		location.reload();
+		});
+};
 </script>
 
 <div class="sleep-list" style="border: 1px solid black">
     <h3>My Sleeps ({{numsleeps}} on {{numdates}} days)</h3>
   <table>
     {% for sleep in sleeps %}
-    <tr id="sleep-entry-id-{{sleep.id}}">
-      <td><a href="javascript:void(0);" class="sleep-delete-button" onclick="deleteSleep({{sleep.id}});">x</a></td>
-          {% timezone sleep.timezone %}
-			<td>{{sleep.date}}: {{sleep.start_time}} to {{sleep.end_time}} ({{sleep.length}}) </td><td><a href="/sleep/edit/{{sleep.pk}}/">[edit]</a></td>
-            {% endtimezone %}
-	</tr>
-	{% if sleep.comments %} <tr><td>&nbsp;</td><td>{{sleep.comments|truncatewords:20}}</td><td>&nbsp;</td></tr>{% endif %}
+		{% displaySleep sleep showcomments=1 showedit=1 showTZ=1 use12HourTime=use12HourTime %}
     {% endfor %}
-  </table>
+</table>
+{% if allnighters %}
+		<h3>My Allnighters ({{numallnighters}} on {{anumdates}} days)</h3>
+		<table>
+				{% for a in allnighters %}
+				{% displayAllNighter a showedit=1 showcomments=1%}
+				{% endfor %}
+</table>
+{% endif %}
 </div>
 {% endif %}

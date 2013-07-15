@@ -6,19 +6,34 @@ import pytz
 import datetime
 import math
 import itertools
+import hashlib
 
 from zscore import settings
 
 TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 
 class SleepManager(models.Manager):
-    def totalSleep(self):
-        sleeps =  Sleep.objects.all()
+    def totalSleep(self, user=None,group=None):
+        if user is None and group is None:
+            sleeps = Sleep.objects.all()
+        elif user is None:
+            sleeps = Sleep.objects.filter(user__sleepergroups=group)
+        elif group is None:
+            sleeps = Sleep.objects.filter(user=user)
+        else:
+            raise ValueError, "Can't compute totalSleep with both a user and a group."
         return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
 
-    def sleepTimes(self,res=1):
-        sleeps = Sleep.objects.all()
-        atTime = [0] * (24 * 60 / res) 
+    def sleepTimes(self,res=1, user = None, group = None):
+        if user is None and group is None:
+            sleeps = Sleep.objects.all()
+        elif user is None:
+            sleeps = Sleep.objects.filter(user__sleepergroups=group)
+        elif group is None:
+            sleeps = Sleep.objects.filter(user=user)
+        else:
+            raise ValueError, "Can't compute sleepTimes with both a user and a group."
+        atTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
             tz = pytz.timezone(sleep.timezone)
             startDate = sleep.start_time.astimezone(tz).date()
@@ -37,8 +52,15 @@ class SleepManager(models.Manager):
                     atTime[i]+=1
         return atTime
 
-    def sleepStartEndTimes(self,res=10):
-        sleeps = Sleep.objects.all()
+    def sleepStartEndTimes(self,res=10, user = None,group=None):
+        if user is None and group is None:
+            sleeps = Sleep.objects.all()
+        elif user is None:
+            sleeps = Sleep.objects.filter(user__sleepergroups=group)
+        elif group is None:
+            sleeps = Sleep.objects.filter(user=user)
+        else:
+            raise ValueError, "Can't compute sleepStartEndTimes with both a user and a group."
         startAtTime = [0] * (24 * 60 / res)
         endAtTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
@@ -49,14 +71,34 @@ class SleepManager(models.Manager):
             endAtTime[(endTime.hour * 60 + endTime.minute) / res]+=1
         return (startAtTime,endAtTime)
 
-    def sleepLengths(self,res=10):
-        sleeps = Sleep.objects.all()
+    def sleepLengths(self,res=10, user = None,group=None):
+        if user is None and group is None:
+            sleeps = Sleep.objects.all()
+        elif user is None:
+            sleeps = Sleep.objects.filter(user__sleepergroups=group)
+        elif group is None:
+            sleeps = Sleep.objects.filter(user=user)
+        else:
+            raise ValueError, "Can't compute sleepStartEndTimes with both a user and a group."
         lengths = map(lambda x: x.length().total_seconds() / (60*res),sleeps)
         packed = [0] * int(max(lengths)+1)
         for length in lengths:
             if length>0:
                 packed[int(length)]+=1
         return packed
+
+class PartialSleep(models.Model):
+    user = models.OneToOneField(User)
+    start_time = models.DateTimeField()
+    timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
+
+    def __unicode__(self):
+        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
+        return "Partial sleep beginning at %s" % self.start_local_time().strftime(tformat)
+
+    def start_local_time(self):
+        tz = pytz.timezone(self.timezone)
+        return self.start_time.astimezone(tz)
 
 class Sleep(models.Model):
     objects = SleepManager()
@@ -67,13 +109,20 @@ class Sleep(models.Model):
     comments = models.TextField(blank=True)
     date = models.DateField()
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
+    sleepcycles = models.SmallIntegerField()
+
+    quality = models.SmallIntegerField(choices=((0,"0 - awful"), (1,"1"),(2,"2"),(3,"3 - meh"),(4,"4"),(5,"5 - awesome")),default=4)
 
     def __unicode__(self):
-        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x" 
+        tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
         return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
 
     def length(self):
         return self.end_time - self.start_time
+
+    def score(self, nightValue = 1.0):
+        p = self.user.sleeperprofile
+        pass
 
     def validate_unique(self, exclude=None):
         overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
@@ -104,6 +153,11 @@ class Sleep(models.Model):
         """Gets the short of a time zone"""
         return self.getSleepTZ().tzname(datetime.datetime(self.date.year, self.date.month, self.date.day))
 
+    def save(self, **kwargs):
+        seconds = self.length().total_seconds()
+        self.sleepcycles = seconds//5400
+        super(Sleep, self).save(**kwargs)
+
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
     date = models.DateField()
@@ -119,6 +173,9 @@ class Allnighter(models.Model):
     def __unicode__(self):
         return "All-nighter on " + self.date.strftime("%x")
 
+class SchoolOrWorkPlace(models.Model):
+    name = models.CharField(max_length=255)
+
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default
@@ -127,22 +184,41 @@ class SleeperProfile(models.Model):
     PRIVACY_NORMAL = 0
     PRIVACY_STATS = 50
     PRIVACY_PUBLIC = 100
+    PRIVACY_GRAPHS = 150
+    PRIVACY_UBER = 200
+    PRIVACY_MAX = 200
     PRIVACY_CHOICES = (
             (PRIVACY_HIDDEN, 'Hidden'),
             (PRIVACY_REDACTED, 'Redacted'),
             (PRIVACY_NORMAL, 'Normal'),
             (PRIVACY_STATS, 'Stats Public'),
             (PRIVACY_PUBLIC, 'Sleep Public'),
+            (PRIVACY_GRAPHS, 'Graphs Public'),
+            (PRIVACY_UBER, 'Everything Public'),
             )
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to anonymous users')
     privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to logged-in users')
     privacyFriends = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to friends')
+
     friends = models.ManyToManyField(User,related_name='friends+',blank=True)
     follows = models.ManyToManyField(User,related_name='follows+',blank=True)
     requested = models.ManyToManyField(User,related_name='requests',blank=True,through='FriendRequest')
+    
     use12HourTime = models.BooleanField(default=False)
 
+    FORCE_MOBILE = 2
+    DETECT_MOBILE = 1
+    FORCE_NONMOBILE = 0
+    MOBILE_CHOICES = (
+            (FORCE_NONMOBILE, "Force Nonmobile"),
+            (DETECT_MOBILE, "Detect Mobile"),
+            (FORCE_MOBILE, "Force Mobile"),
+            )
+
+    mobile = models.SmallIntegerField(choices=MOBILE_CHOICES, default=DETECT_MOBILE, verbose_name="Use mobile interface?")
+
     emailreminders = models.BooleanField(default=False)
+    useGravatar = models.BooleanField(default=True)
 
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
@@ -153,7 +229,7 @@ class SleeperProfile(models.Model):
     idealWakeupWeekday = models.TimeField(default = datetime.time(8))
 
     idealSleepTimeWeekend = models.TimeField(default = datetime.time(0))
-    idealSleepTimeWeekday = models.TimeField(default = datetime.time(11))
+    idealSleepTimeWeekday = models.TimeField(default = datetime.time(23))
 
     def getIdealSleep(self):
         """Returns idealSleep as a timedelta"""
@@ -167,40 +243,65 @@ class SleeperProfile(models.Model):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
 
+    def getPermissions(self, otherUser):
+        """Returns the permissions an other user should have for me.
+        
+        Pass either a user, or a string, like "friends", "user", "anon", if the user should be allowed to override.
+        """
+        otherD = {
+                "friends": "privacyFriends",
+                "user":"privacyLoggedIn",
+                "anon": "privacy",
+                }
+        if otherUser in otherD: #we've passed one of the given strings; the code calling us should check that we're allowed to do this.
+            return getattr(self, otherD[otherUser])
+        elif otherUser == None or otherUser.is_anonymous():
+            return self.privacy
+        elif otherUser.pk == self.user.pk:
+            return self.PRIVACY_MAX
+
+        choices=[self.privacy,self.privacyLoggedIn]
+        if otherUser in self.friends.all():
+            choices.append(self.privacyFriends)
+        #we really want to be able to filter the queryset, but it's probably prefetched, so don't.  (See Django #17001.)  I think this is probably the most efficient even though it's not ideal.
+        myGs = list(self.user.membership_set.all())
+        otherGIDs = map(lambda x: x.id, otherUser.sleepergroups.all())
+        bothGs = [m.privacy for m in myGs if m.group_id in otherGIDs]
+        choices.extend(bothGs)
+        return max(choices)
+
+    def getEmailHash(self):
+        if self.useGravatar:
+            email = self.user.email.strip().lower()
+            return hashlib.md5(email).hexdigest()
+        else: return None
+
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
 
 class SleeperManager(models.Manager):
-    def sorted_sleepers(self,sortBy='zScore',user=None):
-        sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile')
+    def sorted_sleepers(self,sortBy='zScore',user=None,group=None):
+        if group is None:
+            sleepers = Sleeper.objects.all()
+        else:
+            sleepers = Sleeper.objects.filter(sleepergroups=group)
+        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set')
         scored=[]
         extra=[]
         for sleeper in sleepers:
             if len(sleeper.sleepPerDay())>2 and sleeper.sleepPerDay(packDates=True)[-1]['date'] >= datetime.date.today()-datetime.timedelta(5):
                 p = sleeper.sleeperprofile
-                if user is None:
-                    priv = p.PRIVACY_HIDDEN
-                elif user is 'all':
-                    priv = p.PRIVACY_PUBLIC
-                elif user.is_anonymous():
-                    priv = p.privacy
-                elif user.pk==sleeper.pk:
-                    priv = p.PRIVACY_PUBLIC
-                else:
-                    priv = p.privacyLoggedIn
+                if user is 'all': priv = p.PRIVACY_PUBLIC
+                else: priv = p.getPermissions(user)
 
-                if priv<=p.PRIVACY_REDACTED:
-                    sleeper.displayName="[redacted]"
-                else:
-                    sleeper.displayName=sleeper.username
+                if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
+                else: sleeper.displayName=sleeper.username
                 if priv>p.PRIVACY_HIDDEN:
                     d=sleeper.decayStats()
                     d['user']=sleeper
                     if 'is_authenticated' in dir(user) and user.is_authenticated():
-                        if user.pk==sleeper.pk:
-                            d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
-                    else:
-                        d['opcode'] = None
+                        if user.pk==sleeper.pk: d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
+                    else: d['opcode'] = None
                     scored.append(d)
             else:
                 if 'is_authenticated' in dir(user) and user.is_authenticated() and user.pk == sleeper.pk:
@@ -210,7 +311,7 @@ class SleeperManager(models.Manager):
                     d['user']=sleeper
                     d['opcode']='me'
                     extra.append(d)
-        if sortBy in ['stDev', 'idealDev']:
+        if sortBy in ['stDev', 'posStDev','idealDev']:
             scored.sort(key=lambda x: x[sortBy])
         else:
             scored.sort(key=lambda x: -x[sortBy])
@@ -218,38 +319,29 @@ class SleeperManager(models.Manager):
             scored[i]['rank']=i+1
         return scored+extra
 
-    def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None):
-        sleepers = Sleeper.objects.all().prefetch_related('sleep_set','sleeperprofile')
+    def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None):
+        if group is None:
+            sleepers = Sleeper.objects.all()
+        else:
+            sleepers = Sleeper.objects.filter(sleepergroups=group)
+        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set')
         scored=[]
         for sleeper in sleepers:
             p = sleeper.sleeperprofile
-            if user is None:
-                priv = p.PRIVACY_HIDDEN
-            elif user is 'all':
-                priv = p.PRIVACY_PUBLIC
-            elif user.is_anonymous():
-                priv = p.privacy
-            elif user.pk==sleeper.pk:
-                priv = p.PRIVACY_PUBLIC
-            else:
-                priv = p.privacyLoggedIn
+            if user is 'all': priv = p.PRIVACY_PUBLIC
+            else: priv = p.getPermissions(user)
 
-            if priv<=p.PRIVACY_REDACTED:
-                sleeper.displayName="[redacted]"
-            else:
-                sleeper.displayName=sleeper.username
+            if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
+            else: sleeper.displayName=sleeper.username
             if priv>p.PRIVACY_HIDDEN:
                 d={'time':sleeper.timeSleptByTime(start,end)}
                 d['user']=sleeper
                 if 'is_authenticated' in dir(user) and user.is_authenticated():
-                    if user.pk==sleeper.pk:
-                        d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
-                else:
-                    d['opcode'] = None
+                    if user.pk==sleeper.pk: d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
+                else: d['opcode'] = None
                 scored.append(d)
         scored.sort(key=lambda x: -x['time'])
-        for i in xrange(len(scored)):
-            scored[i]['rank']=i+1
+        for i in xrange(len(scored)): scored[i]['rank']=i+1
         return scored
 
 class FriendRequest(models.Model):
@@ -276,24 +368,27 @@ class Sleeper(User):
         sleeps = self.sleep_set.filter(end_time__gt=start,start_time__lt=end)
         return sum([min(s.end_time,end)-max(s.start_time,start) for s in sleeps],datetime.timedelta(0))
 
-    def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False):
+    def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False,includeMissing=False):
         if start==datetime.date.min and end==datetime.date.max:
-            sleeps = self.sleep_set.values('date','start_time','end_time')
+            sleeps = self.sleep_set.all()
+            allnighters = self.allnighter_set.all()
         else:
-            sleeps = self.sleep_set.filter(date__gte=start,date__lte=end).values('date','start_time','end_time')
+            sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
+            allnighters = self.allnighter_set.filter(date__gte=start,date__lte=end)
         if sleeps:
-            dates=map(lambda x: x['date'], sleeps)
-            first = min(dates)
-            last = max(dates)
+            allnighters=map(lambda x: x.date,allnighters)
+            dates=map(lambda x: x.date, sleeps)
+            first = min(itertools.chain(dates,allnighters))
+            last = max(itertools.chain(dates,allnighters))
             n = (last-first).days + 1
             dateRange = [first + datetime.timedelta(i) for i in range(0,n)]
-            byDays = [sum([(s['end_time']-s['start_time']).total_seconds() for s in filter(lambda x: x['date']==d,sleeps)]) for d in dateRange]
+            byDays = [sum([s.length().total_seconds() for s in filter(lambda x: x.date==d,sleeps)]) for d in dateRange]
             if hours:
                 byDays = map(lambda x: x/3600,byDays)
             if packDates:
-                return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i]} for i in range(0,n)]
+                return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i]} for i in range(0,n) if byDays[i]>0 or first + datetime.timedelta(i) in allnighters or includeMissing]
             else:
-                return byDays
+                return [byDays[i] for i in range(0,n) if byDays[i]>0 or first+datetime.timedelta(i) in allnighters or includeMissing]
         else:
             return []
 
@@ -303,7 +398,7 @@ class Sleeper(User):
             yield d
             d += datetime.timedelta(1)
 
-    def sleepWakeTime(self,t='end',start=datetime.date.today(),end=datetime.date.today()):
+    def sleepWakeTime(self,t='end',start=datetime.date.today(),end=datetime.date.today(), stdev = False):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
         if t=='end':
             f=Sleep.end_local_time
@@ -311,34 +406,35 @@ class Sleeper(User):
         elif t=='start':
             f=Sleep.start_local_time
             g = max
-        else:
-            return None
+        else: return None
         datestimes = [(s.date, f(s)) for s in sleeps if s.length() >= datetime.timedelta(hours=3)]
         daily={}
         for i in datestimes:
-            if i[0] in daily:
-                daily[i[0]]=g(daily[i[0]],i[1])
-            else:
-                daily[i[0]]=i[1]
+            if i[0] in daily: daily[i[0]]=g(daily[i[0]],i[1])
+            else: daily[i[0]]=i[1]
         seconds = [daily[t].time().hour*3600 + daily[t].time().minute*60 + daily[t].time().second - 86400 * (t - daily[t].date()).days for t in daily.viewkeys()]
         if daily:
-            av = sum(seconds)/len(seconds)
+            av = 1.0*sum(seconds)/len(seconds)
+            if stdev:
+                if len(daily) > 2: stdev = (sum([(av - s)**2 for s in seconds])/(len(seconds)-1.5))**0.5
+                else: stdev = False
             av = av%86400
-            return datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
+            sleepav =  datetime.time(int(math.floor(av/3600)), int(math.floor((av%3600)/60)), int(math.floor((av%60))))
+            return (sleepav, datetime.timedelta(seconds=stdev)) if stdev else sleepav
         else:
             return None
 
-    def goToSleepTime(self, date=datetime.date.today()):
-        return self.sleepWakeTime('start',date,date)
+    def goToSleepTime(self, date=datetime.date.today(), stdev = False):
+        return self.sleepWakeTime('start',date,date, stdev=stdev)
 
-    def avgGoToSleepTime(self, start = datetime.date.min, end=datetime.date.max):
-        return self.sleepWakeTime('start',start,end)
+    def avgGoToSleepTime(self, start = datetime.date.min, end=datetime.date.max, stdev = False):
+        return self.sleepWakeTime('start',start,end, stdev = stdev)
 
-    def wakeUpTime(self, date=datetime.date.today()):
-        return self.sleepWakeTime('end',date,date)
+    def wakeUpTime(self, date=datetime.date.today(), stdev = False):
+        return self.sleepWakeTime('end',date,date, stdev = stdev)
 
-    def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max):
-        return self.sleepWakeTime('end',start,end)
+    def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max, stdev = False):
+        return self.sleepWakeTime('end',start,end, stdev = stdev)
 
     def movingStats(self,start=datetime.date.min,end=datetime.date.max):
         sleep = self.sleepPerDay(start,end)
@@ -349,12 +445,15 @@ class Sleeper(User):
             d['avg']=avg
             if len(sleep)>2:
                 stDev = math.sqrt(sum(map(lambda x: (x-avg)**2, sleep))/(len(sleep)-1.5)) #subtracting 1.5 is correct according to wikipedia
+                posStDev = math.sqrt(sum(map(lambda x: min(0,x-avg)**2, sleep))/(len(sleep)-1.5)) #subtracting 1.5 is correct according to wikipedia
                 d['stDev']=stDev
+                d['posStDev']=posStDev
                 d['zScore']=avg-stDev
+                d['zPScore']=avg-posStDev
                 idealized = max(ideal, avg)
                 d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
         except:
-            pass 
+            pass
         try:
             offset = 60*60.
             avgRecip = 1/(sum(map(lambda x: 1/(offset+x),sleep))/len(sleep))-offset
@@ -365,7 +464,7 @@ class Sleeper(User):
             d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
+        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:
@@ -390,8 +489,11 @@ class Sleeper(User):
             avg = self.decaying(sleep,hl)
             d['avg']=avg
             stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl,True))
+            posStDev = math.sqrt(self.decaying(map(lambda x: min(0,x-avg)**2,sleep),hl,True))
             d['stDev']=stDev
+            d['posStDev']=posStDev
             d['zScore']=avg-stDev
+            d['zPScore']=avg-posStDev
             idealized = max(ideal, avg)
             d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
         except:
@@ -406,13 +508,24 @@ class Sleeper(User):
             d['avgLog']=avgLog
         except:
             pass
-        for k in ['avg','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
+        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
             if k not in d:
                 d[k]=datetime.timedelta(0)
             else:
                 d[k]=datetime.timedelta(0,d[k])
         return d
 
-class SchoolOrWorkPlace(models.Model):
-    name = models.CharField(max_length=255)
+class SleeperGroup(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    members = models.ManyToManyField(User,related_name='sleepergroups',blank=True,through='Membership')
 
+    def __unicode__(self):
+        return "SleeperGroup %s" % self.name
+
+class Membership(models.Model):
+    user=models.ForeignKey(User)
+    group=models.ForeignKey(SleeperGroup)
+    privacy=models.SmallIntegerField(choices=SleeperProfile.PRIVACY_CHOICES,default=SleeperProfile.PRIVACY_NORMAL,verbose_name='Privacy to members of the given group')
+
+    def __unicode__(self):
+        return "%s is a member of %s" % (self.user,self.group)

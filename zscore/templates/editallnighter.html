@@ -4,14 +4,12 @@
 {% block content %}
 {% load datetime_utils %}
 
-{% if sleep %}
-<h1>Edit Sleep (from {{start}} to {{end}} - {{tz}})</h1>
+{% if editing  %}
+<h1>Editing AllNighter ({{date}})</h1>
 {% else %}
-<h1>Create Sleep</h1>
+<h1>Create AllNighter</h1>
 {% endif %}
-
-{% if fromPartial %}<p>Sleep saved! You can edit it below</p>{% endif %}
-{% if success %}<p>Saved!</p>{% endif %}
+{% if success %}Saved!{% endif %}
 
 <form method="post">{% csrf_token %}
     <table>

@@ -1,0 +1,13 @@
+{% load datetime_utils %}
+{% if ft %}
+    Top Fourier modes of your sleep (for the past 30 days):
+    <table>
+        <tr> <td> Period </td> <td> Weight </td> </tr>
+        {% for m in topModes|slice:":5" %}
+        <tr> <td> {{m.length|floatformat:"-2"}} </td> <td> {{m.size|printHHMM}} </td> </tr>
+        {% endfor %}
+    </table>
+{% else %}
+<i>Enter at least 3 days of data to see Fourier data here!</i>
+{% endif %}
+

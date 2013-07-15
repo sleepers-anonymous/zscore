@@ -2,9 +2,10 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import *
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.core import serializers
 from django.db.models import Q
+from django.db import IntegrityError
 from django.core.exceptions import *
 
 from sleep.models import *
@@ -21,12 +22,15 @@ def faq(request):
 
 @login_required
 def mysleep(request):
-    return HttpResponse(render_to_string('sleep/mysleep.html',{},context_instance=RequestContext(request)))
+    return render_to_response('sleep/mysleep.html',{},context_instance=RequestContext(request))
 
 @login_required
 def editOrCreateAllnighter(request, allNighter = None, success=False):
     context = {'success': success}
+    prof = request.user.sleeperprofile
+    defaulttz = prof.timezone
     if allNighter: #We're editing an allnighter
+        context = {"editing": True}
         try:
             a = Allnighter.objects.get(pk=allNighter)
             if a.user != request.user: raise PermissionDenied
@@ -34,29 +38,57 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
         except Allnighter.MultipleObjectsReturned: return HttpResponseBadRequest('')
         except Allnighter.DoesNotExist: raise Http404
         if request.method == 'POST':
-            pass
+            form = AllNighterForm(request.user, request.POST, instance = a)
+        else:
+            form = AllNighterForm(request.user, instance=a, initial={"date": a.date})
+        context["date"] = a.date.strftime("%x")
+    else: #we're creating a new allnighter
+        if request.method == "POST":
+            form = AllNighterForm(request.user, request.POST, instance = Allnighter(user=request.user))
+        else:
+            if "withdate" in request.GET:
+                try:
+                    defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d")
+                except:
+                    defaultdate = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                defaultdate = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
+            form = AllNighterForm(request.user, initial={"date": str(defaultdate.date())})
+    if request.method == "POST":
+        if form.is_valid():
+            if "delete" in form.data and form.data["delete"] == "on":
+                if allNighter: a.delete()
+                return HttpResponseRedirect('/mysleep/')
+            new = form.save(commit=False)
+            if allNighter == None:
+                new.user = request.user
+                new.save()
+                form = AllNighterForm(request.user, instance=new)
+                return HttpResponseRedirect('/sleep/allnighter/success/')
+            else:
+                new.save()
+                return HttpResponseRedirect('/mysleep/')
+    context['form']=form
+    return render_to_response('editallnighter.html', context, context_instance=RequestContext(request))
 
 @login_required
 def editOrCreateSleep(request,sleep = None,success=False):
     context = {'success': success}
+    if "from" in request.GET and request.GET["from"] == "partial": context["fromPartial"] = True
     prof = request.user.sleeperprofile
     defaulttz = prof.timezone
-    if prof.use12HourTime:
-        fmt = "%I:%M %p %x"
-    else:
-        fmt = "%H:%M %x"
+    if prof.use12HourTime: fmt = "%I:%M %p %x"
+    else: fmt = "%H:%M %x"
     if sleep: # we're editing a sleep
         try:
             s = Sleep.objects.get(pk=sleep)
-            if s.user != request.user:
-                raise PermissionDenied
+            if s.user != request.user: raise PermissionDenied
             context['sleep'] = s
         except Sleep.MultipleObjectsReturned:
             return HttpResponseBadRequest('')
         except Sleep.DoesNotExist:
             raise Http404
-        if request.method == 'POST':
-            form = SleepForm(request.user, fmt, request.POST, instance=s)
+        if request.method == 'POST': form = SleepForm(request.user, fmt, request.POST, instance=s)
         else:
             initial = {
                     "start_time" : s.start_local_time().strftime(fmt),
@@ -79,6 +111,9 @@ def editOrCreateSleep(request,sleep = None,success=False):
             form = SleepForm(request.user, fmt, initial=initial)
     if request.method == 'POST':
         if form.is_valid():
+            if "delete" in form.data and form.data["delete"] == "on":
+                if sleep: s.delete()
+                return HttpResponseRedirect('/mysleep/')
             new = form.save(commit=False)
             if sleep == None:
                 new.user = request.user
@@ -89,29 +124,125 @@ def editOrCreateSleep(request,sleep = None,success=False):
                 new.save()
                 return HttpResponseRedirect('/mysleep/')
     context['form']=form
-    return HttpResponse(render_to_string('editsleep.html', context, context_instance=RequestContext(request)))
+    return render_to_response('editsleep.html', context, context_instance=RequestContext(request))
 
-def leaderboardLegacy(request,sortBy):
-    return HttpResponsePermanentRedirect('/leaderboard/?sort=%s' % sortBy)
+@login_required
+def graph(request):
+    return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
 
-def leaderboard(request):
-    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
+@login_required
+def groups(request):
+    return render_to_response('groups.html', {'groups': request.user.sleepergroups.all()}, context_instance=RequestContext(request))
+
+@login_required
+def createGroup(request):
+    if request.method == 'POST':
+        form = GroupForm(request.POST)
+        if form.is_valid():
+            g=form.save()
+            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn)
+            m.save()
+            return HttpResponseRedirect('/groups/manage/%s/' % g.id)
+    else:
+        form=GroupForm()
+    return render_to_response('create_group.html', {'form': form}, context_instance=RequestContext(request))
+
+@login_required
+def addMember(request):
+    if 'group' in request.POST and 'user' in request.POST:
+        gid = request.POST['group']
+        uid = request.POST['user']
+        gs = SleeperGroup.objects.filter(id=gid)
+        if len(gs)!=1 or request.user not in gs[0].members.all():
+            raise Http404
+        us = Sleeper.objects.filter(id=uid)
+        if len(us)!=1:
+            raise Http404
+        g=gs[0]
+        u=us[0]
+        if u not in g.members.all():
+            m=Membership(group=g,user=u,privacy=u.sleeperprofile.privacyLoggedIn)
+            m.save()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def removeMember(request):
+    if 'group' in request.POST and 'user' in request.POST:
+        gid = request.POST['group']
+        uid = request.POST['user']
+        gs = SleeperGroup.objects.filter(id=gid)
+        if len(gs)!=1 or request.user not in gs[0].members.all():
+            raise Http404
+        us = Sleeper.objects.filter(id=uid)
+        if len(us)!=1:
+            raise Http404
+        g=gs[0]
+        u=us[0]
+        for m in Membership.objects.filter(user=u,group=g):
+            m.delete()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def manageGroup(request,gid):
+    gs=SleeperGroup.objects.filter(id=gid)
+    if len(gs)!=1:
+        raise Http404
+    g=gs[0]
+    if request.user not in g.members.all():
+        raise PermissionDenied
+    context={'group':g}
+    if request.method == 'POST':
+        form=SleeperSearchForm(request.POST)
+        if form.is_valid():
+            us=User.objects.filter(username__icontains=form.cleaned_data['username'])
+            context['results']=us
+            context['count']=us.count()
+    else:
+        form = SleeperSearchForm()
+    context['form']=form
+    context['members']=g.members.all()
+    return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
+
+def leaderboard(request,group=None):
+    if 'sort' not in request.GET or request.GET['sort'] not in ['zPScore','posStDev','zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev']:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
-    ss = Sleeper.objects.sorted_sleepers(sortBy,request.user)
-    top = [ s for s in ss if s['rank']<=10 or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
+    if group is None:
+        lbSize=10
+    else:
+        gs = SleeperGroup.objects.filter(id=group)
+        if gs.count()!=1:
+            raise Http404
+        group = gs[0]
+        if request.user not in group.members.all():
+            raise PermissionDenied
+        nmembers = group.members.count()
+        lbSize=min(10,nmembers//2)
+    ss = Sleeper.objects.sorted_sleepers(sortBy=sortBy,user=request.user,group=group)
+    top = [ s for s in ss if s['rank']<=lbSize or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    lastDayWinner = Sleeper.objects.bestByTime(now-datetime.timedelta(1),now,request.user)[0]
+    recentWinner = Sleeper.objects.bestByTime(start=now-datetime.timedelta(3),end=now,user=request.user,group=group)[0]
+    if group:
+        allUsers = group.members.all()
+    else:
+        allUsers = Sleeper.objects.all()
+    number = allUsers.filter(sleep__isnull=False).distinct().count()
     context = {
+            'group' : group,
             'top' : top,
-            'lastDayWinner' : lastDayWinner,
-            'total' : Sleep.objects.totalSleep(),
-            'number' : Sleep.objects.all().values_list('user').distinct().count(),
+            'recentWinner' : recentWinner,
+            'total' : Sleep.objects.totalSleep(group=group),
+            'number' : number,
+            'leaderboard_valid': len(ss),
             }
-    return HttpResponse(render_to_string('leaderboard.html',context,context_instance=RequestContext(request)))
+    return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
 
-def creep(request,username=None, asOther=None):
+def creep(request,username=None):
     if not username:
         if request.user.is_anonymous():
             creepable=Sleeper.objects.filter(sleeperprofile__privacy__gte=SleeperProfile.PRIVACY_STATS)
@@ -127,13 +258,12 @@ def creep(request,username=None, asOther=None):
             followed = request.user.sleeperprofile.follows.order_by('username')
         total=creepable.distinct().count()
         if request.method == 'POST':
-            form=CreepSearchForm(request.POST)
+            form=SleeperSearchForm(request.POST)
             if form.is_valid():
                 users = creepable.filter(username__icontains=form.cleaned_data['username']).distinct()
                 count = users.count()
-                if count==1:
-                    return HttpResponseRedirect('/creep/%s/' % users[0].username)
-                else: 
+                if count==1: return HttpResponseRedirect('/creep/%s/' % users[0].username)
+                else:
                     context = {
                             'results' : users,
                             'count' : count,
@@ -142,55 +272,62 @@ def creep(request,username=None, asOther=None):
                             'total' : total,
                             'followed' : followed,
                             }
-                    return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
+                    return render_to_response('creepsearch.html',context,context_instance=RequestContext(request))
         else:
-            form = CreepSearchForm()
+            form = SleeperSearchForm()
         context = {
                 'form' : form,
                 'new' : True,
                 'total' : total,
                 'followed' : followed,
                 }
-        return HttpResponse(render_to_string('creepsearch.html',context,context_instance=RequestContext(request)))
+        return render_to_response('creepsearch.html',context,context_instance=RequestContext(request))
     else:
         context = {}
         try:
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
-            if user.is_anonymous():
-                priv = p.privacy
-            elif request.user.pk == user.pk:
-                priv = p.PRIVACY_PUBLIC
-                context["isself"] =True
-            elif request.user in p.friends.all():
-                priv = p.privacyFriends
+            if p.user_id == request.user.id and "as" in request.GET:
+                priv = p.getPermissions(request.GET['as'])
             else:
-                priv = p.privacyLoggedIn
-            if asOther:
-                otherD = {"friends":p.privacyFriends, "user": p.privacyLoggedIn,"anon": p.privacy}
-                if asOther in otherD: priv = min(priv, otherD[asOther])
-            if priv<=p.PRIVACY_NORMAL:
-                return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
+                priv = p.getPermissions(request.user)
+            if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True
+            if priv<=p.PRIVACY_NORMAL: return render_to_response('creepfailed.html',{},context_instance=RequestContext(request))
         except:
-            return HttpResponse(render_to_string('creepfailed.html',{},context_instance=RequestContext(request)))
+            return render_to_response('creepfailed.html',{},context_instance=RequestContext(request))
         context.update({'user' : user,'global' : user.decayStats()})
-        if priv>=p.PRIVACY_PUBLIC:
-            context['sleeps']=user.sleep_set.all().order_by('-end_time')
-        return HttpResponse(render_to_string('creep.html',context,context_instance=RequestContext(request)))
+        if priv>=p.PRIVACY_PUBLIC: context['sleeps']=user.sleep_set.all().order_by('-end_time')
+        if priv>=p.PRIVACY_GRAPHS:
+            if "type" in request.GET and request.GET["type"] == "graph": return render_to_response('graph.html',context,context_instance=RequestContext(request))
+            context["graphs"] = True
+        return render_to_response('creep.html',context,context_instance=RequestContext(request))
 
 @login_required
 def editProfile(request):
     p = request.user.sleeperprofile
-    if p.use12HourTime: fmt = "%I:%M %p %x"
-    else: fmt = "%H:%M %x"
+    if p.use12HourTime: fmt = "%I:%M %p"
+    else: fmt = "%H:%M"
     if request.method == 'POST':
-        form = SleeperProfileForm(request.POST, fmt, instance=p)
+        form = SleeperProfileForm(fmt, request.POST, instance=p)
+        context = {"form":form}
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/editprofile/')
+            return HttpResponseRedirect('/editprofile/?success=True')
+        else:
+            print form.errors.viewkeys()
+            for k in form.errors.viewkeys():
+                if "ideal" in k:
+                    context["page"] = 2
+                    break
     else:
-        form = SleeperProfileForm(fmt, instance=p)
-    return HttpResponse(render_to_string('editprofile.html', {'form': form},context_instance=RequestContext(request)))
+        initial = {"idealWakeupWeekend": p.idealWakeupWeekend.strftime(fmt),
+                "idealWakeupWeekday": p.idealWakeupWeekday.strftime(fmt),
+                "idealSleepTimeWeekend": p.idealSleepTimeWeekend.strftime(fmt),
+                "idealSleepTimeWeekday": p.idealSleepTimeWeekday.strftime(fmt),}
+        form = SleeperProfileForm(fmt, instance=p, initial = initial)
+        context = {"form":form}
+        if "success" in request.GET and request.GET["success"] == "True": context["success"] = True
+    return render_to_response('editprofile.html', context ,context_instance=RequestContext(request))
 
 @login_required
 def friends(request):
@@ -198,7 +335,7 @@ def friends(request):
     friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username')
     requests = request.user.requests.filter(friendrequest__accepted=None).order_by('user__username')
     if request.method == 'POST':
-        form=FriendSearchForm(request.POST)
+        form=SleeperSearchForm(request.POST)
         if form.is_valid():
             users = User.objects.filter(username__icontains=form.cleaned_data['username']).exclude(pk=request.user.pk).distinct()
             count = users.count()
@@ -210,16 +347,16 @@ def friends(request):
                     'friendfollow' : friendfollow,
                     'requests' : requests,
                     }
-            return HttpResponse(render_to_string('friends.html',context,context_instance=RequestContext(request)))
+            return render_to_response('friends.html',context,context_instance=RequestContext(request))
     else:
-        form = FriendSearchForm()
+        form = SleeperSearchForm()
     context = {
             'form' : form,
             'new' : True,
             'friendfollow' : friendfollow,
             'requests' : requests,
             }
-    return HttpResponse(render_to_string('friends.html',context,context_instance=RequestContext(request)))
+    return render_to_response('friends.html',context,context_instance=RequestContext(request))
             
 @login_required
 def requestFriend(request):
@@ -325,6 +462,44 @@ def createSleep(request):
     return HttpResponse('')
 
 @login_required
+def createPartialSleep(request):
+    timezone = request.user.sleeperprofile.timezone
+    start = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
+    try:
+        p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
+        p.save()
+        if "next" in request.GET: return HttpResponseRedirect(request.GET["next"])
+        return HttpResponseRedirect("/")
+    except IntegrityError:
+        return HttpResponseBadRequest('')
+
+@login_required
+def finishPartialSleep(request):
+    timezone = request.user.sleeperprofile.timezone
+    pytztimezone = pytz.timezone(timezone)
+    try:
+        p = request.user.partialsleep
+        start = p.start_time.astimezone(pytztimezone)
+        end = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
+        date = end.date()
+        s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
+        s.save()
+        p.delete()
+        return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
+    except PartialSleep.DoesNotExist:
+        return HttpResponseBadRequest('')
+
+@login_required
+def deletePartialSleep(request):
+    try:
+        p= request.user.partialsleep
+        p.delete()
+        if "next" in request.GET: return HttpResponseRedirect(request.GET["next"])
+        return HttpResponseRedirect("/")
+    except PartialSleep.DoesNotExist:
+        return HttpResponseBadRequest('')
+
+@login_required
 def deleteSleep(request):
     if 'id' in request.POST:
         i = request.POST['id']
@@ -335,6 +510,19 @@ def deleteSleep(request):
         if s.user != request.user:
             raise PermissionDenied
         s.delete()
+        return HttpResponse('')
+    return HttpResponseBadRequest('')
+
+@login_required
+def deleteAllnighter(request):
+    if 'id' in request.POST:
+        i = request.POST['id']
+        a = Allnighter.objects.filter(pk=i)
+        if len(a) == 0: raise Http404
+        a = a[0]
+        if a.user != request.user: raise PermissionDenied
+        print "hi"
+        a.delete()
         return HttpResponse('')
     return HttpResponseBadRequest('')
 

@@ -1,7 +1,7 @@
 {% if graphData|length > 1 %}
-  <canvas id="sleepChart" width="400" height="400"></canvas>
+<canvas id="sleepPerDayChart" width="{{side}}" height="400"></canvas>
   <script>
-    var chartData = {
+    var graphPerDayData = {
       labels : [
         {% for d in graphData %}
           "{{d.date}}",
@@ -29,7 +29,7 @@
       scaleStartValue : 1,
     }
 
-    var sleepChart = new Chart(document.getElementById("sleepChart").getContext("2d")).Line(chartData,chartOptions);
+    var sleepPerDayChart = new Chart(document.getElementById("sleepPerDayChart").getContext("2d")).Line(graphPerDayData,chartOptions);
   </script>
 {% else %}
   <i>Enter at least two days of data to see a pretty graph here!</i>
