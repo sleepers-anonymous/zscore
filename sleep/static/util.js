@@ -90,3 +90,21 @@ function removeMember(gid,uid,link) {
   });
 };
 
+function acceptInvite(id,link) {
+  $.post("/groups/accept/", {
+      "id" : id,
+      "accepted" : "True", 
+  }, function() {
+    link.innerHTML="accepted";
+  });
+};
+
+function rejectInvite(id,link) {
+  $.post("/groups/accept/", {
+      "id" : id,
+      "accepted" : "False", 
+  }, function() {
+    link.innerHTML="rejected";
+  });
+};
+

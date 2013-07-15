@@ -192,6 +192,10 @@ def displayGroupMember(context,group,user):
             })
     return context
 
+@register.inclusion_tag('inclusion/display_invite.html')
+def displayInvite(invite):
+    return {'invite' : invite}
+
 @register.inclusion_tag('inclusion/display_friend.html')
 def displayFriend(you,them,requested=False):
     prof = you.sleeperprofile

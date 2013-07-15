@@ -132,7 +132,11 @@ def graph(request):
 
 @login_required
 def groups(request):
-    return render_to_response('groups.html', {'groups': request.user.sleepergroups.all()}, context_instance=RequestContext(request))
+    context = {
+            'groups' : request.user.sleepergroups.all(),
+            'invites' : request.user.groupinvite_set.filter(accepted=None),
+            }
+    return render_to_response('groups.html', context, context_instance=RequestContext(request))
 
 @login_required
 def createGroup(request):
@@ -146,6 +150,25 @@ def createGroup(request):
     else:
         form=GroupForm()
     return render_to_response('create_group.html', {'form': form}, context_instance=RequestContext(request))
+
+@login_required
+def acceptInvite(request):
+    if 'id' in request.POST and 'accepted' in request.POST:
+        invites = GroupInvite.objects.filter(id=request.POST['id'],accepted=None)
+        if len(invites)!=1:
+            raise Http404
+        invite = invites[0]
+        if request.user.id is not invite.user_id:
+            raise PermissionDenied
+        if request.POST['accepted']=="True":
+            invite.accept()
+        else:
+            invite.reject()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+
 
 @login_required
 def inviteMember(request):
