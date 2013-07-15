@@ -22,6 +22,24 @@ def displayPartialButton(user, path = "/", size = 2.25):
     return context
 
 
+@register.inclusion_tag('inclusion/is_asleep.html', takes_context=True)
+def isAsleep(context, you, them):
+    p = them.sleeperprofile
+    if you.pk == them.pk and "as" in context["request"].GET:
+        priv = p.getPermissions(context["request"].GET["as"])
+    else:
+        priv = p.getPermissions(you)
+    if priv >= p.PRIVACY_MAX: #In case, for some goddamn reason, someone defines a privacy setting higher than PRIVACY_MAX
+        try:
+            partial = them.partialsleep
+            newcontext =  {"asleep": "probably asleep"}
+        except:
+            newcontext =  {"asleep": "probably awake"}
+        newcontext["user"] = them
+        return newcontext
+    else:
+        return {}
+
 @register.inclusion_tag('inclusion/sleep_stats.html',takes_context=True)
 def sleepStatsView(context, renderContent='html'):
     user = context['request'].user

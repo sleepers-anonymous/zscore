@@ -153,10 +153,10 @@ class Sleep(models.Model):
         """Gets the short of a time zone"""
         return self.getSleepTZ().tzname(datetime.datetime(self.date.year, self.date.month, self.date.day))
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         seconds = self.length().total_seconds()
         self.sleepcycles = seconds//5400
-        super(Sleep, self).save(**kwargs)
+        super(Sleep, self).save(*args,**kwargs)
 
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
@@ -185,7 +185,6 @@ class SleeperProfile(models.Model):
     PRIVACY_STATS = 50
     PRIVACY_PUBLIC = 100
     PRIVACY_GRAPHS = 150
-    PRIVACY_UBER = 200
     PRIVACY_MAX = 200
     PRIVACY_CHOICES = (
             (PRIVACY_HIDDEN, 'Hidden'),
@@ -194,7 +193,7 @@ class SleeperProfile(models.Model):
             (PRIVACY_STATS, 'Stats Public'),
             (PRIVACY_PUBLIC, 'Sleep Public'),
             (PRIVACY_GRAPHS, 'Graphs Public'),
-            (PRIVACY_UBER, 'Everything Public'),
+            (PRIVACY_MAX, 'Everything Public'),
             )
     privacy = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to anonymous users')
     privacyLoggedIn = models.SmallIntegerField(choices=PRIVACY_CHOICES,default=PRIVACY_NORMAL,verbose_name='Privacy to logged-in users')
@@ -252,6 +251,10 @@ class SleeperProfile(models.Model):
     def getUserTZ(self):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
+
+    def today(self):
+        """Returns a datetime.date object corresponding to the date the user thinks it is"""
+        return pytz.utc.localize(datetime.datetime.utcnow()).astimezone(self.getUserTZ()).date()
 
     def getPermissions(self, otherUser):
         """Returns the permissions an other user should have for me.
@@ -528,6 +531,7 @@ class Sleeper(User):
 class SleeperGroup(models.Model):
     name = models.CharField(max_length=255, unique=True)
     members = models.ManyToManyField(User,related_name='sleepergroups',blank=True,through='Membership')
+    defunctMembers = models.ManyToManyField(User, related_name='defunct+', blank=True)
     description = models.TextField(blank=True)
 
     def __unicode__(self):
@@ -550,8 +554,20 @@ class Membership(models.Model):
     group=models.ForeignKey(SleeperGroup)
     privacy=models.SmallIntegerField(choices=SleeperProfile.PRIVACY_CHOICES,default=SleeperProfile.PRIVACY_NORMAL,verbose_name='Privacy to members of the given group')
 
+    MEMBER = 0
+    ADMIN = 50
+    OWNER = 100
+
+    ROLE_CHOICES = (
+            (MEMBER, "member"),
+            (ADMIN, "administrator"),
+            (OWNER, "owner"),
+            )
+
+    role = models.SmallIntegerField(choices=ROLE_CHOICES,default=MEMBER)
+
     def __unicode__(self):
-        return "%s is a member of %s" % (self.user,self.group)
+        return "%s is a(n) %s of %s" % (self.user,self.get_role_display(),self.group)
 
 class GroupInvite(models.Model):
     user=models.ForeignKey(User)
