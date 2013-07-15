@@ -13,6 +13,7 @@ from sleep.forms import *
 
 import datetime
 import pytz
+import csv
 
 def home(request):
     return render(request, 'index.html')
@@ -356,6 +357,19 @@ def editProfile(request):
         context = {"form":form}
         if "success" in request.GET and request.GET["success"] == "True": context["success"] = True
     return render_to_response('editprofile.html', context ,context_instance=RequestContext(request))
+
+@login_required
+def exportSleeps(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="zscore_sleeps_' + request.user.username + '.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(["Start Time", "End Time", "Date", "Comments", "Timezone", "Quality"])
+
+    for s in request.user.sleep_set.all():
+        writer.writerow([s.start_local_time(), s.end_local_time(), s.date, s.comments, s.timezone, s.quality])
+
+    return response
 
 @login_required
 def friends(request):
