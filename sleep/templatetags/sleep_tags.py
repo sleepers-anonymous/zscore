@@ -192,6 +192,16 @@ def displayGroupMember(context,group,user):
             })
     return context
 
+@register.inclusion_tag('inclusion/display_invite.html')
+def displayInvite(invite):
+    return {'invite' : invite}
+
+@register.simple_tag
+def displayInvites(user):
+    gi = user.groupinvite_set.filter(accepted=None)
+    if gi: return " <b>(%s)</b>" % gi.count()
+    else: return ""
+
 @register.inclusion_tag('inclusion/display_friend.html')
 def displayFriend(you,them,requested=False):
     prof = you.sleeperprofile
@@ -208,6 +218,6 @@ def displayFriend(you,them,requested=False):
 
 @register.simple_tag
 def displayFriendRequests(user):
-    fr = FriendRequest.objects.filter(requestee=user,accepted=None)
+    fr = user.friendrequest_set.filter(accepted=None)
     if fr: return " <b>(%s)</b>" % fr.count()
     else: return ""

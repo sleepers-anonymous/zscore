@@ -6,6 +6,6 @@
     {% if member %}
     <td><a class="remove-member-button" onclick="removeMember({{group.id}},{{user.id}},this)" href="javascript:void(0);">remove</a></td>
     {% else %}
-    <td><a class="add-member-button" onclick="addMember({{group.id}},{{user.id}},this)" href="javascript:void(0);">add</a></td>
+    <td><a class="invite-member-button" onclick="inviteMember({{group.id}},{{user.id}},this)" href="javascript:void(0);">invite</a></td>
     {% endif %}
 </tr>
