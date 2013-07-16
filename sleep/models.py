@@ -7,6 +7,7 @@ import datetime
 import math
 import itertools
 import hashlib
+import re
 
 from zscore import settings
 
@@ -179,6 +180,8 @@ class SchoolOrWorkPlace(models.Model):
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default
+
+    #--------------------------------------Privacy Settings -----------------------
     PRIVACY_HIDDEN = -100
     PRIVACY_REDACTED = -50
     PRIVACY_NORMAL = 0
@@ -215,6 +218,7 @@ class SleeperProfile(models.Model):
     
     use12HourTime = models.BooleanField(default=False)
 
+    #----------------------------------------Mobile settings--------------------------
     FORCE_MOBILE = 2
     DETECT_MOBILE = 1
     FORCE_NONMOBILE = 0
@@ -225,11 +229,53 @@ class SleeperProfile(models.Model):
             )
 
     mobile = models.SmallIntegerField(choices=MOBILE_CHOICES, default=DETECT_MOBILE, verbose_name="Use mobile interface?")
+    
+    #------------------------------Regexes for mobile detection ------------------------------
+    userAgentsTestMatch = r'^(?:%s)' % '|'.join((
+        "w3c ", "acs-", "alav", "alca", "amoi", "audi",
+        "avan", "benq", "bird", "blac", "blaz", "brew",
+        "cell", "cldc", "cmd-", "dang", "doco", "eric",
+        "hipt", "inno", "ipaq", "java", "jigs", "kddi",
+        "keji", "leno", "lg-c", "lg-d", "lg-g", "lge-",
+        "maui", "maxo", "midp", "mits", "mmef", "mobi",
+        "mot-", "moto", "mwbp", "nec-", "newt", "noki",
+        "xda", "palm", "pana", "pant", "phil", "play",
+        "port", "prox", "qwap", "sage", "sams", "sany",
+        "sch-", "sec-", "send", "seri", "sgh-", "shar",
+        "sie-", "siem", "smal", "smar", "sony", "sph-",
+        "symb", "t-mo", "teli", "tim-", "tosh", "tsm-",
+        "upg1", "upsi", "vk-v", "voda", "wap-", "wapa",
+        "wapi", "wapp", "wapr", "webc", "winw", "xda-",))
 
+    userAgentsTestSearch = u"(?:%s)" % u'|'.join((
+        'up.browser', 'up.link', 'mmp', 'symbian', 'smartphone', 'midp',
+        'wap', 'phone', 'windows ce', 'pda', 'mobile', 'mini', 'palm',
+        'netfront', 'opera mobi',
+        ))
+
+    userAgentsException = u"(?:%s)" % u'|'.join((
+        'ipad',
+        ))
+
+    httpAcceptRegex = re.compile("application/vnd\.wap\.xhtml\+xml", re.IGNORECASE)
+
+    userAgentsTestMatchRegex = re.compile(userAgentsTestMatch, re.IGNORECASE)
+    userAgentsTestSearchRegex = re.compile(userAgentsTestSearch, re.IGNORECASE)
+    userAgentsExceptionSearchRegex = re.compile(userAgentsException, re.IGNORECASE)
+
+    #---------------------------End Regexes -------------------------------
+
+    #---------------------------Related to emails ---------------------------
     emailreminders = models.BooleanField(default=False)
+    
+    #---------------------------User customification -------------------------
     useGravatar = models.BooleanField(default=True)
 
+    #---------------------------Timezones------------------------------------
+
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
+
+    #--------------------------Ideal Sleep Metrics--------------------------------
 
     idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
     #Decimalfield restricts to two decimal places, float would not.
@@ -274,6 +320,27 @@ class SleeperProfile(models.Model):
         if today_interval[0] <= now <= today_interval[1]: return True
         tomorrow_interval = self.getIdealSleepInterval(today + datetime.timedelta(1))
         if tomorrow_interval[0] <= now <= tomorrow_interval[1]: return True
+        return False
+
+    def isMobile(self, request):
+        """Returns whether or not we should be assuming mobile or not"""
+        if self.mobile == 2: return True
+        if self.mobile == 0: return False
+
+        #Mostly taken from https://github.com/gregmuellegger/django-mobile/blob/master/django_mobile/middleware.py
+        #I didn't just use that code b/c I didn't want it to be middleware
+
+        if request.META.has_key('HTTP_USER_AGENT'):
+            userAgent = request.META["HTTP_USER_AGENT"]
+            #Test for common mobile values first:
+            if self.userAgentsTestSearchRegex.search(userAgent) and not self.userAgentsExceptionSearchRegex.search(userAgent): return True
+            #Nokia is apparently a special snowflake, according to the folks who developed django-mobile
+            if request.META.has_key('HTTP_ACCEPT'):
+                httpAccept = request.META["HTTP_ACCEPT"]
+                if self.httpAcceptRegex.search(httpAccept): return True
+            #Now test from the larger list
+            if self.userAgentsTestMatchRegex.match(userAgent): return True
+
         return False
 
     def getPermissions(self, otherUser):
