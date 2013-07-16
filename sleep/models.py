@@ -9,6 +9,7 @@ import math
 import itertools
 import hashlib
 import re
+import random
 
 from zscore import settings
 
@@ -270,7 +271,7 @@ class SleeperProfile(models.Model):
     emailreminders = models.BooleanField(default=False)
     emailSHA1 =  models.CharField(max_length=50, blank=True)
     emailSHA1GenerationDate = models.DateTimeField(default=now())
-    emailActivated = models.BooleanField(default=False) 
+    emailActivated = models.BooleanField(default=False)
 
     #---------------------------User customification -------------------------
     useGravatar = models.BooleanField(default=True)
@@ -289,6 +290,36 @@ class SleeperProfile(models.Model):
 
     idealSleepTimeWeekend = models.TimeField(default = datetime.time(0))
     idealSleepTimeWeekday = models.TimeField(default = datetime.time(23))
+
+    def activateEmail(self, sha):
+        """Activates the user's email address. Returns True on success and False on failure"""
+        if now() - self.emailSHA1GenerationDate < datetime.timedelta(7): #if I generated this key less than a week ago....
+            if sha == self.emailSHA1:
+                self.emailActivated = True
+                self.emailSHA1 = ''
+                self.save()
+                return True
+        return False
+
+    def genEmailSha(self, newemail = None, overrideTimeConstraint = False):
+        """Generates a new email SHA and emails it to the user. Returns True on success and False on failure"""
+        if not(overrideTimeConstraint) and (now() - self.emailSHA1GenerationDate > datetime.timedelta(hours=1)): return False
+        user_hash = hashlib.sha1(self.user.username).hexdigest()[:10]
+        random_salt = hashlib.sha1(str(random.random())).hexdigest()
+        sha = hashlib.sha1(random_salt + user_hash).hexdigest()
+        self.emailSHA1 = sha
+        self.emailSHA1GenerationDate = now()
+        self.emailActivated = False
+        self.save()
+        print sha
+        if newemail != None:
+            self.user.email = newemail
+            self.user.save()
+        text = "<html> Hi " + self.user.username + "! <br /><br />"
+        text += "Click on the following link in order to activate your email! <br /><br />"
+        text += "<a href='http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha +"</a> <br /><br />"
+        self.user.email_user("zScore email activation", text)
+        return True
 
     def getIdealSleep(self):
         """Returns idealSleep as a timedelta"""
