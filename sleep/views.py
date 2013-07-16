@@ -7,6 +7,7 @@ from django.core import serializers
 from django.db.models import Q
 from django.db import IntegrityError
 from django.core.exceptions import *
+from django.utils.timezone import now
 
 from sleep.models import *
 from sleep.forms import *
@@ -51,9 +52,9 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
                 try:
                     defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d")
                 except:
-                    defaultdate = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0, minute=0, second=0, microsecond=0)
+                    defaultdate = now().astimezone(pytz.timezone(defaulttz)).replace(hour=0, minute=0, second=0, microsecond=0)
             else:
-                defaultdate = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
+                defaultdate = now().astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
             form = AllNighterForm(request.user, initial={"date": str(defaultdate.date())})
     if request.method == "POST":
         if form.is_valid():
@@ -102,7 +103,7 @@ def editOrCreateSleep(request,sleep = None,success=False):
         if request.method == 'POST':
             form = SleepForm(request.user, fmt, request.POST, instance=Sleep(user=request.user))
         else:
-            today = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
+            today = now().astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
             initial = {
                     "start_time" : today.strftime(fmt),
                     "end_time" : today.strftime(fmt),
@@ -255,8 +256,8 @@ def leaderboard(request,group=None):
         lbSize=min(10,nmembers//2)
     ss = Sleeper.objects.sorted_sleepers(sortBy=sortBy,user=request.user,group=group)
     top = [ s for s in ss if s['rank']<=lbSize or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
-    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    recentWinner = Sleeper.objects.bestByTime(start=now-datetime.timedelta(3),end=now,user=request.user,group=group)[0]
+    n = now()
+    recentWinner = Sleeper.objects.bestByTime(start=n-datetime.timedelta(3),end=n,user=request.user,group=group)[0]
     if group:
         allUsers = group.members.all()
     else:
@@ -506,7 +507,7 @@ def createSleep(request):
 @login_required
 def createPartialSleep(request):
     timezone = request.user.sleeperprofile.timezone
-    start = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
+    start = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
     try:
         p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
         p.save()
@@ -522,7 +523,7 @@ def finishPartialSleep(request):
     try:
         p = request.user.partialsleep
         start = p.start_time.astimezone(pytztimezone)
-        end = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
+        end = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
         date = end.date()
         s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
         s.save()

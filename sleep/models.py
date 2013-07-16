@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import *
+from django.utils.timezone import now
 
 import pytz
 import datetime
@@ -300,7 +301,7 @@ class SleeperProfile(models.Model):
 
     def today(self):
         """Returns a datetime.date object corresponding to the date the user thinks it is"""
-        return pytz.utc.localize(datetime.datetime.utcnow()).astimezone(self.getUserTZ()).date()
+        return now().astimezone(self.getUserTZ()).date()
 
     def getIdealSleepInterval(self, date, timezone=None):
         """Returns (idealSleepTime,idealWakeTime) for a user on a specific date, localized"""
@@ -316,10 +317,10 @@ class SleeperProfile(models.Model):
     def isLikelyAsleep(self):
         today = self.today()
         today_interval = self.getIdealSleepInterval(today)
-        now = pytz.utc.localize(datetime.datetime.utcnow())
-        if today_interval[0] <= now <= today_interval[1]: return True
+        n = now()
+        if today_interval[0] <= n <= today_interval[1]: return True
         tomorrow_interval = self.getIdealSleepInterval(today + datetime.timedelta(1))
-        if tomorrow_interval[0] <= now <= tomorrow_interval[1]: return True
+        if tomorrow_interval[0] <= n <= tomorrow_interval[1]: return True
         return False
 
     def isMobile(self, request):
