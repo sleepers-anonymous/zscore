@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Membership.role'
         db.add_column('sleep_membership', 'role',
-                      self.gf('django.db.models.fields.SmallIntegerField')(default=0),
+                      self.gf('django.db.models.fields.SmallIntegerField')(default=50),
                       keep_default=False)
 
 
