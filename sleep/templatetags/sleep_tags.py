@@ -7,19 +7,21 @@ from numpy.fft import rfft
 register = template.Library()
 
 # Inclusion tags
-@register.inclusion_tag('inclusion/partial_sleep.html')
-def displayPartialButton(user, path = "/", size = 2.25):
+@register.inclusion_tag('inclusion/partial_sleep.html', takes_context=True)
+def displayPartialButton(context, user, path = "/", size = 1):
     if user.is_authenticated():
         try:
             p = user.partialsleep
-            context = {"hasPartial": 1}
+            newcontext = {"hasPartial": 1}
         except PartialSleep.DoesNotExist:
-            context = {"hasPartial": 2}
+            newcontext = {"hasPartial": 2}
+        finally:
+            if user.sleeperprofile.isMobile(context["request"]): size = size*2.25
     else:
-        context = {}
-    context["path"] = path
-    context["size"] = size
-    return context
+        newcontext = {}
+    newcontext["path"] = path
+    newcontext["size"] = size
+    return newcontext
 
 
 @register.inclusion_tag('inclusion/is_asleep.html', takes_context=True)
