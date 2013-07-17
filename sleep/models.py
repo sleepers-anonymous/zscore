@@ -303,7 +303,7 @@ class SleeperProfile(models.Model):
 
     def genEmailSha(self, newemail = None, overrideTimeConstraint = False):
         """Generates a new email SHA and emails it to the user. Returns True on success and False on failure"""
-        if not(overrideTimeConstraint) and (now() - self.emailSHA1GenerationDate > datetime.timedelta(hours=1)): return False
+        if not(overrideTimeConstraint) and (now() - self.emailSHA1GenerationDate < datetime.timedelta(hours=1)): return False
         user_hash = hashlib.sha1(self.user.username).hexdigest()[:10]
         random_salt = hashlib.sha1(str(random.random())).hexdigest()
         sha = hashlib.sha1(random_salt + user_hash).hexdigest()
