@@ -317,7 +317,7 @@ class SleeperProfile(models.Model):
             self.user.save()
         text = "<html> Hi " + self.user.username + "! <br /><br />"
         text += "Click on the following link in order to activate your email! <br /><br />"
-        text += "<a href='http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha +"</a> <br /><br />"
+        text += "<a href='http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha +"</a></html>"
         self.user.email_user("zScore email activation", text)
         return True
 
