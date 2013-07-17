@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+import datetime, pytz
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -8,15 +8,31 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Membership.role'
-        db.add_column('sleep_membership', 'role',
-                      self.gf('django.db.models.fields.SmallIntegerField')(default=50),
+        # Adding field 'SleeperProfile.emailSHA1'
+        db.add_column('sleep_sleeperprofile', 'emailSHA1',
+                      self.gf('django.db.models.fields.CharField')(default='', max_length=50, blank=True),
+                      keep_default=False)
+
+        # Adding field 'SleeperProfile.emailSHA1GenerationDate'
+        db.add_column('sleep_sleeperprofile', 'emailSHA1GenerationDate',
+                      self.gf('django.db.models.fields.DateTimeField')(default=pytz.utc.localize(datetime.datetime(2013, 7, 16, 0, 0))),
+                      keep_default=False)
+
+        # Adding field 'SleeperProfile.emailActivated'
+        db.add_column('sleep_sleeperprofile', 'emailActivated',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'Membership.role'
-        db.delete_column('sleep_membership', 'role')
+        # Deleting field 'SleeperProfile.emailSHA1'
+        db.delete_column('sleep_sleeperprofile', 'emailSHA1')
+
+        # Deleting field 'SleeperProfile.emailSHA1GenerationDate'
+        db.delete_column('sleep_sleeperprofile', 'emailSHA1GenerationDate')
+
+        # Deleting field 'SleeperProfile.emailActivated'
+        db.delete_column('sleep_sleeperprofile', 'emailActivated')
 
 
     models = {
@@ -120,6 +136,9 @@ class Migration(SchemaMigration):
         'sleep.sleeperprofile': {
             'Meta': {'object_name': 'SleeperProfile'},
             'autoAcceptGroups': ('django.db.models.fields.SmallIntegerField', [], {'default': '50'}),
+            'emailActivated': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'emailSHA1': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
+            'emailSHA1GenerationDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 7, 16, 0, 0)'}),
             'emailreminders': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'follows': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'follows+'", 'blank': 'True', 'to': "orm['auth.User']"}),
             'friends': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'friends+'", 'blank': 'True', 'to': "orm['auth.User']"}),

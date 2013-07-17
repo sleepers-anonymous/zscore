@@ -1,5 +1,6 @@
 from django import template
 from sleep.models import *
+from django.utils.timezone import now
 import datetime
 import pytz
 import numpy
@@ -7,19 +8,21 @@ from numpy.fft import rfft
 register = template.Library()
 
 # Inclusion tags
-@register.inclusion_tag('inclusion/partial_sleep.html')
-def displayPartialButton(user, path = "/", size = 2.25):
+@register.inclusion_tag('inclusion/partial_sleep.html', takes_context=True)
+def displayPartialButton(context, user, path = "/", size = 1):
     if user.is_authenticated():
         try:
             p = user.partialsleep
-            context = {"hasPartial": 1}
+            newcontext = {"hasPartial": 1}
         except PartialSleep.DoesNotExist:
-            context = {"hasPartial": 2}
+            newcontext = {"hasPartial": 2}
+        finally:
+            if user.sleeperprofile.isMobile(context["request"]): size = size*2.25
     else:
-        context = {}
-    context["path"] = path
-    context["size"] = size
-    return context
+        newcontext = {}
+    newcontext["path"] = path
+    newcontext["size"] = size
+    return newcontext
 
 
 @register.inclusion_tag('inclusion/is_asleep.html', takes_context=True)
@@ -54,8 +57,8 @@ def sleepStatsView(context, renderContent='html'):
     if sleeptime != None:
         if type(sleeptime) == tuple: context["sleeptime"], context["sleeptime_dev"] = sleeptime[0].strftime(timestyle), sleeptime[1]
         else: context["sleeptime"] = sleeptime.strftime(timestyle)
-    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    context['lastDay'] = sleeper.timeSleptByTime(now-datetime.timedelta(1),now)
+    n = now()
+    context['lastDay'] = sleeper.timeSleptByTime(n-datetime.timedelta(1),n)
     context['total'] = sleeper.timeSleptByDate()
     context['renderContent'] = renderContent
     return context
@@ -72,13 +75,13 @@ def sleepStatsTable(user):
 @register.inclusion_tag('inclusion/fourier_stats.html')
 def fourierStats(user,length=None):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    now=pytz.utc.localize(datetime.datetime.utcnow())
+    n = now()
     if length is None:
         start=datetime.date.min
         end=datetime.date.max
     else:
-        start=now-datetime.timedelta(length)
-        end=now
+        start=n-datetime.timedelta(length)
+        end=n
     sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
     if len(sleepPerDay)>3:
         ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]

@@ -3,4 +3,4 @@ zscore
 
 Sleeping competition app
 
-Dependencies: pytz
+Dependencies: pytz, numpy, matplotlib

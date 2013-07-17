@@ -40,6 +40,9 @@ urlpatterns = patterns('',
     url(r'^accounts/password/done/$', 'django.contrib.auth.views.password_reset_complete', {
             'template_name': 'users/password_reset_complete.html'
     }),
+    url(r'^accounts/emailconfirm/([0-9A-Za-z]+)/', 'zscore.views.emailConfirm'),
+    url(r'^accounts/editemail/', 'zscore.views.editEmail'),
+    url(r'^accounts/editemail/success/', 'zscore.views.editEmail', {'success': True}),
 
     # Pages
     url(r'^leaderboard/$', 'sleep.views.leaderboard'),
@@ -77,4 +80,5 @@ urlpatterns = patterns('',
     url(r'^sleep/editallnighter/(?P<allNighter>\d+)/', 'sleep.views.editOrCreateAllnighter'),
     url(r'^$', 'sleep.views.home'),
     url(r'^faq/$', 'sleep.views.faq'),
+    url(r'^sleep/export/$', 'sleep.views.exportSleeps'),
 )

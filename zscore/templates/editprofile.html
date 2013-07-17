@@ -21,6 +21,7 @@ $(function() {
             <li><a href="#tabs-general">General Settings</a></li>
             <li {% if page == 2 %}class="ui-tabs-active"{%endif%}><a href="#tabs-ideal">Idealized Settings</a></li>
             <li><a href="#tabs-privacy">Privacy Settings</a></li>
+            <li><a href="#tabs-experimental">Experimental Settings</a></li>
         </ul>
 
         <div id="tabs-general">
@@ -64,6 +65,14 @@ $(function() {
                 <i>Everything public:</i> In addition to all the benefits from <i>Graphs Public</i>, people will be able to stalk when you're <i>actually asleep</i>, if you use the punch.in/punch.out feature. Additionally, if we decide to add more privacy options, you will be defaulted to having the most permissive privacy setting
             </p>
             <p>If you choose not to use your Gravatar, you will have the default no-Gravatar displayed instead.</p>
+            <p><input type="submit" value="Save" /></p>
+        </div>
+
+        <div id="tabs-experimental">
+            Settings in this tab are even more alpha than the rest of the site, and are definitely not guarenteed to work.
+            <table>
+                <tr><td><label for="id_mobile">Use mobile site: </label></td><td>{{ form.mobile }}</td><td> {{form.mobile.errors }}</td></tr>
+            </table>
             <p><input type="submit" value="Save" /></p>
         </div>
 </div>

@@ -1,0 +1,17 @@
+{% extends "frame.html" %}
+
+{% block content %}
+<h3>Edit and Confirm Email</h3>
+{% if success %}
+<p>Success!</p>
+{% endif %}
+{% if timeout %}
+<p>It appears you've sent yourself an activation email within the last hour. In order to reduce spam, you're limited to one activation email per hour. If you really want your account to be active <i>right now</i>, send <a href="mailto:zscore-devs@mit.edu">us</a> an email!</a></p>
+{% endif %}
+<form method="POST"> {% csrf_token %}
+    <table>
+        {{form.as_table}}
+    </table>
+    <p><input type="submit" value="Save and send activation email" /></p>
+</form>
+{% endblock %}
