@@ -506,8 +506,9 @@ def createSleep(request):
 
 @login_required
 def createPartialSleep(request):
-    timezone = request.user.sleeperprofile.timezone
-    start = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
+    prof = request.user.sleeperprofile
+    timezone = prof.timezone
+    start = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0) + prof.getPunchInDelay()
     try:
         p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
         p.save()

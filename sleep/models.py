@@ -280,6 +280,8 @@ class SleeperProfile(models.Model):
 
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
 
+    punchInDelay = models.DecimalField(max_digits=4, decimal_places=2, default= 15, verbose_name="punch.in delay time, in minutes")
+
     #--------------------------Ideal Sleep Metrics--------------------------------
 
     idealSleep = models.DecimalField(max_digits=4, decimal_places=2, default = 7.5)
@@ -326,8 +328,12 @@ class SleeperProfile(models.Model):
         return datetime.timedelta(hours=float(self.idealSleep))
 
     def getFloatIdealSleep(self):
-        """Rtunes idealSleep as a float"""
+        """Retunes idealSleep as a float"""
         return float(self.idealSleep)
+
+    def getPunchInDelay(self):
+        """Return punchInDelay as a timedelta"""
+        return datetime.timedelta(minutes=float(self.punchInDelay))
 
     def getUserTZ(self):
         """Returns user timezone as a timezone object"""
