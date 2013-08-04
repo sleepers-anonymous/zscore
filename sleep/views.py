@@ -253,7 +253,7 @@ def leaderboard(request,group=None):
         if request.user not in group.members.all():
             raise PermissionDenied
         nmembers = group.members.count()
-        lbSize=min(10,nmembers//2)
+        lbSize=min(10,nmembers)
     ss = Sleeper.objects.sorted_sleepers(sortBy=sortBy,user=request.user,group=group)
     top = [ s for s in ss if s['rank']<=lbSize or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
     n = now()
