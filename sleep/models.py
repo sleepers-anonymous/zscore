@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import *
 from django.utils.timezone import now
+from django.core.mail import send_mail()
 
 import pytz
 import datetime
@@ -320,7 +321,7 @@ class SleeperProfile(models.Model):
         text = "<html> Hi " + self.user.username + "! <br /><br />"
         text += "Click on the following link in order to activate your email! <br /><br />"
         text += "<a href='http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha +"</a></html>"
-        self.user.email_user("zScore email activation", text)
+        send_mail( subject = "zScore email activation", message = "", html_message = text, recipient_list=[self.user.email])
         return True
 
     def getIdealSleep(self):
