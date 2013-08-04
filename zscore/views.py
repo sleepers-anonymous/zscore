@@ -20,7 +20,7 @@ def editEmail(request, success=False):
     if request.method == 'POST':
         form = genEmailShaForm(request.POST)
         if form.is_valid():
-            if user.sleeperprofile.genEmailSha(newemail = form.cleaned_data["email"]): return HttpResponseRedirect("/editemail/success/")
+            if user.sleeperprofile.genEmailSha(newemail = form.cleaned_data["email"]): return HttpResponseRedirect("/accounts/editemail/success/")
             context["timeout"] = True
             print "hi"
     else:
