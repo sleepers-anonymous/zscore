@@ -321,7 +321,7 @@ class SleeperProfile(models.Model):
         text = "<html> Hi " + self.user.username + "! <br /><br />"
         text += "Click on the following link in order to activate your email! <br /><br />"
         text += "<a href='http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha +"</a></html>"
-        send_mail( subject = "zScore email activation", message = "", html_content = text, recipient_list=[self.user.email])
+        send_mail( subject = "zScore email activation", message = "", recipient_list=[self.user.email], html_message = text)
         return True
 
     def getIdealSleep(self):
