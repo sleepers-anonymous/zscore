@@ -6,8 +6,9 @@ DATABASES = {
         'NAME': 'zscore',
         'OPTIONS': {
         },
+        'HOST': 'localhost',
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-        'USER': 'root',
+        'USER': 'zscore',
         'PASSWORD': '',                  # set me!
     }
 }
