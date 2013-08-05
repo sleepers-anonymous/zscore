@@ -690,6 +690,14 @@ class SleeperGroup(models.Model):
         if (autoAccept >= SleeperProfile.AUTO_ACCEPT_ALL or autoAccept >= SleeperProfile.AUTO_ACCEPT_FRIENDS and sleeper.sleeperprofile.friends.filter(id=inviter.id).exists()) and not GroupInvite.objects.filter(user=sleeper,group=self,accepted=False): # if they will auto-accept the request
             i.accept()
 
+    def request(self, sleeper):
+        if self.members.filter(id=sleeper.id).exists(): #if they're already a member of the group
+            raise ValueError, "Already member of group %s", self.name
+        if GroupRequest.objects.filter(user=sleeper, group=self).exists(): # if they've made a request in the past
+            return
+        i = GroupRequest(user=sleeper, group=self, accepted=None)
+        i.save()
+
     def delete(self, *args, **kwargs):
         """Override the delete function in order to remove all membership objects associated with a group first."""
         for m in tuple(self.membership_set.all()):
@@ -750,6 +758,26 @@ class GroupInvite(models.Model):
         self.accepted=True
         self.save()
     
+    def reject(self):
+        self.accepted=False
+        self.save()
+
+class GroupRequest(models.Model):
+    user = models.ForeignKey(User)
+    group = models.ForeignKey(SleeperGroup)
+    accepted = models.NullBooleanField()
+
+    def __unicode__(self):
+        return "%s requests admission to %s" % (self.user, self.group)
+
+    def accept(self, privacy = None):
+        if privacy is None:
+            privacy = self.user.sleeperprofle.privacyLoggedIn
+        m = Membership(user=self.user, group=self.group, privacy=privacy)
+        m.save()
+        self.accepted = True
+        self.save()
+
     def reject(self):
         self.accepted=False
         self.save()
