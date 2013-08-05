@@ -146,7 +146,7 @@ def createGroup(request):
         form = GroupForm(request.POST)
         if form.is_valid():
             g=form.save()
-            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn)
+            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn, role=50)
             m.save()
             return HttpResponseRedirect('/groups/manage/%s/' % g.id)
     else:
@@ -169,8 +169,6 @@ def acceptInvite(request):
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
-
-
 
 @login_required
 def inviteMember(request):
