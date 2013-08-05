@@ -138,6 +138,14 @@ def groups(request):
             'groups' : request.user.sleepergroups.all(),
             'invites' : request.user.groupinvite_set.filter(accepted=None),
             }
+    if request.method =="POST":
+        form = GroupSearchForm(request.POST)
+        if form.is_valid():
+            gs=SleeperGroup.objects.filter(name__icontains=form.cleaned_data['group'], privacy__gte=SleeperGroup.REQUEST)
+            context['results']=gs
+    else:
+        form = GroupSearchForm()
+    context["form"] = form
     return render_to_response('groups.html', context, context_instance=RequestContext(request))
 
 @login_required
@@ -146,7 +154,7 @@ def createGroup(request):
         form = GroupForm(request.POST)
         if form.is_valid():
             g=form.save()
-            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn, role=50)
+            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn, role__gte=Membership.ADMIN)
             m.save()
             return HttpResponseRedirect('/groups/manage/%s/' % g.id)
     else:
