@@ -10,7 +10,7 @@ class GroupForm(forms.ModelForm):
 
     class Meta:
         model=SleeperGroup
-        fields = ['name', 'description']
+        fields = ['name', 'privacy', 'description']
 
 class SleeperProfileForm(forms.ModelForm):
     idealWakeupWeekend = forms.CharField(max_length=30)
