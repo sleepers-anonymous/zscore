@@ -226,15 +226,14 @@ def manageGroup(request,gid):
     else:
         searchForm = SleeperSearchForm()
     if request.method == 'POST' and "GroupForm" in request.POST:
+        if context['isAdmin'] == False:
+            raise PermissionDenied
         groupForm = GroupForm(request.POST, instance=g)
         if groupForm.is_valid():
-            print groupForm.data
             if 'delete' in groupForm.data and groupForm.data['delete'] == 'on':
                 g.delete()
                 return HttpResponseRedirect('/groups/')
             groupForm.save()
-        else:
-            print groupForm
     else:
         groupForm = GroupForm(instance=g)
     context['searchForm']=searchForm
