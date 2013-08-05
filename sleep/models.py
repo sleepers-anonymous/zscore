@@ -679,11 +679,11 @@ class SleeperGroup(models.Model):
         if (autoAccept >= SleeperProfile.AUTO_ACCEPT_ALL or autoAccept >= SleeperProfile.AUTO_ACCEPT_FRIENDS and sleeper.sleeperprofile.friends.filter(id=inviter.id).exists()) and not GroupInvite.objects.filter(user=sleeper,group=self,accepted=False): # if they will auto-accept the request
             i.accept()
 
-    def delete(self, args, **kwargs):
+    def delete(self, *args, **kwargs):
         """Override the delete function in order to remove all membership objects associated with a group first."""
-        for m in self.membership_set.all():
+        for m in tuple(self.membership_set.all()):
             m.delete()
-        self.delete(args, **kwargs)
+        super(SleeperGroup, self).delete(args, **kwargs)
 
 class Membership(models.Model):
     user=models.ForeignKey(User)
