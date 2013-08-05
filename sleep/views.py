@@ -216,6 +216,33 @@ def removeMember(request):
         return HttpResponseBadRequest('')
 
 @login_required
+def groupRequest(request):
+    if 'group' in request.POST:
+        gid = request.POST['group']
+        gs = SleeperGroup.objects.filter(id=gid)
+        if gs.count() != 1: raise Http404
+        g = gs[0]
+        if g.privacy < SleeperGroup.REQUEST: raise PermissionDenied
+        g.request(request.user)
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def groupJoin(request):
+    if 'group' in request.POST:
+        gid = request.POST['group']
+        gs = SleeperGroup.objects.filter(id=gid)
+        if gs.count() != 1: raise Http404
+        g = gs[0]
+        if g.privacy < SleeperGroup.PUBLIC: raise PermissionDenied
+        m = Membership(user = request.user, group = g, privacy = request.user.sleeperprofile.privacyLoggedIn)
+        m.save()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
 def manageGroup(request,gid):
     gs=SleeperGroup.objects.filter(id=gid)
     if len(gs)!=1:
