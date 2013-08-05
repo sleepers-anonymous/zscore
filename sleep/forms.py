@@ -6,6 +6,8 @@ import pytz
 import datetime
 
 class GroupForm(forms.ModelForm):
+    delete = forms.BooleanField(required=False)
+
     class Meta:
         model=SleeperGroup
         fields = ['name', 'description']

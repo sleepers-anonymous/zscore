@@ -215,7 +215,7 @@ def manageGroup(request,gid):
     g=gs[0]
     if request.user not in g.members.all():
         raise PermissionDenied
-    context={'group':g}
+    context={'group':g, 'isAdmin': (request.user.membership_set.get(group = g).role >= 50)}
     if request.method == 'POST' and "SleeperSearchForm" in request.POST:
         searchForm=SleeperSearchForm(request.POST)
         if searchForm.is_valid():
@@ -228,7 +228,13 @@ def manageGroup(request,gid):
     if request.method == 'POST' and "GroupForm" in request.POST:
         groupForm = GroupForm(request.POST, instance=g)
         if groupForm.is_valid():
+            print groupForm.data
+            if 'delete' in groupForm.data and groupForm.data['delete'] == 'on':
+                g.delete()
+                return HttpResponseRedirect('/groups/')
             groupForm.save()
+        else:
+            print groupForm
     else:
         groupForm = GroupForm(instance=g)
     context['searchForm']=searchForm
