@@ -679,6 +679,11 @@ class SleeperGroup(models.Model):
         if (autoAccept >= SleeperProfile.AUTO_ACCEPT_ALL or autoAccept >= SleeperProfile.AUTO_ACCEPT_FRIENDS and sleeper.sleeperprofile.friends.filter(id=inviter.id).exists()) and not GroupInvite.objects.filter(user=sleeper,group=self,accepted=False): # if they will auto-accept the request
             i.accept()
 
+    def delete(self, args, **kwargs):
+        """Override the delete function in order to remove all membership objects associated with a group first."""
+        for m in self.membership_set.all():
+            m.delete()
+        self.delete(args, **kwargs)
 
 class Membership(models.Model):
     user=models.ForeignKey(User)
@@ -697,6 +702,18 @@ class Membership(models.Model):
 
     def __unicode__(self):
         return "%s is a(n) %s of %s" % (self.user,self.get_role_display(),self.group)
+
+    def makeAdmin(self):
+        self.role = 50
+        self.save()
+
+    def makeMember(self):
+        otherAdmins = self.group.membership_set.filter(role__gte=50).count()
+        if otherAdmins >= 2:
+            self.role = 0
+            self.save()
+        else:
+            raise ValueError, "Cannot remove last admin of a group"
 
 class GroupInvite(models.Model):
     user=models.ForeignKey(User)
