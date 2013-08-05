@@ -665,6 +665,17 @@ class SleeperGroup(models.Model):
     defunctMembers = models.ManyToManyField(User, related_name='defunct+', blank=True)
     description = models.TextField(blank=True)
 
+    PUBLIC = 100
+    REQUEST = 50
+    CLOSED = 0
+    PRIVACY_OPTIONS = (
+            (PUBLIC,"public"),
+            (REQUEST,"request-only"),
+            (CLOSED,"closed"),
+            )
+            
+    privacy = models.SmallIntegerField(choices=PRIVACY_OPTIONS, default=REQUEST, verbose_name="Group privacy setting")
+
     def __unicode__(self):
         return "SleeperGroup %s" % self.name
 
