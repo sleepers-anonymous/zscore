@@ -1,5 +1,9 @@
 import datetime, pytz, math
 
+def overlap(a,b):
+    """Calculates the overlap present in two seperate time intervals"""
+    return max(min(a[1], b[1]) - max(a[0],b[0]), datetime.timedelta(0))
+
 def dgsin(degree):
     return math.sin(math.radians(degree))
 

@@ -11,8 +11,10 @@ import itertools
 import hashlib
 import re
 import random
+from operator import add
 
 from zscore import settings
+from sleep import utils
 
 TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 
@@ -126,7 +128,14 @@ class Sleep(models.Model):
 
     def score(self, nightValue = 1.0):
         p = self.user.sleeperprofile
-        pass
+        length = self.length().total_seconds()
+        tz = self.getSleepTZ()
+        idealToday = p.getIdealSleepInterval(self.date, tz)
+        idealYesterday = p.getIdealSleepInterval(self.date - datetime.timedelta(1), tz)
+        idealTomorrow = p.getIdealSleepInterval(self.date + datetime.timedelta(1), tz)
+        inIdeal = reduce(add, [utils.overlap((self.start_time, self.end_time), i) for i in [idealToday, idealYesterday, idealTomorrow]], datetime.timedelta(0)).total_seconds()
+        score = nightValue*inIdeal + length - inIdeal
+        return datetime.timedelta(seconds=score)
 
     def validate_unique(self, exclude=None):
         overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
