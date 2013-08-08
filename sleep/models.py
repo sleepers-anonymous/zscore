@@ -481,7 +481,10 @@ class SleeperManager(models.Manager):
             sleepers = Sleeper.objects.filter(sleepergroups=group)
         sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
         scored=[]
-        myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
+        if user.is_authenticated():
+            myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
+        else:
+            myGroupIDs=[]
         for sleeper in sleepers:
             p = sleeper.sleeperprofile
             if user is 'all': priv = p.PRIVACY_PUBLIC
