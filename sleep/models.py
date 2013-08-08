@@ -42,16 +42,18 @@ class SleepManager(models.Manager):
         atTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
             tz = pytz.timezone(sleep.timezone)
-            startDate = sleep.start_time.astimezone(tz).date()
-            endDate = sleep.end_time.astimezone(tz).date()
+            startLocal = sleep.start_local_time()
+            endLocal = sleep.end_local_time()
+            startDate = startLocal.date()
+            endDate = endLocal.date()
             dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
             for d in dr:
                 if d == startDate:
-                    startTime = sleep.start_time.astimezone(tz).time()
+                    startTime = startLocal.time()
                 else:
                     startTime = datetime.time(0)
                 if d == endDate:
-                    endTime = sleep.end_time.astimezone(tz).time()
+                    endTime = endLocal.time()
                 else:
                     endTime = datetime.time(23,59)
                 for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
@@ -412,7 +414,7 @@ class SleeperProfile(models.Model):
             return getattr(self, otherD[otherUser])
         elif otherUser == None or otherUser.is_anonymous():
             return self.privacy
-        elif otherUser.pk == self.user.pk:
+        elif otherUser.id == self.user_id:
             return self.PRIVACY_MAX
 
         choices=[self.privacy,self.privacyLoggedIn]
@@ -440,14 +442,18 @@ class SleeperManager(models.Manager):
             sleepers = Sleeper.objects.all()
         else:
             sleepers = Sleeper.objects.filter(sleepergroups=group)
-        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set')
+        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
         scored=[]
         extra=[]
+        if 'is_authenticated' in dir(user) and user.is_authenticated():
+            myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
+        else:
+            myGroupIDs=[]
         for sleeper in sleepers:
-            if len(sleeper.sleepPerDay())>2 and sleeper.sleepPerDay(packDates=True)[-1]['date'] >= datetime.date.today()-datetime.timedelta(5):
+            if sleeper.sleep_set.count()>2 and sleeper.sleepPerDay(packDates=True)[-1]['date'] >= datetime.date.today()-datetime.timedelta(5):
                 p = sleeper.sleeperprofile
                 if user is 'all': priv = p.PRIVACY_PUBLIC
-                else: priv = p.getPermissions(user)
+                else: priv = p.getPermissions(user,otherUserGroupIDs=myGroupIDs)
 
                 if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
                 else: sleeper.displayName=sleeper.username
@@ -481,7 +487,7 @@ class SleeperManager(models.Manager):
             sleepers = Sleeper.objects.filter(sleepergroups=group)
         sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
         scored=[]
-        if user.is_authenticated():
+        if 'is_authenticated' in dir(user) and user.is_authenticated():
             myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
         else:
             myGroupIDs=[]
@@ -540,13 +546,14 @@ class Sleeper(User):
             sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
             allnighters = self.allnighter_set.filter(date__gte=start,date__lte=end)
         if sleeps:
-            allnighters=map(lambda x: x.date,allnighters)
-            dates=map(lambda x: x.date, sleeps)
+            allnighters=[x.date for x in iter(allnighters)] #map(lambda x: x.date,allnighters)
+            sleeps=list(iter(sleeps))
+            dates=[x.date for x in sleeps] #map(lambda x: x.date, sleeps)
             first = min(itertools.chain(dates,allnighters))
             last = max(itertools.chain(dates,allnighters))
             n = (last-first).days + 1
             dateRange = [first + datetime.timedelta(i) for i in range(0,n)]
-            byDays = [sum([s.length().total_seconds() for s in filter(lambda x: x.date==d,sleeps)]) for d in dateRange]
+            byDays = [sum([s.length().total_seconds() for s in sleeps if s.date==d]) for d in dateRange]
             if hours:
                 byDays = map(lambda x: x/3600,byDays)
             if packDates:
