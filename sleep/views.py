@@ -154,7 +154,7 @@ def createGroup(request):
         form = GroupForm(request.POST)
         if form.is_valid():
             g=form.save()
-            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn, role__gte=Membership.ADMIN)
+            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn, role=Membership.ADMIN)
             m.save()
             return HttpResponseRedirect('/groups/manage/%s/' % g.id)
     else:
