@@ -396,10 +396,12 @@ class SleeperProfile(models.Model):
 
         return False
 
-    def getPermissions(self, otherUser):
+    def getPermissions(self, otherUser, otherUserGroupIDs=None):
         """Returns the permissions an other user should have for me.
         
         Pass either a user, or a string, like "friends", "user", "anon", if the user should be allowed to override.
+
+        Use otherUserGroups iff you know what you're doing for efficiency.
         """
         otherD = {
                 "friends": "privacyFriends",
@@ -418,7 +420,7 @@ class SleeperProfile(models.Model):
             choices.append(self.privacyFriends)
         #we really want to be able to filter the queryset, but it's probably prefetched, so don't.  (See Django #17001.)  I think this is probably the most efficient even though it's not ideal.
         myGs = list(self.user.membership_set.all())
-        otherGIDs = map(lambda x: x.id, otherUser.sleepergroups.all())
+        otherGIDs = otherUserGroupIDs if otherUserGroupIDs is not None else map(lambda x: x.id, otherUser.sleepergroups.all())
         bothGs = [m.privacy for m in myGs if m.group_id in otherGIDs]
         choices.extend(bothGs)
         return max(choices)
@@ -477,17 +479,18 @@ class SleeperManager(models.Manager):
             sleepers = Sleeper.objects.all()
         else:
             sleepers = Sleeper.objects.filter(sleepergroups=group)
-        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set')
+        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
         scored=[]
+        myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
         for sleeper in sleepers:
             p = sleeper.sleeperprofile
             if user is 'all': priv = p.PRIVACY_PUBLIC
-            else: priv = p.getPermissions(user)
+            else: priv = p.getPermissions(user,otherUserGroupIDs=myGroupIDs)
 
             if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
             else: sleeper.displayName=sleeper.username
             if priv>p.PRIVACY_HIDDEN:
-                d={'time':sleeper.timeSleptByTime(start,end)}
+                d={'time':sleeper.timeSleptByTime(start,end,noFilter=True)}
                 d['user']=sleeper
                 if 'is_authenticated' in dir(user) and user.is_authenticated():
                     if user.pk==sleeper.pk: d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
@@ -517,9 +520,14 @@ class Sleeper(User):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
         return sum([s.end_time-s.start_time for s in sleeps],datetime.timedelta(0))
 
-    def timeSleptByTime(self,start=datetime.datetime.min,end=datetime.datetime.max):
-        sleeps = self.sleep_set.filter(end_time__gt=start,start_time__lt=end)
-        return sum([min(s.end_time,end)-max(s.start_time,start) for s in sleeps],datetime.timedelta(0))
+    def timeSleptByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,noFilter=False):
+        '''Use noFilter if you want to prefetch stuff.  If in doubt, leave it False.'''
+        if noFilter:
+            sleeps = self.sleep_set.all()
+            return sum([min(s.end_time,end)-max(s.start_time,start) for s in sleeps if s.end_time>=start and s.start_time<=end],datetime.timedelta(0))
+        else:
+            sleeps = self.sleep_set.filter(end_time__gt=start,start_time__lt=end)
+            return sum([min(s.end_time,end)-max(s.start_time,start) for s in sleeps],datetime.timedelta(0))
 
     def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False,includeMissing=False):
         if start==datetime.date.min and end==datetime.date.max:
