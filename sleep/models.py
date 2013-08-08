@@ -704,9 +704,10 @@ class Sleeper(User):
             d['zPScore']=avg-posStDev
             idealized = max(ideal, avg)
             d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
+            d['consistent'] = self.consistencyStat(end = end, decay = True, hl = hl)
         except:
             pass
-        d['consistent'] = self.consistencyStat(end = end, decay = True, hl = hl)
+
         try:
             offset = 60*60.
             avgRecip = 1/(self.decaying(map(lambda x: 1/(offset+x),sleep),hl))-offset
