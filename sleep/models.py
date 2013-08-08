@@ -674,14 +674,14 @@ class Sleeper(User):
                             atTime[i] += 2**(-(lastdate-sleep.date).days/float(hl))
                         else:
                             atTime[i]+=1
-        numerator = sum(map(lambda x: x**3, atTime))
+        numerator = sum(map(lambda x: x**2, atTime))
         if decay:
             numDays = sum([2**(-i/float(hl)) for i in range(0,(lastdate-firstdate).days + 1)])
         else:
             numDays = (lastdate - firstdate).days + 1
-        denominator = sum(atTime) * numDays ** 2
+        denominator = sum(atTime) * numDays
         try:
-            return int(100 * float(numerator)/denominator)
+            return int(1000 * float(numerator)/denominator)
         except:
             return 0
 
