@@ -175,4 +175,8 @@ try:
     INSTALLED_APPS += LOCAL_INSTALLED_APPS
 except:
     pass
+try:
+    MIDDLEWARE_CLASSES += LOCAL_MIDDLEWARE_CLASSES
+except:
+    pass
 

@@ -396,10 +396,12 @@ class SleeperProfile(models.Model):
 
         return False
 
-    def getPermissions(self, otherUser):
+    def getPermissions(self, otherUser, otherUserGroupIDs=None):
         """Returns the permissions an other user should have for me.
         
         Pass either a user, or a string, like "friends", "user", "anon", if the user should be allowed to override.
+
+        Use otherUserGroups iff you know what you're doing for efficiency.
         """
         otherD = {
                 "friends": "privacyFriends",
@@ -418,7 +420,7 @@ class SleeperProfile(models.Model):
             choices.append(self.privacyFriends)
         #we really want to be able to filter the queryset, but it's probably prefetched, so don't.  (See Django #17001.)  I think this is probably the most efficient even though it's not ideal.
         myGs = list(self.user.membership_set.all())
-        otherGIDs = map(lambda x: x.id, otherUser.sleepergroups.all())
+        otherGIDs = otherUserGroupIDs if otherUserGroupIDs is not None else map(lambda x: x.id, otherUser.sleepergroups.all())
         bothGs = [m.privacy for m in myGs if m.group_id in otherGIDs]
         choices.extend(bothGs)
         return max(choices)
@@ -477,17 +479,21 @@ class SleeperManager(models.Manager):
             sleepers = Sleeper.objects.all()
         else:
             sleepers = Sleeper.objects.filter(sleepergroups=group)
-        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set')
+        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
         scored=[]
+        if user.is_authenticated():
+            myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
+        else:
+            myGroupIDs=[]
         for sleeper in sleepers:
             p = sleeper.sleeperprofile
             if user is 'all': priv = p.PRIVACY_PUBLIC
-            else: priv = p.getPermissions(user)
+            else: priv = p.getPermissions(user,otherUserGroupIDs=myGroupIDs)
 
             if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
             else: sleeper.displayName=sleeper.username
             if priv>p.PRIVACY_HIDDEN:
-                d={'time':sleeper.timeSleptByTime(start,end)}
+                d={'time':sleeper.timeSleptByTime(start,end,noFilter=True)}
                 d['user']=sleeper
                 if 'is_authenticated' in dir(user) and user.is_authenticated():
                     if user.pk==sleeper.pk: d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
@@ -517,9 +523,14 @@ class Sleeper(User):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
         return sum([s.end_time-s.start_time for s in sleeps],datetime.timedelta(0))
 
-    def timeSleptByTime(self,start=datetime.datetime.min,end=datetime.datetime.max):
-        sleeps = self.sleep_set.filter(end_time__gt=start,start_time__lt=end)
-        return sum([min(s.end_time,end)-max(s.start_time,start) for s in sleeps],datetime.timedelta(0))
+    def timeSleptByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,noFilter=False):
+        '''Use noFilter if you want to prefetch stuff.  If in doubt, leave it False.'''
+        if noFilter:
+            sleeps = self.sleep_set.all()
+            return sum([min(s.end_time,end)-max(s.start_time,start) for s in sleeps if s.end_time>=start and s.start_time<=end],datetime.timedelta(0))
+        else:
+            sleeps = self.sleep_set.filter(end_time__gt=start,start_time__lt=end)
+            return sum([min(s.end_time,end)-max(s.start_time,start) for s in sleeps],datetime.timedelta(0))
 
     def sleepPerDay(self,start=datetime.date.min,end=datetime.date.max,packDates=False,hours=False,includeMissing=False):
         if start==datetime.date.min and end==datetime.date.max:
@@ -605,6 +616,7 @@ class Sleeper(User):
                 d['zPScore']=avg-posStDev
                 idealized = max(ideal, avg)
                 d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
+                d['consistent'] = self.consistencyStat(start = start, end = end)
         except:
             pass
         try:
@@ -623,6 +635,49 @@ class Sleeper(User):
             else:
                 d[k]=datetime.timedelta(0,d[k])
         return d
+
+    def consistencyStat(self,res=1, start = datetime.date.today() + datetime.timedelta(-14), end = datetime.date.max, decay = False, hl = None):
+        sleeps = self.sleep_set.all()
+        atTime = [0] * (24 * 60 / res)
+        firstdate = datetime.date.max
+        lastdate = datetime.date.min
+        try:
+            firstdate = min([sleep.date for sleep in sleeps if sleep.date >= start])
+            lastdate = max([sleep.date for sleep in sleeps if sleep.date <= end])
+        except:
+            #if no sleeps in that range
+            return 0
+        for sleep in sleeps:
+            if sleep.date <= end and sleep.date >= start:
+                tz = pytz.timezone(sleep.timezone)
+                startDate = sleep.start_time.astimezone(tz).date()
+                endDate = sleep.end_time.astimezone(tz).date()
+                dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
+                for d in dr:
+                    if d == startDate:
+                        startTime = sleep.start_time.astimezone(tz).time()
+                    else:
+                        startTime = datetime.time(0)
+                    if d == endDate:
+                        endTime = sleep.end_time.astimezone(tz).time()
+                    else:
+                        endTime = datetime.time(23,59)
+                    for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
+                        if decay:
+                            atTime[i] += 2**(-(lastdate-sleep.date).days/float(hl))
+                        else:
+                            atTime[i]+=1
+        numerator = sum(map(lambda x: x**3, atTime))
+        if decay:
+            numDays = sum([2**(-i/float(hl)) for i in range(0,(lastdate-firstdate).days + 1)])
+        else:
+            numDays = (lastdate - firstdate).days + 1
+        denominator = sum(atTime) * numDays ** 2
+        try:
+            return int(100 * float(numerator)/denominator)
+        except:
+            return 0
+
 
     def decaying(self,data,hl,stDev=False):
         s = 0
@@ -649,8 +704,10 @@ class Sleeper(User):
             d['zPScore']=avg-posStDev
             idealized = max(ideal, avg)
             d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
+            d['consistent'] = self.consistencyStat(end = end, decay = True, hl = hl)
         except:
             pass
+
         try:
             offset = 60*60.
             avgRecip = 1/(self.decaying(map(lambda x: 1/(offset+x),sleep),hl))-offset
