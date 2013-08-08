@@ -13,7 +13,7 @@ Another way of accounting for consistent sleep is to have some sort of diminishi
 
 <p>The <b>idealDev</b> measures your deviance from max(the amount of sleep you set as your ideal amount of sleep, the average amount of sleep you got).</p>
 
-<p>The <b>consistent</b> metric measures how consistent the <i>times</i> when you slept were, not how consistent the length of your sleep was. If <i>f(t)</i> is the probability considered over your sleep history that you're asleep at time <i>t</i>, <b>consistent</b> is the integral from midnight to midnight of <i>f</i> cubed, over the integral of <i>f</i>, all multiplied by 100. If you sleep at exactly the same time every day, your score will be 100; otherwise, it will be less. </p>
+<p>The <b>consistent</b> metric measures how consistent the <i>times</i> when you slept were, not how consistent the length of your sleep was. This is the probability (multiplied by 1000) that if you pick a random point when you were asleep, and then pick a random day, you were asleep at that time on that day too. If you sleep at exactly the same time every day, your score will be 1000; otherwise, it will be less. </p>
 
 <p><i>Q: Over what time period are the stats computed?  And what's this exponentially decaying thing?</i></p>
 <p>A: The exponentially decaying average is a weighted average over all time, where the sleep from <i>n</i> days ago has a weight of 2<sup>-<i>n</i>/4</sup>, i.e., the weights have a half-life of 4 days.  This counts all sleep, but counts recent sleep (the last week or so) for the most.  We also compute averages over all time ("global") and over the last 7 days ("weekly").  The leaderboard uses the exponentially decaying average.</p>
