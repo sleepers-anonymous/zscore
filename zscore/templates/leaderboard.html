@@ -26,6 +26,7 @@
         <td><a href="?sort=stDev">stDev</a></td>
         <td><a href="?sort=posStDev">posStDev</a></td>
         <td><a href="?sort=idealDev">idealDev</a></td>
+	<td><a href="?sort=consistent">consistent</a></td>
     </tr>
   {% for s in top %}
   <tr {% if s.opcode == "me" %} style="background-color:#DEF2FF" {% endif %}>
@@ -41,6 +42,7 @@
     <td> {{s.stDev|printHHMM}} </td>
     <td> {{s.posStDev|printHHMM}} </td>
     <td> {{s.idealDev|printHHMM}}</td>
+    <td> {{s.consistent}} </td>
   </tr>
   {% endfor %}
 </table>
