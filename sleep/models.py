@@ -827,7 +827,7 @@ class Membership(models.Model):
         if otherMembers >= 2:
             self.delete()
         else:
-            raise ValueError, "You appear to be the last member of this group. Care to delete it instead?"
+            self.group.delete()
 
 class GroupInvite(models.Model):
     user=models.ForeignKey(User)

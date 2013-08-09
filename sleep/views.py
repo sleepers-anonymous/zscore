@@ -210,7 +210,7 @@ def removeMember(request):
         g=gs[0]
         u=us[0]
         for m in Membership.objects.filter(user=u,group=g):
-            m.delete()
+            m.removeMember()
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
