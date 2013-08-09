@@ -1,0 +1,26 @@
+{% extends "frame.html" %}
+
+{% block content %}
+{% load datetime_utils %}
+{% load sleep_tags %}
+{% load graphs %}
+{% load gravatar %}
+{% if group %}
+<h1> {{group.name}} graphs </h1>
+{% else %}
+<h1> Graphs </h1>
+{% endif %}
+
+{% graphSleepTimes group=group %}
+<br/>
+<i>At what times users were asleep.</i>
+<br/>
+{% graphSleepStartEndTimes group=group %}
+<br/>
+<i>Green is when users go to sleep, red is when they wake up.</i>
+<br/>
+{% graphSleepLengths group=group %}
+<br/>
+<i>How long users slept at a time.</i>
+
+{% endblock %}
