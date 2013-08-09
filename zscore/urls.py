@@ -47,6 +47,8 @@ urlpatterns = patterns('',
     # Pages
     url(r'^leaderboard/$', 'sleep.views.leaderboard'),
     url(r'^leaderboard/(\d+)/$', 'sleep.views.leaderboard'),
+    url(r'^graphs/$', 'sleep.views.graphs'),
+    url(r'^graphs/(\d+)/$', 'sleep.views.graphs'),
     url(r'^mysleep/$', 'sleep.views.mysleep'),
     url(r'^sleep/simple/$', 'sleep.views.editOrCreateSleep'),
     url(r'^sleep/simple/success/$', 'sleep.views.editOrCreateSleep', {'success' : True}),
