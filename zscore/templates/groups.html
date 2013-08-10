@@ -59,7 +59,7 @@ Create a group <a href="/groups/create/">here</a>.
 {% endfor %}
 </table>
 {% else %}
-No groups found matching that search, sorry.
+{% if noresults %} No groups found matching that search, sorry.{% endif %}
 {% endif %}
 
 {% endblock %}

@@ -143,6 +143,7 @@ def groups(request):
         if form.is_valid():
             gs=SleeperGroup.objects.filter(name__icontains=form.cleaned_data['group'], privacy__gte=SleeperGroup.REQUEST).exclude(members=request.user)
             context['results']=gs
+            if gs.count() == 0 : context["noresults"] = True
     else:
         form = GroupSearchForm()
     context["form"] = form
@@ -250,7 +251,10 @@ def manageGroup(request,gid):
     g=gs[0]
     if request.user not in g.members.all():
         raise PermissionDenied
-    context={'group':g, 'isAdmin': (request.user.membership_set.get(group = g).role >= 50)}
+    context={
+            'group':g,
+            'isAdmin': (request.user.membership_set.get(group = g).role >= 50),
+            }
     if request.method == 'POST' and "SleeperSearchForm" in request.POST:
         searchForm=SleeperSearchForm(request.POST)
         if searchForm.is_valid():
@@ -274,6 +278,7 @@ def manageGroup(request,gid):
     context['searchForm']=searchForm
     context['groupForm']=groupForm
     context['members']=g.members.all()
+    if context['isAdmin']: context['requests'] = g.grouprequest_set.all()
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):

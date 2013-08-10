@@ -35,14 +35,16 @@
 
 <h3>Edit Group</h3>
 <form method="post">{% csrf_token %}
-    {{groupForm.name.as_hidden}}
     <table>
-        <tr><td><label for="id_privacy">Group Privacy: </label></td><td>{{groupForm.privacy}}</td><td>{{groupForm.privacy.errors}}</td></tr>
-        <tr><td><label for="id_description">Description: </label></td><td>{{groupForm.description}}</td><td>{{groupForm.description.errors}}</td></tr>
-        <tr><td><label for="id_delete">Delete Group: </label></td><td>{{groupForm.delete}}</td><td>{{groupForm.delete.errors}}</td></tr>
+        {{groupForm.as_table}}
     </table>
     <p><input type="submit" value="Save" name="GroupForm"/></p>
 </form>
-{% endif %}
 
+<h3>Requests</h3>
+{% for r in requests %}
+    {% displayUser r.user %}
+{% endfor %}
+
+{% endif %}
 {% endblock %}

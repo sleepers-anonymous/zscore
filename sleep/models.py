@@ -779,7 +779,7 @@ class SleeperGroup(models.Model):
 
     def request(self, sleeper):
         if self.members.filter(id=sleeper.id).exists(): #if they're already a member of the group
-            raise ValueError, "Already member of group %s", self.name
+            raise ValueError, "Already member of group " +  self.name
         if GroupRequest.objects.filter(user=sleeper, group=self).exists(): # if they've made a request in the past
             return
         i = GroupRequest(user=sleeper, group=self, accepted=None)
