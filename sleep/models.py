@@ -244,41 +244,6 @@ class SleeperProfile(models.Model):
 
     mobile = models.SmallIntegerField(choices=MOBILE_CHOICES, default=DETECT_MOBILE, verbose_name="Use mobile interface?")
     
-    #------------------------------Regexes for mobile detection ------------------------------
-    userAgentsTestMatch = r'^(?:%s)' % '|'.join((
-        "w3c ", "acs-", "alav", "alca", "amoi", "audi",
-        "avan", "benq", "bird", "blac", "blaz", "brew",
-        "cell", "cldc", "cmd-", "dang", "doco", "eric",
-        "hipt", "inno", "ipaq", "java", "jigs", "kddi",
-        "keji", "leno", "lg-c", "lg-d", "lg-g", "lge-",
-        "maui", "maxo", "midp", "mits", "mmef", "mobi",
-        "mot-", "moto", "mwbp", "nec-", "newt", "noki",
-        "xda", "palm", "pana", "pant", "phil", "play",
-        "port", "prox", "qwap", "sage", "sams", "sany",
-        "sch-", "sec-", "send", "seri", "sgh-", "shar",
-        "sie-", "siem", "smal", "smar", "sony", "sph-",
-        "symb", "t-mo", "teli", "tim-", "tosh", "tsm-",
-        "upg1", "upsi", "vk-v", "voda", "wap-", "wapa",
-        "wapi", "wapp", "wapr", "webc", "winw", "xda-",))
-
-    userAgentsTestSearch = u"(?:%s)" % u'|'.join((
-        'up.browser', 'up.link', 'mmp', 'symbian', 'smartphone', 'midp',
-        'wap', 'phone', 'windows ce', 'pda', 'mobile', 'mini', 'palm',
-        'netfront', 'opera mobi',
-        ))
-
-    userAgentsException = u"(?:%s)" % u'|'.join((
-        'ipad',
-        ))
-
-    httpAcceptRegex = re.compile("application/vnd\.wap\.xhtml\+xml", re.IGNORECASE)
-
-    userAgentsTestMatchRegex = re.compile(userAgentsTestMatch, re.IGNORECASE)
-    userAgentsTestSearchRegex = re.compile(userAgentsTestSearch, re.IGNORECASE)
-    userAgentsExceptionSearchRegex = re.compile(userAgentsException, re.IGNORECASE)
-
-    #---------------------------End Regexes -------------------------------
-
     #---------------------------Related to emails ---------------------------
     emailreminders = models.BooleanField(default=False)
     emailSHA1 =  models.CharField(max_length=50, blank=True)
@@ -389,13 +354,13 @@ class SleeperProfile(models.Model):
         if request.META.has_key('HTTP_USER_AGENT'):
             userAgent = request.META["HTTP_USER_AGENT"]
             #Test for common mobile values first:
-            if self.userAgentsTestSearchRegex.search(userAgent) and not self.userAgentsExceptionSearchRegex.search(userAgent): return True
+            if utils.userAgentsTestSearchRegex.search(userAgent) and not utils.userAgentsExceptionSearchRegex.search(userAgent): return True
             #Nokia is apparently a special snowflake, according to the folks who developed django-mobile
             if request.META.has_key('HTTP_ACCEPT'):
                 httpAccept = request.META["HTTP_ACCEPT"]
-                if self.httpAcceptRegex.search(httpAccept): return True
+                if utils.httpAcceptRegex.search(httpAccept): return True
             #Now test from the larger list
-            if self.userAgentsTestMatchRegex.match(userAgent): return True
+            if utils.userAgentsTestMatchRegex.match(userAgent): return True
 
         return False
 

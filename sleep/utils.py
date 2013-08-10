@@ -1,4 +1,4 @@
-import datetime, pytz, math
+import datetime, pytz, math, re
 
 def overlap(a,b):
     """Calculates the overlap present in two seperate time intervals"""
@@ -14,6 +14,39 @@ def julian(date):
     m = date.month + 12*a - 3
 
     return date.day + (153*m + 2)//5 +365*y +y//4 - y//100 + y//400 - 32045
+
+#------------------------------Regexes for mobile detection ------------------------------
+userAgentsTestMatch = r'^(?:%s)' % '|'.join((
+        "w3c ", "acs-", "alav", "alca", "amoi", "audi",
+        "avan", "benq", "bird", "blac", "blaz", "brew",
+        "cell", "cldc", "cmd-", "dang", "doco", "eric",
+        "hipt", "inno", "ipaq", "java", "jigs", "kddi",
+        "keji", "leno", "lg-c", "lg-d", "lg-g", "lge-",
+        "maui", "maxo", "midp", "mits", "mmef", "mobi",
+        "mot-", "moto", "mwbp", "nec-", "newt", "noki",
+        "xda", "palm", "pana", "pant", "phil", "play",
+        "port", "prox", "qwap", "sage", "sams", "sany",
+        "sch-", "sec-", "send", "seri", "sgh-", "shar",
+        "sie-", "siem", "smal", "smar", "sony", "sph-",
+        "symb", "t-mo", "teli", "tim-", "tosh", "tsm-",
+        "upg1", "upsi", "vk-v", "voda", "wap-", "wapa",
+        "wapi", "wapp", "wapr", "webc", "winw", "xda-",))
+
+userAgentsTestSearch = u"(?:%s)" % u'|'.join((
+        'up.browser', 'up.link', 'mmp', 'symbian', 'smartphone', 'midp',
+        'wap', 'phone', 'windows ce', 'pda', 'mobile', 'mini', 'palm',
+        'netfront', 'opera mobi',
+        ))
+
+userAgentsException = u"(?:%s)" % u'|'.join((
+        'ipad',
+        ))
+
+httpAcceptRegex = re.compile("application/vnd\.wap\.xhtml\+xml", re.IGNORECASE)
+
+userAgentsTestMatchRegex = re.compile(userAgentsTestMatch, re.IGNORECASE)
+userAgentsTestSearchRegex = re.compile(userAgentsTestSearch, re.IGNORECASE)
+userAgentsExceptionSearchRegex = re.compile(userAgentsException, re.IGNORECASE)
 
 #def sunriseset(date, lat, lon):
 #    """Takes a Gregorian calendar date and calculates the sunrise and sunset times"""
