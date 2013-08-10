@@ -244,46 +244,12 @@ class SleeperProfile(models.Model):
 
     mobile = models.SmallIntegerField(choices=MOBILE_CHOICES, default=DETECT_MOBILE, verbose_name="Use mobile interface?")
     
-    #------------------------------Regexes for mobile detection ------------------------------
-    userAgentsTestMatch = r'^(?:%s)' % '|'.join((
-        "w3c ", "acs-", "alav", "alca", "amoi", "audi",
-        "avan", "benq", "bird", "blac", "blaz", "brew",
-        "cell", "cldc", "cmd-", "dang", "doco", "eric",
-        "hipt", "inno", "ipaq", "java", "jigs", "kddi",
-        "keji", "leno", "lg-c", "lg-d", "lg-g", "lge-",
-        "maui", "maxo", "midp", "mits", "mmef", "mobi",
-        "mot-", "moto", "mwbp", "nec-", "newt", "noki",
-        "xda", "palm", "pana", "pant", "phil", "play",
-        "port", "prox", "qwap", "sage", "sams", "sany",
-        "sch-", "sec-", "send", "seri", "sgh-", "shar",
-        "sie-", "siem", "smal", "smar", "sony", "sph-",
-        "symb", "t-mo", "teli", "tim-", "tosh", "tsm-",
-        "upg1", "upsi", "vk-v", "voda", "wap-", "wapa",
-        "wapi", "wapp", "wapr", "webc", "winw", "xda-",))
-
-    userAgentsTestSearch = u"(?:%s)" % u'|'.join((
-        'up.browser', 'up.link', 'mmp', 'symbian', 'smartphone', 'midp',
-        'wap', 'phone', 'windows ce', 'pda', 'mobile', 'mini', 'palm',
-        'netfront', 'opera mobi',
-        ))
-
-    userAgentsException = u"(?:%s)" % u'|'.join((
-        'ipad',
-        ))
-
-    httpAcceptRegex = re.compile("application/vnd\.wap\.xhtml\+xml", re.IGNORECASE)
-
-    userAgentsTestMatchRegex = re.compile(userAgentsTestMatch, re.IGNORECASE)
-    userAgentsTestSearchRegex = re.compile(userAgentsTestSearch, re.IGNORECASE)
-    userAgentsExceptionSearchRegex = re.compile(userAgentsException, re.IGNORECASE)
-
-    #---------------------------End Regexes -------------------------------
-
     #---------------------------Related to emails ---------------------------
     emailreminders = models.BooleanField(default=False)
     emailSHA1 =  models.CharField(max_length=50, blank=True)
     emailSHA1GenerationDate = models.DateTimeField(default=now())
     emailActivated = models.BooleanField(default=False)
+    emailTime = models.TimeField(default = datetime.time(12), verbose_name="Reminder email time")
 
     #---------------------------User customification -------------------------
     useGravatar = models.BooleanField(default=True)
@@ -388,15 +354,22 @@ class SleeperProfile(models.Model):
         if request.META.has_key('HTTP_USER_AGENT'):
             userAgent = request.META["HTTP_USER_AGENT"]
             #Test for common mobile values first:
-            if self.userAgentsTestSearchRegex.search(userAgent) and not self.userAgentsExceptionSearchRegex.search(userAgent): return True
+            if utils.userAgentsTestSearchRegex.search(userAgent) and not utils.userAgentsExceptionSearchRegex.search(userAgent): return True
             #Nokia is apparently a special snowflake, according to the folks who developed django-mobile
             if request.META.has_key('HTTP_ACCEPT'):
                 httpAccept = request.META["HTTP_ACCEPT"]
-                if self.httpAcceptRegex.search(httpAccept): return True
+                if utils.httpAcceptRegex.search(httpAccept): return True
             #Now test from the larger list
-            if self.userAgentsTestMatchRegex.match(userAgent): return True
+            if utils.userAgentsTestMatchRegex.match(userAgent): return True
 
         return False
+
+    def getSimplePermissions(self, otherUser):
+        """Returns the permissions an arbitrary user should have for me, ignoring groups and friends, and thus only differentiating between logged-in and anonymous users."""
+        if otherUser.is_authenticated():
+            return self.privacyLoggedIn
+        else:
+            return self.privacy
 
     def getPermissions(self, otherUser, otherUserGroupIDs=None):
         """Returns the permissions an other user should have for me.
@@ -440,38 +413,40 @@ class SleeperManager(models.Manager):
     def sorted_sleepers(self,sortBy='zScore',user=None,group=None):
         if group is None:
             sleepers = Sleeper.objects.all()
+            sleepers=sleepers.select_related('sleeperprofile','sleeperprofile__user').prefetch_related('sleep_set','allnighter_set')
         else:
             sleepers = Sleeper.objects.filter(sleepergroups=group)
-        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
+            sleepers=sleepers.select_related('sleeperprofile','sleeperprofile__user').prefetch_related('sleep_set','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
+            if 'is_authenticated' in dir(user) and user.is_authenticated():
+                myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
+            else:
+                myGroupIDs=[]
         scored=[]
         extra=[]
-        if 'is_authenticated' in dir(user) and user.is_authenticated():
-            myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
-        else:
-            myGroupIDs=[]
         for sleeper in sleepers:
             if sleeper.sleep_set.count()>2 and sleeper.sleepPerDay(packDates=True)[-1]['date'] >= datetime.date.today()-datetime.timedelta(5):
                 p = sleeper.sleeperprofile
-                if user is 'all': priv = p.PRIVACY_PUBLIC
-                else: priv = p.getPermissions(user,otherUserGroupIDs=myGroupIDs)
+                if user is 'all':
+                    priv = p.PRIVACY_PUBLIC
+                elif group is None:
+                    priv = p.getSimplePermissions(user)
+                else:
+                    priv = p.getPermissions(user,otherUserGroupIDs=myGroupIDs)
 
-                if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
-                else: sleeper.displayName=sleeper.username
+                if priv<=p.PRIVACY_REDACTED:
+                    sleeper.displayName="[redacted]"
+                else:
+                    sleeper.displayName=sleeper.username
                 if priv>p.PRIVACY_HIDDEN:
                     d=sleeper.decayStats()
                     d['user']=sleeper
-                    if 'is_authenticated' in dir(user) and user.is_authenticated():
-                        if user.pk==sleeper.pk: d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
-                    else: d['opcode'] = None
                     scored.append(d)
             else:
-                if 'is_authenticated' in dir(user) and user.is_authenticated() and user.pk == sleeper.pk:
-                    d = sleeper.decayStats()
-                    d['rank']='n/a'
-                    sleeper.displayName=sleeper.username
-                    d['user']=sleeper
-                    d['opcode']='me'
-                    extra.append(d)
+                d = sleeper.decayStats()
+                d['rank']='n/a'
+                sleeper.displayName=sleeper.username
+                d['user']=sleeper
+                extra.append(d)
         if sortBy in ['stDev', 'posStDev','idealDev']:
             scored.sort(key=lambda x: x[sortBy])
         else:
@@ -483,27 +458,31 @@ class SleeperManager(models.Manager):
     def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None):
         if group is None:
             sleepers = Sleeper.objects.all()
+            sleepers=sleepers.select_related('sleeperprofile','sleeperprofile__user').prefetch_related('sleep_set','allnighter_set')
         else:
             sleepers = Sleeper.objects.filter(sleepergroups=group)
-        sleepers=sleepers.prefetch_related('sleep_set','sleeperprofile','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
+            sleepers=sleepers.select_related('sleeperprofile','sleeperprofile__user').prefetch_related('sleep_set','allnighter_set','sleeperprofile__friends','sleeperprofile__user','sleeperprofile__user__membership_set')
+            if 'is_authenticated' in dir(user) and user.is_authenticated():
+                myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
+            else:
+                myGroupIDs=[]
         scored=[]
-        if 'is_authenticated' in dir(user) and user.is_authenticated():
-            myGroupIDs = map(lambda x: x.id, user.sleepergroups.all())
-        else:
-            myGroupIDs=[]
         for sleeper in sleepers:
             p = sleeper.sleeperprofile
-            if user is 'all': priv = p.PRIVACY_PUBLIC
-            else: priv = p.getPermissions(user,otherUserGroupIDs=myGroupIDs)
+            if user is 'all':
+                priv = p.PRIVACY_PUBLIC
+            elif group is None:
+                priv = p.getSimplePermissions(user)
+            else:
+                priv = p.getPermissions(user,otherUserGroupIDs=myGroupIDs)
 
-            if priv<=p.PRIVACY_REDACTED: sleeper.displayName="[redacted]"
-            else: sleeper.displayName=sleeper.username
+            if priv<=p.PRIVACY_REDACTED:
+                sleeper.displayName="[redacted]"
+            else:
+                sleeper.displayName=sleeper.username
             if priv>p.PRIVACY_HIDDEN:
                 d={'time':sleeper.timeSleptByTime(start,end,noFilter=True)}
                 d['user']=sleeper
-                if 'is_authenticated' in dir(user) and user.is_authenticated():
-                    if user.pk==sleeper.pk: d['opcode']='me' #I'm using opcodes to mark specific users as self or friend.
-                else: d['opcode'] = None
                 scored.append(d)
         scored.sort(key=lambda x: -x['time'])
         for i in xrange(len(scored)): scored[i]['rank']=i+1

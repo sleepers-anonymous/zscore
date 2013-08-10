@@ -311,6 +311,16 @@ def leaderboard(request,group=None):
             }
     return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
 
+def graphs(request,group=None):
+    if group is not None:
+        gs = SleeperGroup.objects.filter(id=group)
+        if gs.count()!=1:
+            raise Http404
+        group = gs[0]
+        if request.user not in group.members.all():
+            raise PermissionDenied
+    return render_to_response('graphs.html',{'group': group},context_instance=RequestContext(request))
+
 def creep(request,username=None):
     if not username:
         if request.user.is_anonymous():
