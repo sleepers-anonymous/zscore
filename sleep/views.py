@@ -141,7 +141,7 @@ def groups(request):
     if request.method =="POST":
         form = GroupSearchForm(request.POST)
         if form.is_valid():
-            gs=SleeperGroup.objects.filter(name__icontains=form.cleaned_data['group'], privacy__gte=SleeperGroup.REQUEST)
+            gs=SleeperGroup.objects.filter(name__icontains=form.cleaned_data['group'], privacy__gte=SleeperGroup.REQUEST).exclude(members=request.user)
             context['results']=gs
     else:
         form = GroupSearchForm()

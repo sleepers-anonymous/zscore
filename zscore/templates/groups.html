@@ -3,6 +3,23 @@
 {% load sleep_tags %}
 
 {% block content %}
+<script type="text/javascript">
+    function requestGroup(id) {
+        $.post("/groups/request/", {
+            "group": id
+            }, function() {
+            location.reload();
+        });
+    };
+    function joinGroup(id) {
+        $.post("/groups/join/", {
+            "group": id
+            }, function() {
+            location.reload();
+        });
+    };
+</script>
+
 <h1>Groups</h1>
 
 {% if invites %}
@@ -14,12 +31,11 @@
 </table>
 {% endif %}
 
-
 {% if groups %}
 <h3>My Groups</h3>
 <table>
 {% for group in groups %}
-    {% displayMyGroup group %}
+    {% displayMyGroup group 1 %}
 {% endfor %}
 </table>
 {% else %}
@@ -37,9 +53,13 @@ Create a group <a href="/groups/create/">here</a>.
 </form>
 
 {% if results %}
-{% for g in results %}
-<p>{{g.name}}</p>
+<table>
+{% for group in results %}
+    {% displayMyGroup group 0 %}
 {% endfor %}
+</table>
+{% else %}
+No groups found matching that search, sorry.
 {% endif %}
 
 {% endblock %}
