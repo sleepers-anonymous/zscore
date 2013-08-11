@@ -16,16 +16,26 @@ div.navigation-bar ul {
 
 div.navigation-bar ul li {
 		display:inline;
-		padding:2px;
+		padding:4px;
 }
 
-div.navigation-bar ul li a {
+div.navigation-bar ul li a:link {
+		color: white;
+		text-decoration:none;
+}
+
+div.navigation-bar ul li a:visited {
 		color: white;
 		text-decoration:none;
 }
 
 div.navigation-bar ul li a:hover {
 		color: white;
+		background: black;
+}
+
+div.navigation-bar ul li a:active {
+		color:white;
 		background: black;
 }
 
