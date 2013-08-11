@@ -23,12 +23,15 @@
     {% block scripts %}
     <script src="/static/util.js" type="text/javascript"></script>
     {% endblock %}
+    <!-- Day/Night switching -->
+    <script src="/static/daynight.js" type="text/javascript"></script>
+    <!-- End Day/Night switching -->
     {% block stylesheets %}
         <link href="/static/zscore.css" rel="stylesheet">
     {% endblock %}
     {% block meta %}{% endblock %}
   </head>
-  <body class="daytime">
+  <body class="daytime" onload="set_style()">
     <div class="global-wrapper">
       {% block navbar %}
       <div class="navigation-bar">
