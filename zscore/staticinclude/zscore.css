@@ -1,12 +1,66 @@
 body.daytime {
 		background: #d6f9ff;
+		padding:0px;
+		width:100%;
 }
 
 body.nighttime {
 		background: #08285C;
+		color:white;
 }
 
 body.daytime a.hidden {
 		text-decoration:none;
 		color:black;
 }
+
+body.nighttime a.hidden {
+		text-decoration:none;
+		color:white;
+}
+
+body.nighttime a:hover {
+		color: yellow;
+}
+
+body.nighttime a:link {
+		color:white;
+}
+
+body.nighttime a:visited {
+		color:white;
+}
+
+div.global-wrapper {
+		margin:0;
+		padding:0;
+}
+
+/* navbar */
+div.navigation-bar {
+		width:100%;
+		background: #525252;
+		color: white;
+		margin:0px;
+}
+
+div.navigation-bar ul {
+		list-style-type:none;
+		margin:0;
+		padding:10px;
+}
+
+div.navigation-bar ul li {
+		display:inline;
+		padding:2px;
+}
+
+div.navigation-bar ul li a {
+		color: white;
+		text-decoration:none;
+}
+
+div.navigation-bar ul li a:hover {
+		background: #424242;
+}
+
