@@ -23,6 +23,9 @@ def home(request):
 def faq(request):
     return render(request, 'faq.html')
 
+def privacy(request):
+    return render(request, 'privacy.html')
+
 @login_required
 def mysleep(request):
     return render_to_response('sleep/mysleep.html',{},context_instance=RequestContext(request))
@@ -302,13 +305,17 @@ def leaderboard(request,group=None):
     else:
         allUsers = Sleeper.objects.all()
     number = allUsers.filter(sleep__isnull=False).distinct().count()
+    metricsToDisplay = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev','consistent']
+    metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
     context = {
             'group' : group,
             'top' : top,
             'recentWinner' : recentWinner,
             'total' : Sleep.objects.totalSleep(group=group),
             'number' : number,
-            'leaderboard_valid': len(ss),
+            'leaderboard_valid' : len(ss),
+            'metricsToDisplay' : metricsToDisplay,
+            'metricsDisplayedAsTimes' : metricsDisplayedAsTimes
             }
     return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
 
