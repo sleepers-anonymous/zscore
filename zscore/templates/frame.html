@@ -29,7 +29,7 @@
   </head>
   <body>
     <div class="global-wrapper">
-      {% cache 900 request.user %}
+      {% cache 900 header request.user.username %}
       {% block navbar %}
       <div class="navigation-bar">
 	<a href="/"><b>zScore</b></a><sup>[alpha]</sup>
@@ -54,7 +54,7 @@
       {% endcache %}
       {% block content %}{% endblock %}
 
-      {% cache 900 request.user %}
+      {% cache 900 footer request.user.username %}
       <div class="footer" style="text-align:center;clear:both;">
           <p>{% block footer %}&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;{% endblock %}</p>
       </div>
