@@ -22,6 +22,9 @@ def home(request):
 def faq(request):
     return render(request, 'faq.html')
 
+def privacy(request):
+    return render(request, 'privacy.html')
+
 @login_required
 def mysleep(request):
     return render_to_response('sleep/mysleep.html',{},context_instance=RequestContext(request))

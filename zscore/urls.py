@@ -82,5 +82,6 @@ urlpatterns = patterns('',
     url(r'^sleep/editallnighter/(?P<allNighter>\d+)/', 'sleep.views.editOrCreateAllnighter'),
     url(r'^$', 'sleep.views.home'),
     url(r'^faq/$', 'sleep.views.faq'),
+    url(r'^privacy/$', 'sleep.views.privacy'),
     url(r'^sleep/export/$', 'sleep.views.exportSleeps'),
 )
