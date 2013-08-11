@@ -206,8 +206,8 @@ def displayUser(username):
     else: return username
 
 @register.inclusion_tag('inclusion/display_my_group.html')
-def displayMyGroup(group):
-    return {'group' : group}
+def displayMyGroup(group, amMember = 0):
+    return {'group' : group, 'amMember' : amMember, 'isPublic': group.privacy >= group.PUBLIC}
 
 @register.inclusion_tag('inclusion/display_group_member.html',takes_context=True)
 def displayGroupMember(context,group,user):

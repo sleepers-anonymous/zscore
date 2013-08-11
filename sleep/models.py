@@ -742,7 +742,7 @@ class SleeperGroup(models.Model):
 
     def request(self, sleeper):
         if self.members.filter(id=sleeper.id).exists(): #if they're already a member of the group
-            raise ValueError, "Already member of group %s", self.name
+            raise ValueError, "Already member of group " +  self.name
         if GroupRequest.objects.filter(user=sleeper, group=self).exists(): # if they've made a request in the past
             return
         i = GroupRequest(user=sleeper, group=self, accepted=None)
@@ -790,7 +790,7 @@ class Membership(models.Model):
         if otherMembers >= 2:
             self.delete()
         else:
-            raise ValueError, "You appear to be the last member of this group. Care to delete it instead?"
+            self.group.delete()
 
 class GroupInvite(models.Model):
     user=models.ForeignKey(User)
