@@ -1,47 +1,11 @@
-body.daytime {
-		background: #d6f9ff;
-		padding:0px;
-		width:100%;
-}
-
-body.nighttime {
-		background: #08285C;
-		color:white;
-}
-
-body.daytime a.hidden {
-		text-decoration:none;
-		color:black;
-}
-
-body.nighttime a.hidden {
-		text-decoration:none;
-		color:white;
-}
-
-body.nighttime a:hover {
-		color: yellow;
-}
-
-body.nighttime a:link {
-		color:white;
-}
-
-body.nighttime a:visited {
-		color:white;
-}
-
-div.global-wrapper {
-		margin:0;
-		padding:0;
-}
-
 /* navbar */
 div.navigation-bar {
 		width:100%;
-		background: #525252;
+		background: #424242;
 		color: white;
 		margin:0px;
+		-moz-border-radius: 15px;
+		border-radius: 15px;
 }
 
 div.navigation-bar ul {
@@ -61,6 +25,61 @@ div.navigation-bar ul li a {
 }
 
 div.navigation-bar ul li a:hover {
-		background: #424242;
+		color: white;
+		background: black;
 }
+
+/* body daytime/nighttime */
+
+body.daytime {
+		background: #d6f9ff;
+		padding:0px;
+		width:100%;
+}
+
+body.nighttime {
+		background: #08285C;
+		color:white;
+}
+
+body.daytime a.hidden {
+		text-decoration:none;
+		color:black;
+}
+
+body.daytime a:link {
+		color: #08285C;
+}
+
+body.daytime a:visited {
+		color: #08285C
+}
+
+body.nighttime a.hidden {
+		text-decoration:none;
+		color:white;
+}
+
+body.nighttime a:link {
+		color:white;
+}
+
+body.nighttime a:visited {
+		color:white;
+}
+
+body.nighttime a:hover {
+		color: #d6f9ff;
+}
+
+body.nighttime a:active {
+		color: #d6f9ff;
+}
+
+div.global-wrapper {
+		margin:0;
+		padding:0;
+}
+
+
 
