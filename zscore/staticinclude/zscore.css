@@ -8,4 +8,5 @@ body.nighttime {
 
 body.daytime a.hidden {
 		text-decoration:none;
+		color:black;
 }
