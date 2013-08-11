@@ -12,20 +12,20 @@
 </form>
 {% if not new %}
     {% if count %}
-        Found {{count}} users.<br/>
+        <p>Found {{count}} users.</p>
         <table>
             {% for user in results %}
             {% displayFriend request.user user %}
             {% endfor %}
         </table>
     {% else %}
-        No users found.<br/>
+        <p>No users found.</p>
     {% endif %}
 {% endif %}
 
 {% if requests %}
     <h3>Friend Requests</h3>
-    The users below have asked you to friend them.  They won't know if you friend them, hide the request, or leave it here.
+    <p>The users below have asked you to friend them.  They won't know if you friend them, hide the request, or leave it here.</p>
     <table>
         {% for prof in requests %}
             {% displayFriend request.user prof.user 'True' %}
@@ -34,7 +34,7 @@
 {% endif %}
 
 <h3>My Friends and Follows</h3>
-<i>Friends</i> can see whatever you set friends to be able to see in your <a href="/editprofile/">profile</a>.  Users you <i>follow</i> will show up here and in the <a href="/creep/">creep</a> page, for your convenience.  They can't see that you follow them.
+<p><i>Friends</i> can see whatever you set friends to be able to see in your <a href="/editprofile/">profile</a>.  Users you <i>follow</i> will show up here and in the <a href="/creep/">creep</a> page, for your convenience.  They can't see that you follow them.</p>
 {% if friendfollow %}
     <table>
         {% for user in friendfollow %}
@@ -42,7 +42,7 @@
         {% endfor %}
     </table>
 {% else %}
-    Add friends or follow other users above!
+<p>Add friends or follow other users above!</p>
 {% endif %}
 
 {% endblock %}
