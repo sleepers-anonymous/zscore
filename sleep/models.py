@@ -9,7 +9,6 @@ import datetime
 import math
 import itertools
 import hashlib
-import re
 import random
 from operator import add
 
