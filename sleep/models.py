@@ -290,7 +290,6 @@ class SleeperProfile(models.Model):
         self.emailSHA1GenerationDate = now()
         self.emailActivated = False
         self.save()
-        print sha
         if newemail != None:
             self.user.email = newemail
             self.user.save()
