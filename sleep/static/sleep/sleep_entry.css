@@ -89,7 +89,7 @@ body.daytime .sleep-box .end
 
 body.nighttime .sleep-box .end
 {
-    border-left: 10px solid purple;
+    border-left: 10px solid white;
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
     float: right;
