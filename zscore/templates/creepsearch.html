@@ -2,14 +2,15 @@
 
 {% block content %}
 <h1>Creep</h1>
-{{total}} creepable users</br>
+<p>{{total}} creepable users</p>
 {% if followed %}
-    Following: 
+<p>Following:
     {% for user in followed %}
         <a href="{{user.username}}">{{user.username}}</a>
     {% endfor %}
-{% else %} 
-    <a href="/friends/">Follow</a> users to see them here!
+</p>
+{% else %}
+<p><a href="/friends/">Follow</a> users to see them here!</p>
 {% endif %}
         
     
@@ -19,13 +20,13 @@
 </form>
 {% if not new %}
     {% if count %}
-        Found {{count}} users.<br/>
+        <p>Found {{count}} users.<br/>
         {% for user in results %}
             <a href="{{user.username}}">{{user.username}}</a><br/>
-        {% endfor %}
+            {% endfor %}</p>
     {% else %}
-        No users found.<br/>
+        <p>No users found.</p>
     {% endif %}
 {% endif %}
 
-{% endblock %}        
+{% endblock %}
