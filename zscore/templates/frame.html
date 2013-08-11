@@ -38,7 +38,6 @@
 	<a href="/leaderboard/">leaderboard</a>
 	<a href="/graphs/">graphs</a>
     <a href="/creep/">creep</a>
-	<a href="http://goo.gl/l2Dkb">feedback</a>
 	{% if request.user.is_staff %}
 	<a href="/admin/">admin</a>
 	{% endif %}
@@ -53,7 +52,7 @@
       {% block content %}{% endblock %}
 
       <div class="footer" style="text-align:center;">
-          {% block footer %}&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull;{% endblock %}
+          {% block footer %}&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;{% endblock %}
       </div>
   </div>
 
