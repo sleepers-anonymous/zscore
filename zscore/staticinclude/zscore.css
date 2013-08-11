@@ -1,1 +1,11 @@
+body.daytime {
+		background: #d6f9ff;
+}
 
+body.nighttime {
+		background: #08285C;
+}
+
+body.daytime a.hidden {
+		text-decoration:none;
+}
