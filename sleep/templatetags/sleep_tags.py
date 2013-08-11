@@ -66,9 +66,13 @@ def sleepStatsView(context, renderContent='html'):
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
     sleeper = Sleeper.objects.get(pk=user.pk)
+    metricsToDisplay = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev','consistent']
+    metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
     context = {'global': sleeper.movingStats(),
             'weekly': sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today()),
             'decaying': sleeper.decayStats(),
+            'metricsToDisplay': metricsToDisplay,
+            'metricsDisplayedAsTimes': metricsDisplayedAsTimes
     }
     return context
 
@@ -244,3 +248,10 @@ def displayFriendRequests(user):
     fr = user.friendrequest_set.filter(accepted=None)
     if fr: return " <b>(%s)</b>" % fr.count()
     else: return ""
+
+@register.filter
+def getScore(statdict, metric):
+    try:
+        return statdict[metric]
+    except:
+        return ''
