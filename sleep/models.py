@@ -34,7 +34,7 @@ class SleepManager(models.Manager):
         else:
             raise ValueError, "Can't compute totalSleep with both a user and a group."
         total = sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
-        cache.set(cacheKey,total)
+        if not (user is None) and not (group is None): cache.set(cacheKey,total)
         return total
 
     def sleepTimes(self,res=1, user = None, group = None):
