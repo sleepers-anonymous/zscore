@@ -82,9 +82,10 @@ function inviteMember(gid,uid,link) {
   });
 };
 function removeMember(gid,uid,link) {
-  $.post("/groups/remove/", {
+  $.post("/groups/membership/", {
       "group" : gid,
-      "user" : uid
+      "user" : uid,
+      "action": "remove"
   }, function() {
     link.innerHTML="removed";
   });
