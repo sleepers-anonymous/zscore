@@ -202,7 +202,7 @@ def inviteMember(request):
         return HttpResponseBadRequest('')
 
 @login_required
-def removeMember(request):
+def manageMember(request):
     if 'group' in request.POST and 'user' in request.POST:
         gid = request.POST['group']
         uid = request.POST['user']
