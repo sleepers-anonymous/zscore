@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.db import IntegrityError
 from django.core.exceptions import *
 from django.utils.timezone import now
+from django.core.cache import cache
 
 from sleep.models import *
 from sleep.forms import *
@@ -141,6 +142,14 @@ def groups(request):
             'groups' : request.user.sleepergroups.all(),
             'invites' : request.user.groupinvite_set.filter(accepted=None),
             }
+    if request.method =="POST":
+        form = GroupSearchForm(request.POST)
+        if form.is_valid():
+            gs=SleeperGroup.objects.filter(name__icontains=form.cleaned_data['group'], privacy__gte=SleeperGroup.REQUEST)
+            context['results']=gs
+    else:
+        form = GroupSearchForm()
+    context["form"] = form
     return render_to_response('groups.html', context, context_instance=RequestContext(request))
 
 @login_required
@@ -149,7 +158,7 @@ def createGroup(request):
         form = GroupForm(request.POST)
         if form.is_valid():
             g=form.save()
-            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn, role=50)
+            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn, role=Membership.ADMIN)
             m.save()
             return HttpResponseRedirect('/groups/manage/%s/' % g.id)
     else:
@@ -211,6 +220,33 @@ def removeMember(request):
         return HttpResponseBadRequest('')
 
 @login_required
+def groupRequest(request):
+    if 'group' in request.POST:
+        gid = request.POST['group']
+        gs = SleeperGroup.objects.filter(id=gid)
+        if gs.count() != 1: raise Http404
+        g = gs[0]
+        if g.privacy < SleeperGroup.REQUEST: raise PermissionDenied
+        g.request(request.user)
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def groupJoin(request):
+    if 'group' in request.POST:
+        gid = request.POST['group']
+        gs = SleeperGroup.objects.filter(id=gid)
+        if gs.count() != 1: raise Http404
+        g = gs[0]
+        if g.privacy < SleeperGroup.PUBLIC: raise PermissionDenied
+        m = Membership(user = request.user, group = g, privacy = request.user.sleeperprofile.privacyLoggedIn)
+        m.save()
+        return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
 def manageGroup(request,gid):
     gs=SleeperGroup.objects.filter(id=gid)
     if len(gs)!=1:
@@ -229,15 +265,14 @@ def manageGroup(request,gid):
     else:
         searchForm = SleeperSearchForm()
     if request.method == 'POST' and "GroupForm" in request.POST:
+        if context['isAdmin'] == False:
+            raise PermissionDenied
         groupForm = GroupForm(request.POST, instance=g)
         if groupForm.is_valid():
-            print groupForm.data
             if 'delete' in groupForm.data and groupForm.data['delete'] == 'on':
                 g.delete()
                 return HttpResponseRedirect('/groups/')
             groupForm.save()
-        else:
-            print groupForm
     else:
         groupForm = GroupForm(instance=g)
     context['searchForm']=searchForm

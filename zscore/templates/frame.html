@@ -2,6 +2,7 @@
 {% load staticfiles %}
 {% load sleep_tags %}
 {% load gravatar %}
+{% load cache %}
 <html lang="en">
   <head>
     <title>{% block title %}zScore{% endblock %}</title>
@@ -28,6 +29,7 @@
   </head>
   <body>
     <div class="global-wrapper">
+      {% cache 900 header request.user.username %}
       {% block navbar %}
       <div class="navigation-bar">
 	<a href="/"><b>zScore</b></a><sup>[alpha]</sup>
@@ -49,11 +51,14 @@
 	{% endif %}
       </div>
       {% endblock %}
+      {% endcache %}
       {% block content %}{% endblock %}
 
+      {% cache 900 footer request.user.username %}
       <div class="footer" style="text-align:center;clear:both;">
-          {% block footer %}&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;{% endblock %}
+          <p>{% block footer %}&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;{% endblock %}</p>
       </div>
+      {% endcache %}
   </div>
 
   </body>

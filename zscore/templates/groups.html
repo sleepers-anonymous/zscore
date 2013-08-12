@@ -23,11 +23,23 @@
 {% endfor %}
 </table>
 {% else %}
-Join groups to see them here!
+<p>Join groups to see them here!</p>
 {% endif %}
 
 <p>
 Create a group <a href="/groups/create/">here</a>.
 </p>
+
+<h3>Public Groups</h3>
+<form method="post">{% csrf_token %}
+    {{form.as_p}}
+    <p><input type="submit" value="Search"></p>
+</form>
+
+{% if results %}
+{% for g in results %}
+<p>{{g.name}}</p>
+{% endfor %}
+{% endif %}
 
 {% endblock %}

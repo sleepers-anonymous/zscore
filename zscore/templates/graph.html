@@ -13,19 +13,14 @@
 {% graphTimeOfDayBars user %}
 <br/>
 {% graphSleepTimes user %}
-<br/>
-<i>Sleep time histogram</i>
 <br />
+<p><i>Sleep time histogram</i></p>
 {% graphSleepStartEndTimes user %}
-<br/>
-<i>Green is when you go to sleep, red is when you wake up.</i>
-<br/>
+<p><i>Green is when you go to sleep, red is when you wake up.</i></p>
 {% graphSleepLengths user %}
-<br />
-<i>Histogram of sleep lengths for you</i>
-<br />
+<p><i>Histogram of sleep lengths for you</i></p>
 {% else %}
-<i>Enter at least one sleep to see pretty pictures!</i>
+<p><i>Enter at least one sleep to see pretty pictures!</i></p>
 {% endif %}
 
 

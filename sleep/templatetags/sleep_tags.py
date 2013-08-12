@@ -215,6 +215,7 @@ def displayGroupMember(context,group,user):
             'group' : group,
             'user' : user,
             'member' : user in group.members.all(),
+            'canremove': context['isAdmin'] or context['request'].user == user,
             })
     return context
 
