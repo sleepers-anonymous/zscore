@@ -12,6 +12,7 @@ div.navigation-bar ul {
 		list-style-type:none;
 		margin:0;
 		padding:10px;
+		width:100%;
 }
 
 div.navigation-bar ul li {
@@ -37,6 +38,24 @@ div.navigation-bar ul li a:hover {
 div.navigation-bar ul li a:active {
 		color:white;
 		background: black;
+}
+
+div.navigation-bar ul li.day {
+		background: #d6f9ff;
+		color:black;
+}
+
+div.navigation-bar ul li.day:hover {
+		color:white;
+		background:black;
+}
+
+div.navigation-bar ul li.night {
+		background: #08285C;
+}
+
+div.navigation-bar ul li.night:hover{
+		background:black;
 }
 
 /* body daytime/nighttime */
@@ -92,4 +111,10 @@ div.global-wrapper {
 }
 
 
+body.daytime tr.me {
+		background-color:#f2b6ee;
+}
 
+body.nighttime tr.me {
+		background-color:#73176d;
+}

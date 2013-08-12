@@ -23,7 +23,7 @@
     </tr>
 
   {% for s in top %}
-  <tr {% if s.user.id == request.user.id %} style="background-color:#DEF2FF" {% endif %}>
+  <tr {% if s.user.id == request.user.id %} class="me"{% endif %}>
 
     <td> {{s.rank}} </td>
     <td> {% gravatar request.user s.user 20 1 %} </td>

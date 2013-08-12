@@ -60,8 +60,10 @@
                 <li>)</li>
 	          {% else %}
                 <li><a href="/accounts/login">log in</a> <a href="/accounts/create">register</a></li>
-              {% endif %}
-            </ul>
+                {% endif %}
+                <li class="day" onclick="switch_style('daytime')">D</li>
+                <li class="night" onclick="switch_style('nighttime')">N</li>
+          </ul>
       </div>
       {% endblock %}
       {% endcache %}
