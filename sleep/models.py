@@ -116,6 +116,10 @@ class PartialSleep(models.Model):
         tz = pytz.timezone(self.timezone)
         return self.start_time.astimezone(tz)
 
+    def gen_potential_wakeup(self):
+        d = user.sleeperprofile.getPunchInDelay()
+        raise NotImplemented
+
 class Sleep(models.Model):
     objects = SleepManager()
 
