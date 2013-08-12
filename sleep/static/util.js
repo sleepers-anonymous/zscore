@@ -108,7 +108,7 @@ function removeAdmin(gid, uid, link) {
         "action": "removeAdmin"
     }, function() {
         link.innerHTML = "unadminified";
-    });
+    }).fail( function() { link.innerHTML = 'cannot remove last admin' };
 };
 
 function acceptInvite(id,link) {
