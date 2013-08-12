@@ -11,7 +11,6 @@
     <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
     <script src="{% static 'jquery/jquery-ui-timepicker-addon.js' %}" type="text/javascript"></script>
     <script src="{% static 'jquery/jquery.cookie.js' %}" type="text/javascript"></script>
-    <meta name="robots" content="noindex"> <!--Asks search engines not to index us. -->
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" type="text/css"/>
     <link rel="stylesheet" href="{% static 'jquery/jquery-ui-timepicker-addon.css' %}" type="text/css"/>
     {% endblock %}
@@ -30,11 +29,14 @@
     {% block stylesheets %}
         <link href="/static/zscore.css" rel="stylesheet">
     {% endblock %}
-    {% block meta %}{% endblock %}
+    {% block meta %}
+    <meta name="robots" content="none,noarchive"> <!--Asks search engines not to index us. -->
+    <meta http-equiv="Content=Type" content="text/html; charset=UTF-8">
+    {% endblock %}
   </head>
   <body class="daytime" onload="set_style()">
     <div class="global-wrapper">
-      {% cache 900 header request.user.username %}
+      {% cache 86400 header request.user.username %}
       {% block navbar %}
       <div class="navigation-bar">
           <ul>
@@ -70,7 +72,7 @@
       <div class="content">
           {% block content %}{% endblock %}
       </div>
-      {% cache 900 footer request.user.username %}
+      {% cache 864000 footer %}
       <div class="footer" style="text-align:center;clear:both;">
           <p>{% block footer %}&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;{% endblock %}</p>
       </div>

@@ -290,7 +290,7 @@ def manageGroup(request,gid):
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
-    if 'sort' not in request.GET or request.GET['sort'] not in ['zPScore','posStDev','zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev', 'consistent']:
+    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','stDev', 'consistent', 'consistent2']:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
@@ -440,7 +440,7 @@ def exportSleeps(request):
 @login_required
 def friends(request):
     prof = request.user.sleeperprofile
-    friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username')
+    friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username').select_related('sleeperprofile').prefetch_related('sleeperprofile__friends')
     requests = request.user.requests.filter(friendrequest__accepted=None).order_by('user__username')
     if request.method == 'POST':
         form=SleeperSearchForm(request.POST)
