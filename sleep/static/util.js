@@ -82,18 +82,39 @@ function inviteMember(gid,uid,link) {
   });
 };
 function removeMember(gid,uid,link) {
-  $.post("/groups/remove/", {
+  $.post("/groups/membership/", {
       "group" : gid,
-      "user" : uid
+      "user" : uid,
+      "action": "remove"
   }, function() {
     link.innerHTML="removed";
   });
 };
 
+function makeAdmin(gid,uid, link) {
+    $.post("/groups/membership/", {
+        "group": gid,
+        "user": uid,
+        "action": "makeAdmin"
+    }, function() {
+        link.innerHTML = "adminified";
+    });
+};
+
+function removeAdmin(gid, uid, link) {
+    $.post("/groups/membership/", {
+        "group": gid,
+        "user": uid,
+        "action": "removeAdmin"
+    }, function() {
+        link.innerHTML = "unadminified";
+    }).fail( function() { link.innerHTML = 'cannot remove last admin' };
+};
+
 function acceptInvite(id,link) {
   $.post("/groups/accept/", {
       "id" : id,
-      "accepted" : "True", 
+      "accepted" : "True",
   }, function() {
     link.innerHTML="accepted";
   });
@@ -102,9 +123,8 @@ function acceptInvite(id,link) {
 function rejectInvite(id,link) {
   $.post("/groups/accept/", {
       "id" : id,
-      "accepted" : "False", 
+      "accepted" : "False",
   }, function() {
     link.innerHTML="rejected";
   });
 };
-

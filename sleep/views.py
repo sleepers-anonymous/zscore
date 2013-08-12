@@ -214,9 +214,21 @@ def manageMember(request):
             raise Http404
         g=gs[0]
         u=us[0]
-        for m in Membership.objects.filter(user=u,group=g):
-            m.removeMember()
-        return HttpResponse('')
+        if 'action' in request.POST and request.POST["action"] == "remove":
+            for m in Membership.objects.filter(user=u,group=g):
+                m.removeMember()
+            return HttpResponse('')
+        if 'action' in request.POST and request.POST["action"] == "makeAdmin":
+            for m in Membership.objects.filter(user=u,group=g):
+                m.makeAdmin()
+            return HttpResponse('')
+        if 'action' in request.POST and request.POST["action"] == "removeAdmin":
+            for m in Membership.objects.filter(user=u, group=g):
+                try:
+                    m.makeMember()
+                except ValueError:
+                    return HttpResponseBadRequest('')
+            return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
 
