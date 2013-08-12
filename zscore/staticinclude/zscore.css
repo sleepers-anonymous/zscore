@@ -59,6 +59,11 @@ div.navigation-bar ul li.night:hover{
 }
 
 /* make footer smaller */
+div.footer {
+		text-align: center;
+		clear: both;
+}
+
 div.footer p {
 		font-size:0.8em;
 }
