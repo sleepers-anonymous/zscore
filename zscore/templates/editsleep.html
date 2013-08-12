@@ -11,6 +11,7 @@
 {% endif %}
 
 {% if fromPartial %}<p>Sleep saved! You can edit it below</p>{% endif %}
+{% if partialError %}<p>Something happened. Try editing the sleep and saving again?</p>{% endif %}
 {% if success %}<p>Saved!</p>{% endif %}
 
 <form method="post">{% csrf_token %}
