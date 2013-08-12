@@ -603,6 +603,7 @@ class Sleeper(User):
                 idealized = max(ideal, avg)
                 d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
                 d['consistent'] = self.consistencyStat(start = start, end = end)
+                d['consistent2'] = self.consistencyStat2(start = start, end = end)
         except:
             pass
         try:
@@ -622,49 +623,83 @@ class Sleeper(User):
                 d[k]=datetime.timedelta(0,d[k])
         return d
 
-    def consistencyStat(self,res=1, start = datetime.date.today() + datetime.timedelta(-14), end = datetime.date.max, decay = False, hl = None):
+    def consistencyStat(self,res=1, start = datetime.date.min, end = datetime.date.max, decay = False, hl = 4):
         sleeps = self.sleep_set.all()
         atTime = [0] * (24 * 60 / res)
-        firstdate = datetime.date.max
-        lastdate = datetime.date.min
-        try:
-            firstdate = min([sleep.date for sleep in sleeps if sleep.date >= start])
-            lastdate = max([sleep.date for sleep in sleeps if sleep.date <= end])
-        except:
-            #if no sleeps in that range
+        sleepdates = set([sleep.date for sleep in sleeps if sleep.date >= start and sleep.date <= end])
+        if len(sleepdates) < 2:
+            return 0
+        maxdate = max(sleepdates)
+        if len([day for day in sleepdates if (maxdate-day).days < 14]) < 3:
             return 0
         for sleep in sleeps:
             if sleep.date <= end and sleep.date >= start:
-                tz = pytz.timezone(sleep.timezone)
-                startDate = sleep.start_time.astimezone(tz).date()
-                endDate = sleep.end_time.astimezone(tz).date()
+                startDate = sleep.start_local_time().date()
+                endDate = sleep.end_local_time().date()
                 dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
                 for d in dr:
                     if d == startDate:
-                        startTime = sleep.start_time.astimezone(tz).time()
+                        startTime = sleep.start_local_time().time()
                     else:
                         startTime = datetime.time(0)
                     if d == endDate:
-                        endTime = sleep.end_time.astimezone(tz).time()
+                        endTime = sleep.end_local_time().time()
                     else:
                         endTime = datetime.time(23,59)
                     for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
                         if decay:
-                            atTime[i] += 2**(-(lastdate-sleep.date).days/float(hl))
+                            atTime[i] += 2**(-(maxdate-sleep.date).days/float(hl))
                         else:
                             atTime[i]+=1
         numerator = sum(map(lambda x: x**2, atTime))
         if decay:
-            numDays = sum([2**(-i/float(hl)) for i in range(0,(lastdate-firstdate).days + 1)])
+            numDays = sum([2**(-((maxdate-day).days/float(hl))) for day in sleepdates])
         else:
-            numDays = (lastdate - firstdate).days + 1
+            numDays = len(sleepdates)
         denominator = sum(atTime) * numDays
         try:
-            return int(1000 * float(numerator)/denominator)
+            if int(1000 * float(numerator)/denominator) <= 1000:
+                return int(1000 * float(numerator)/denominator)
+            else:
+                return 0
         except:
             return 0
 
-
+    def consistencyStat2(self,res=1, start = datetime.date.min, end = datetime.date.max, decay = False, hl = 4):
+        sleeps = self.sleep_set.all()
+        atTime = [0] * (24 * 60 / res)
+        sleepdates = set([sleep.date for sleep in sleeps if sleep.date >= start and sleep.date <= end])
+        if len(sleepdates) < 2:
+            return 0
+        maxdate = max(sleepdates)
+        if len([day for day in sleepdates if (maxdate-day).days < 14]) < 3:
+            return 0
+        for sleep in sleeps:
+            if sleep.date <= end and sleep.date >= start:
+                startDate = sleep.start_local_time().date()
+                endDate = sleep.end_local_time().date()
+                dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
+                for d in dr:
+                    if d == startDate:
+                        startTime = sleep.start_local_time().time()
+                    else:
+                        startTime = datetime.time(0)
+                    if d == endDate:
+                        endTime = sleep.end_local_time().time()
+                    else:
+                        endTime = datetime.time(23,59)
+                    for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
+                        if decay:
+                            atTime[i] += 2**(-(maxdate-sleep.date).days/float(hl))
+                        else:
+                            atTime[i]+=1
+        if decay:
+            numDays = sum([2**(-((maxdate-day).days/float(hl))) for day in sleepdates])
+        else:
+            numDays = len(sleepdates)
+        return int(1000 * sum([(float(i)/numDays) ** 2 + (1-float(i)/numDays) ** 2 for i in atTime]) / (24 * 60))
+        
+        
     def decaying(self,data,hl,stDev=False):
         s = 0
         w = 0
@@ -691,9 +726,9 @@ class Sleeper(User):
             idealized = max(ideal, avg)
             d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
             d['consistent'] = self.consistencyStat(end = end, decay = True, hl = hl)
+            d['consistent2'] = self.consistencyStat2(end = end, decay = True, hl = hl)
         except:
             pass
-
         try:
             offset = 60*60.
             avgRecip = 1/(self.decaying(map(lambda x: 1/(offset+x),sleep),hl))-offset
