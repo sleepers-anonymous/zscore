@@ -6,6 +6,7 @@ div.navigation-bar {
 		margin:10px auto;
 		-moz-border-radius: 15px;
 		border-radius: 15px;
+		height:45px;
 }
 
 div.navigation-bar ul {
@@ -13,11 +14,32 @@ div.navigation-bar ul {
 		margin:0;
 		padding:10px;
 		width:100%;
+		position:absolute;
 }
 
 div.navigation-bar ul li {
-		display:inline;
+		float:left;
 		padding:4px;
+}
+
+div.navigation-bar ul li ul{
+		display:none;
+		height: auto;
+		margin: 10px 0px;
+		padding: 10px;
+		width: auto;
+}
+
+div.navigation-bar ul li:hover ul{
+		display:block;
+		background-color: #222222;
+		padding:10px;
+		margin: 10px 0px;
+		border-radius: 15px;
+		-moz-border-radius:15px;
+		-webkit-box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
+		-moz-box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
+		box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
 }
 
 div.navigation-bar ul li a:link {
@@ -38,6 +60,12 @@ div.navigation-bar ul li a:hover {
 div.navigation-bar ul li a:active {
 		color:white;
 		background: black;
+}
+
+div.navigation-bar ul li ul li {
+		min-width:70px;
+		width: auto !important;
+		width:70px;
 }
 
 div.navigation-bar ul li.day {
