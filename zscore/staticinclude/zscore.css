@@ -169,6 +169,14 @@ body.nighttime table.leaderboard tr.me {
 		background-color:#73176d;
 }
 
+body.nighttime canvas {
+		background: white;
+}
+
+body.daytime canvas{
+		background: none;
+}
+
 table.leaderboard{
 		margin:0px;
 		padding:0px;
