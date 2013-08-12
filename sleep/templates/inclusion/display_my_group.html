@@ -5,9 +5,9 @@
 				<td><a href="/groups/manage/{{group.id}}/">manage</a></td>
 		{% else %}
 				{% if isPublic %}
-						<td><a href="javascript:void(0);" class="group-join-button" onclick="joinGroup({{group.pk}})">join</a></td>
+						<td><a href="javascript:void(0);" class="group-join-button" onclick="joinGroup({{group.pk}}, this)">join</a></td>
 				{% else %}
-						<td><a href="javascript:void(0);" class="group-request-button" onclick="requestGroup({{group.pk}})">request</a></td>
+						<td><a href="javascript:void(0);" class="group-request-button" onclick="requestGroup({{group.pk}}, this)">request</a></td>
 				{% endif %}
 				<td>&nbsp;</td>
 		{% endif %}

@@ -134,3 +134,20 @@ function rejectInvite(id,link) {
     link.innerHTML="rejected";
   });
 };
+
+function requestGroup(id, link) {
+    $.post("/groups/request/", {
+            "group": id
+            }, function() {
+            link.innerHTML = "requested";
+        });
+};
+
+function joinGroup(id, link) {
+    $.post("/groups/join/", {
+            "group": id
+            }, function() {
+            link.innerHTML = "joined";
+        });
+};
+

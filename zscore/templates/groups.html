@@ -3,22 +3,6 @@
 {% load sleep_tags %}
 
 {% block content %}
-<script type="text/javascript">
-    function requestGroup(id) {
-        $.post("/groups/request/", {
-            "group": id
-            }, function() {
-            location.reload();
-        });
-    };
-    function joinGroup(id) {
-        $.post("/groups/join/", {
-            "group": id
-            }, function() {
-            location.reload();
-        });
-    };
-</script>
 
 <h1>Groups</h1>
 
