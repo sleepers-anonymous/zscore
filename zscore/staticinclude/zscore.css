@@ -140,9 +140,22 @@ body.daytime .ui-widget-header {
 		font-weight: bold;
 }
 
+body.nighttime .ui-widget-header {
+		border: none;
+		background: none;
+		color: white;
+		font-weight: bold;
+}
+
 body.daytime .ui-widget-content {
 		border: 1px solid black;
 		background: none;
+}
+
+body.nighttime .ui-widget-content {
+		border: 1px solid black;
+		background: none;
+		color:white;
 }
 
 body.daytime .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
@@ -161,7 +174,28 @@ body.daytime .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-hea
 
 body.daytime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
 		border: 1px solid black;
-		background: #ffffff;
+		background: white;
 		font-weight: normal;
 		color: #212121;
+}
+
+body.nighttime .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+		border: 1px solid white;
+		background: #28578a;
+		font-weight: normal;
+		color: white;
+}
+
+body.nighttime .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+		border: 1px solid white;
+		background: #63B0E0;
+		font-weight: normal;
+		color: white;
+}
+
+body.nighttime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+		border: 1px solid white;
+		background: black;
+		font-weight: normal;
+		color: white;
 }
