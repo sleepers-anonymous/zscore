@@ -38,7 +38,7 @@ $(function() {
                 {% endfor %}
             </table>
 
-        <h3>Add members</h3>
+        <h3>Invite new members</h3>
             <form method="post">{% csrf_token %}
                 {{searchForm.as_p}}
                 <p><input type="submit" value="Add" name="SleeperSearchForm"/></p>
