@@ -286,7 +286,7 @@ def manageGroup(request,gid):
     context['members']=g.members.all()
     if context['isAdmin']:
         context['requests'] = g.grouprequest_set.all()
-        if context['requests'].count() > 0: context['page'] = 3
+        if if 'page' not in context and context['requests'].count() > 0: context['page'] = 3
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
