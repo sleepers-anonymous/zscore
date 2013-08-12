@@ -276,12 +276,16 @@ def manageGroup(request,gid):
                 g.delete()
                 return HttpResponseRedirect('/groups/')
             groupForm.save()
+        else:
+            context['page'] = 2
     else:
         groupForm = GroupForm(instance=g)
     context['searchForm']=searchForm
     context['groupForm']=groupForm
     context['members']=g.members.all()
-    if context['isAdmin']: context['requests'] = g.grouprequest_set.all()
+    if context['isAdmin']:
+        context['requests'] = g.grouprequest_set.all()
+        if context['requests'].count() > 0: context['page'] = 3
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
