@@ -22,7 +22,7 @@ $(function() {
         <li><a href="#tabs-manage">Manage {{group.name}}</a></li>
         {% if isAdmin %}
         <li><a href="#tabs-edit">Edit Group Settings</a></li>
-        <li><a href="#tabs-requests">Accept/Reject Requests</a></li>
+        {% if requests %}<li><a href="#tabs-requests">Accept/Reject Requests</a></li>{% endif %}
         {% endif %}
     </ul>
 
@@ -68,11 +68,13 @@ $(function() {
         </form>
     </div>
 
+    {% if requests %}
     <div id="tabs-requests">
         {% for r in requests %}
         {% displayUser r.user %}
         {% endfor %}
     </div>
+    {% endif %}
 
 {% endif %}
 
