@@ -31,8 +31,8 @@
   </head>
   <body>
     <div class="global-wrapper">
-      {% cache 86400 header request.user.username %}
       {% block navbar %}
+      {% cache 86400 header request.user.username %}
       <div class="navigation-bar">
 	<a href="/"><b>zScore</b></a><sup>[alpha]</sup>
     <a href="/mysleep/">my sleep</a>
@@ -52,15 +52,17 @@
 	<a href="/accounts/login">log in</a> <a href="/accounts/create">register</a> <br/>
 	{% endif %}
       </div>
-      {% endblock %}
       {% endcache %}
+      {% endblock %}
       {% block content %}{% endblock %}
 
+      {% block footer %}
       {% cache 864000 footer %}
       <div class="footer" style="text-align:center;clear:both;">
-          <p>{% block footer %}&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;{% endblock %}</p>
+          <p>&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;</p>
       </div>
       {% endcache %}
+      {% endblock %}
   </div>
 
   </body>
