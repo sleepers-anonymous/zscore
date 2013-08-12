@@ -58,6 +58,34 @@ div.navigation-bar ul li.night:hover{
 		background:black;
 }
 
+/* make footer smaller */
+div.footer p {
+		font-size:0.8em;
+}
+
+/* change error formatting for forms */
+table.form {
+		padding:10px;
+}
+
+table.form tr{
+		padding: 10px;
+}
+
+table.form th{
+		float:right;
+		padding: 10px;
+}
+table.form ul.errorlist {
+		list-style-type:none;
+		margin: 0px;
+		padding: 10px 0px;
+}
+
+table.form ul.errorlist li {
+		margin: 0px;
+}
+
 /* body daytime/nighttime */
 
 body.daytime {
@@ -197,5 +225,15 @@ body.nighttime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget
 		border: 1px solid white;
 		background: black;
 		font-weight: normal;
+		color: white;
+}
+
+body.daytime input,select,textarea {
+		background: white;
+		color: black;
+}
+
+body.nighttime input,select,textarea {
+		background: black;
 		color: white;
 }
