@@ -481,7 +481,7 @@ class SleeperManager(models.Manager):
         scored.extend(extra)
         return scored
 
-    @cache_function(lambda self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None: (start.strftime('%Y-%m-%d-%H'),end.strftime('%Y-%m-%d-%H'),authStatus(user)),())
+    @cache_function(lambda self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None: (start.strftime('%Y-%m-%d-%H'),end.strftime('%Y-%m-%d-%H'),authStatus(user)) if group is None else None,())
     def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None):
         if group is None:
             sleepers = Sleeper.objects.all()

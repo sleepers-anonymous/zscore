@@ -36,8 +36,8 @@
   </head>
   <body class="daytime" onload="set_style()">
     <div class="global-wrapper">
-      {% cache 86400 header request.user.username %}
       {% block navbar %}
+      {% cache 86400 header request.user.username %}
       <div class="navigation-bar">
           <ul>
               <li><a href="/"><b>zScore</b></a><sup>[alpha]</sup></li>
@@ -67,16 +67,18 @@
                 <li class="night" onclick="switch_style('nighttime')">N</li>
           </ul>
       </div>
-      {% endblock %}
       {% endcache %}
       <div class="content">
           {% block content %}{% endblock %}
       </div>
+      
+      {% block footer %}
       {% cache 864000 footer %}
       <div class="footer">
-          <p>{% block footer %}&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;{% endblock %}</p>
+          <p>&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;</p>
       </div>
       {% endcache %}
+      {% endblock %}
   </div>
 
   </body>

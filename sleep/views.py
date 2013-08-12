@@ -114,6 +114,13 @@ def editOrCreateSleep(request,sleep = None,success=False):
                     "date" : today.date().strftime("%x"),
                     "timezone" : defaulttz,
                     }
+            if "error" in request.GET:
+                if request.GET["error"] == "partial":
+                    context["partialError"] = True
+                    try:
+                        p = request.user.partialsleep
+                        initial.update({"timezone": p.timezone, "start_time": p.start_local_time().strftime(fmt)})
+                    except PartialSleep.DoesNotExist: pass
             form = SleepForm(request.user, fmt, initial=initial)
     if request.method == 'POST':
         if form.is_valid():
@@ -578,7 +585,12 @@ def createSleep(request):
     else:
         comments = ""
     # Create the Sleep instance
-    Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments=comments, date=date,timezone=timezone)
+    s = Sleep(user=request.user, start_time=start, end_time=end, comments=comments, date=date,timezone=timezone)
+    try:
+        s.validate_unique()
+        s.save()
+    except ValidationError:
+        return HttpResponseBadRequest('')
     return HttpResponse('')
 
 @login_required
@@ -604,9 +616,13 @@ def finishPartialSleep(request):
         end = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
         date = end.date()
         s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
-        s.save()
-        p.delete()
-        return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
+        try:
+            s.validate_unique()
+            s.save()
+            p.delete()
+            return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
+        except ValidationError:
+            return HttpResponseRedirect("/sleep/simple/?error=partial")
     except PartialSleep.DoesNotExist:
         return HttpResponseBadRequest('')
 
