@@ -21,8 +21,8 @@ $(function() {
     <ul>
         <li><a href="#tabs-manage">Manage {{group.name}}</a></li>
         {% if isAdmin %}
-        <li><a href="#tabs-edit">Edit Group Settings</a></li>
-        {% if requests %}<li><a href="#tabs-requests">Accept/Reject Requests</a></li>{% endif %}
+        <li {% if page == 2 %}class="ui-tabs-active"{% endif %}><a href="#tabs-edit">Edit Group Settings</a></li>
+        {% if requests %}<li {% if page == 3 %}class="ui-tabs-active"{% endif %}><a href="#tabs-requests">Accept/Reject Requests</a></li>{% endif %}
         {% endif %}
     </ul>
 
@@ -38,7 +38,7 @@ $(function() {
                 {% endfor %}
             </table>
 
-        <h3>Add members</h3>
+        <h3>Invite new members</h3>
             <form method="post">{% csrf_token %}
                 {{searchForm.as_p}}
                 <p><input type="submit" value="Add" name="SleeperSearchForm"/></p>
