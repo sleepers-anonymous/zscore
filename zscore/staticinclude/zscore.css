@@ -210,7 +210,7 @@ table.leaderboard{
 		padding:0px;
 }
 
-/* jquery tabs, daytime */
+/* jquery tabs, daytime/nighttime */
 
 body.daytime .ui-tabs {
 		background-color:#d6f9ff;
