@@ -1,9 +1,9 @@
 /* navbar */
 div.navigation-bar {
-		width:100%;
+		width:98%;
 		background: #424242;
 		color: white;
-		margin:0px;
+		margin:10px auto;
 		-moz-border-radius: 15px;
 		border-radius: 15px;
 }
@@ -91,12 +91,15 @@ table.form ul.errorlist li {
 body.daytime {
 		background: #d6f9ff;
 		padding:0px;
+		margin:0px;
 		width:100%;
 }
 
 body.nighttime {
 		background: #08285C;
 		color:white;
+		padding:0px;
+		margin:0px;
 }
 
 body.daytime a.hidden {
@@ -133,9 +136,24 @@ body.nighttime a:active {
 		color: #d6f9ff;
 }
 
+body.daytime input,select,textarea {
+		background: white;
+		color: black;
+}
+
+body.nighttime input,select,textarea {
+		background: black;
+		color: white;
+}
+
 div.global-wrapper {
 		margin:0;
 		padding:0;
+}
+
+div.content {
+		margin: 10px;
+		padding: 10px;
 }
 
 body.daytime table.leaderboard tr.me {
@@ -228,12 +246,3 @@ body.nighttime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget
 		color: white;
 }
 
-body.daytime input,select,textarea {
-		background: white;
-		color: black;
-}
-
-body.nighttime input,select,textarea {
-		background: black;
-		color: white;
-}
