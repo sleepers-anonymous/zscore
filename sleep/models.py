@@ -854,12 +854,13 @@ class Membership(models.Model):
             raise ValueError, "Cannot remove last admin of a group"
 
     def removeMember(self):
-        if self.role >= 50: self.makeMember() # attempt to make self not an admin if am admin
         otherMembers = self.group.membership_set.all().count()
         if otherMembers >= 2:
+            if self.role >= 50: self.makeMember() # attempt to make self not an admin if am admin
             self.delete()
         else:
             self.group.delete()
+            return "redirect"
 
 class GroupInvite(models.Model):
     user=models.ForeignKey(User)

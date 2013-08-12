@@ -135,6 +135,16 @@ body.nighttime {
 		margin:0px;
 }
 
+body.daytime a.button-error:link {
+		color: red;
+		text-decoration:none;
+}
+
+body.nighttime a.button-error:link {
+		color: #ff8282;
+		text-decoration: none;
+}
+
 body.daytime a.hidden {
 		text-decoration:none;
 		color:black;

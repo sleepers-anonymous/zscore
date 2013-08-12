@@ -223,7 +223,8 @@ def manageMember(request):
         u=us[0]
         if 'action' in request.POST and request.POST["action"] == "remove":
             for m in Membership.objects.filter(user=u,group=g):
-                m.removeMember()
+                r = m.removeMember()
+                if r == "redirect": return HttpResponseRedirect("/groups")
             return HttpResponse('')
         if 'action' in request.POST and request.POST["action"] == "makeAdmin":
             for m in Membership.objects.filter(user=u,group=g):

@@ -88,6 +88,9 @@ function removeMember(gid,uid,link) {
       "action": "remove"
   }, function() {
     link.innerHTML="removed";
+  }).fail ( function() {
+      link.innerHTML = "cannot remove last admin";
+      link.className = "button-error"
   });
 };
 
@@ -108,7 +111,10 @@ function removeAdmin(gid, uid, link) {
         "action": "removeAdmin"
     }, function() {
         link.innerHTML = "unadminified";
-    }).fail( function() { link.innerHTML = 'cannot remove last admin' };
+    }).fail( function() {
+        link.innerHTML = 'cannot remove last admin';
+        link.className = "button-error"
+    });
 };
 
 function acceptInvite(id,link) {
