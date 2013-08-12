@@ -110,11 +110,58 @@ div.global-wrapper {
 		padding:0;
 }
 
-
-body.daytime tr.me {
+body.daytime table.leaderboard tr.me {
 		background-color:#f2b6ee;
 }
 
-body.nighttime tr.me {
+body.nighttime table.leaderboard tr.me {
 		background-color:#73176d;
+}
+
+table.leaderboard{
+		margin:0px;
+		padding:0px;
+}
+
+/* jquery tabs, daytime */
+
+body.daytime .ui-tabs {
+		background-color:#d6f9ff;
+}
+
+body.nighttime .ui-tabs {
+		background-color:#08285C;
+}
+
+body.daytime .ui-widget-header {
+		border: none;
+		background: none;
+		color: #222222;
+		font-weight: bold;
+}
+
+body.daytime .ui-widget-content {
+		border: 1px solid black;
+		background: none;
+}
+
+body.daytime .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+		border: 1px solid black;
+		background: #9bc4de;
+		font-weight: normal;
+		color: #555555;
+}
+
+body.daytime .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+		border: 1px solid black;
+		background: #63B0E0;
+		font-weight: normal;
+		color: #212121;
+}
+
+body.daytime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+		border: 1px solid black;
+		background: #ffffff;
+		font-weight: normal;
+		color: #212121;
 }

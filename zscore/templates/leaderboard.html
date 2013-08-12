@@ -13,12 +13,12 @@
 
 <p>{{number}} {% if group %}{{group.name}} members {% else %} zScore users {% endif %} have slept a total of {{total|printYDHM}}!</p>
 
-<table>
+<table class="leaderboard">
     <tr>
-        <td>Rank</td>
-        <td colspan="2">Username</td>
+        <th>Rank</th>
+        <th colspan="2">Username</th>
 	{% for metric in metricsToDisplay %}
-	<td><a href="?sort={{metric}}">{{metric}}</a></td>
+	<th><a href="?sort={{metric}}">{{metric}}</a></th>
 	{% endfor %}
     </tr>
 
