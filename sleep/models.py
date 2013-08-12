@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import *
 from django.utils.timezone import now
 from django.core.mail import EmailMultiAlternatives
+from django.core.cache import cache
 
 import pytz
 import datetime
@@ -10,6 +11,7 @@ import math
 import itertools
 import hashlib
 import random
+import time
 from operator import add
 
 from zscore import settings
@@ -20,6 +22,10 @@ TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 class SleepManager(models.Manager):
     def totalSleep(self, user=None,group=None):
         if user is None and group is None:
+            cacheKey='totalSleep'
+            cached = cache.get(cacheKey)
+            if cached is not None:
+                return cached
             sleeps = Sleep.objects.all()
         elif user is None:
             sleeps = Sleep.objects.filter(user__sleepergroups=group)
@@ -27,7 +33,10 @@ class SleepManager(models.Manager):
             sleeps = Sleep.objects.filter(user=user)
         else:
             raise ValueError, "Can't compute totalSleep with both a user and a group."
-        return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
+        total = sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
+        if user is None and group is None:
+            cache.set(cacheKey,total)
+        return total
 
     def sleepTimes(self,res=1, user = None, group = None):
         if user is None and group is None:
@@ -107,6 +116,10 @@ class PartialSleep(models.Model):
         tz = pytz.timezone(self.timezone)
         return self.start_time.astimezone(tz)
 
+    def gen_potential_wakeup(self):
+        d = user.sleeperprofile.getPunchInDelay()
+        raise NotImplemented
+
 class Sleep(models.Model):
     objects = SleepManager()
 
@@ -170,6 +183,10 @@ class Sleep(models.Model):
     def save(self, *args, **kwargs):
         seconds = self.length().total_seconds()
         self.sleepcycles = seconds//5400
+        cache.delete('decayStats:%s' % self.user_id)
+        cache.delete('bestByTime')
+        cache.delete('sorted_sleepers')
+        cache.delete('totalSleep')
         super(Sleep, self).save(*args,**kwargs)
 
 class Allnighter(models.Model):
@@ -186,6 +203,12 @@ class Allnighter(models.Model):
 
     def __unicode__(self):
         return "All-nighter on " + self.date.strftime("%x")
+
+    def save(self, *args, **kwargs):
+        cache.delete('decayStats:%s' % self.user_id)
+        cache.delete('bestByTime')
+        cache.delete('sorted_sleepers')
+        super(Allnighter, self).save(*args,**kwargs)
 
 class SchoolOrWorkPlace(models.Model):
     name = models.CharField(max_length=255)
@@ -269,6 +292,11 @@ class SleeperProfile(models.Model):
 
     idealSleepTimeWeekend = models.TimeField(default = datetime.time(0))
     idealSleepTimeWeekday = models.TimeField(default = datetime.time(23))
+
+    def save(self, *args, **kwargs):
+        cache.delete('bestByTime')
+        cache.delete('sorted_sleepers')
+        super(SleeperProfile, self).save(*args,**kwargs)
 
     def activateEmail(self, sha):
         """Activates the user's email address. Returns True on success and False on failure"""
@@ -410,6 +438,18 @@ class SleeperProfile(models.Model):
 class SleeperManager(models.Manager):
     def sorted_sleepers(self,sortBy='zScore',user=None,group=None):
         if group is None:
+            cacheUser = user.is_authenticated() if 'is_authenticated' in dir(user) else user
+            groupKey = 'sorted_sleepers'
+            cacheKey = 'sorted_sleepers:%s:%s' % (sortBy,cacheUser)
+            print cacheKey
+            cacheGroup = cache.get(groupKey,set())
+            if cacheKey in cacheGroup:
+                cached = cache.get(cacheKey)
+                if cached is not None:
+                    return cached
+                else:
+                    cache.set(groupKey,cacheGroup.difference(cacheKey))
+        if group is None:
             sleepers = Sleeper.objects.all()
             sleepers=sleepers.select_related('sleeperprofile','sleeperprofile__user').prefetch_related('sleep_set','allnighter_set')
         else:
@@ -451,9 +491,28 @@ class SleeperManager(models.Manager):
             scored.sort(key=lambda x: -x[sortBy])
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
-        return scored+extra
+        scored.extend(extra)
+        if group is None:
+            cache.set(cacheKey,scored)
+            cacheGroup = cache.get(groupKey,set())
+            cacheGroup.add(cacheKey)
+            cache.set(groupKey,cacheGroup)
+        return scored
 
     def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None):
+        if group is None:
+            replaceArgs = {'second': 0, 'minute': 0, 'microsecond': 0}
+            cacheUser = user.is_authenticated() if 'is_authenticated' in dir(user) else user
+            groupKey = 'bestByTime'
+            cacheKey = 'bestByTime:%s:%s:%s' % (start.replace(**replaceArgs).isoformat(),end.replace(**replaceArgs).isoformat(),cacheUser)
+            print cacheKey
+            cacheGroup = cache.get(groupKey,set())
+            if cacheKey in cacheGroup:
+                cached = cache.get(cacheKey)
+                if cached is not None:
+                    return cached
+                else:
+                    cache.set(groupKey,cacheGroup.difference(cacheKey))
         if group is None:
             sleepers = Sleeper.objects.all()
             sleepers=sleepers.select_related('sleeperprofile','sleeperprofile__user').prefetch_related('sleep_set','allnighter_set')
@@ -484,6 +543,11 @@ class SleeperManager(models.Manager):
                 scored.append(d)
         scored.sort(key=lambda x: -x['time'])
         for i in xrange(len(scored)): scored[i]['rank']=i+1
+        if group is None:
+            cache.set(cacheKey,scored)
+            cacheGroup = cache.get(groupKey,set())
+            cacheGroup.add(cacheKey)
+            cache.set(groupKey,cacheGroup)
         return scored
 
 class FriendRequest(models.Model):
@@ -601,6 +665,7 @@ class Sleeper(User):
                 idealized = max(ideal, avg)
                 d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
                 d['consistent'] = self.consistencyStat(start = start, end = end)
+                d['consistent2'] = self.consistencyStat2(start = start, end = end)
         except:
             pass
         try:
@@ -620,49 +685,83 @@ class Sleeper(User):
                 d[k]=datetime.timedelta(0,d[k])
         return d
 
-    def consistencyStat(self,res=1, start = datetime.date.today() + datetime.timedelta(-14), end = datetime.date.max, decay = False, hl = None):
+    def consistencyStat(self,res=1, start = datetime.date.min, end = datetime.date.max, decay = False, hl = 4):
         sleeps = self.sleep_set.all()
         atTime = [0] * (24 * 60 / res)
-        firstdate = datetime.date.max
-        lastdate = datetime.date.min
-        try:
-            firstdate = min([sleep.date for sleep in sleeps if sleep.date >= start])
-            lastdate = max([sleep.date for sleep in sleeps if sleep.date <= end])
-        except:
-            #if no sleeps in that range
+        sleepdates = set([sleep.date for sleep in sleeps if sleep.date >= start and sleep.date <= end])
+        if len(sleepdates) < 2:
+            return 0
+        maxdate = max(sleepdates)
+        if len([day for day in sleepdates if (maxdate-day).days < 14]) < 3:
             return 0
         for sleep in sleeps:
             if sleep.date <= end and sleep.date >= start:
-                tz = pytz.timezone(sleep.timezone)
-                startDate = sleep.start_time.astimezone(tz).date()
-                endDate = sleep.end_time.astimezone(tz).date()
+                startDate = sleep.start_local_time().date()
+                endDate = sleep.end_local_time().date()
                 dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
                 for d in dr:
                     if d == startDate:
-                        startTime = sleep.start_time.astimezone(tz).time()
+                        startTime = sleep.start_local_time().time()
                     else:
                         startTime = datetime.time(0)
                     if d == endDate:
-                        endTime = sleep.end_time.astimezone(tz).time()
+                        endTime = sleep.end_local_time().time()
                     else:
                         endTime = datetime.time(23,59)
                     for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
                         if decay:
-                            atTime[i] += 2**(-(lastdate-sleep.date).days/float(hl))
+                            atTime[i] += 2**(-(maxdate-sleep.date).days/float(hl))
                         else:
                             atTime[i]+=1
         numerator = sum(map(lambda x: x**2, atTime))
         if decay:
-            numDays = sum([2**(-i/float(hl)) for i in range(0,(lastdate-firstdate).days + 1)])
+            numDays = sum([2**(-((maxdate-day).days/float(hl))) for day in sleepdates])
         else:
-            numDays = (lastdate - firstdate).days + 1
+            numDays = len(sleepdates)
         denominator = sum(atTime) * numDays
         try:
-            return int(1000 * float(numerator)/denominator)
+            if int(1000 * float(numerator)/denominator) <= 1000:
+                return int(1000 * float(numerator)/denominator)
+            else:
+                return 0
         except:
             return 0
 
-
+    def consistencyStat2(self,res=1, start = datetime.date.min, end = datetime.date.max, decay = False, hl = 4):
+        sleeps = self.sleep_set.all()
+        atTime = [0] * (24 * 60 / res)
+        sleepdates = set([sleep.date for sleep in sleeps if sleep.date >= start and sleep.date <= end])
+        if len(sleepdates) < 2:
+            return 0
+        maxdate = max(sleepdates)
+        if len([day for day in sleepdates if (maxdate-day).days < 14]) < 3:
+            return 0
+        for sleep in sleeps:
+            if sleep.date <= end and sleep.date >= start:
+                startDate = sleep.start_local_time().date()
+                endDate = sleep.end_local_time().date()
+                dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
+                for d in dr:
+                    if d == startDate:
+                        startTime = sleep.start_local_time().time()
+                    else:
+                        startTime = datetime.time(0)
+                    if d == endDate:
+                        endTime = sleep.end_local_time().time()
+                    else:
+                        endTime = datetime.time(23,59)
+                    for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
+                        if decay:
+                            atTime[i] += 2**(-(maxdate-sleep.date).days/float(hl))
+                        else:
+                            atTime[i]+=1
+        if decay:
+            numDays = sum([2**(-((maxdate-day).days/float(hl))) for day in sleepdates])
+        else:
+            numDays = len(sleepdates)
+        return int(1000 * sum([(float(i)/numDays) ** 2 + (1-float(i)/numDays) ** 2 for i in atTime]) / (24 * 60))
+        
+        
     def decaying(self,data,hl,stDev=False):
         s = 0
         w = 0
@@ -674,6 +773,16 @@ class Sleeper(User):
         return s/w
 
     def decayStats(self,end=datetime.date.max,hl=4):
+        groupKey = 'decayStats:%s' % self.id
+        cacheKey = 'decayStats:%s:%s:%s' % (self.id, end.isoformat(),hl)
+        group = cache.get(groupKey,set())
+        if cacheKey in group:
+            cached = cache.get(cacheKey)
+            if cached is not None:
+                return cached
+            else:
+                cache.set(groupKey,group.difference(cacheKey))
+
         sleep = self.sleepPerDay(datetime.date.min,end)
         ideal = int(self.sleeperprofile.getFloatIdealSleep()*3600)
         d = {}
@@ -689,9 +798,9 @@ class Sleeper(User):
             idealized = max(ideal, avg)
             d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
             d['consistent'] = self.consistencyStat(end = end, decay = True, hl = hl)
+            d['consistent2'] = self.consistencyStat2(end = end, decay = True, hl = hl)
         except:
             pass
-
         try:
             offset = 60*60.
             avgRecip = 1/(self.decaying(map(lambda x: 1/(offset+x),sleep),hl))-offset
@@ -707,6 +816,10 @@ class Sleeper(User):
                 d[k]=datetime.timedelta(0)
             else:
                 d[k]=datetime.timedelta(0,d[k])
+        cache.set(cacheKey,d)
+        group = cache.get(groupKey,set())
+        group.add(cacheKey)
+        cache.set(groupKey,group)
         return d
 
 class SleeperGroup(models.Model):

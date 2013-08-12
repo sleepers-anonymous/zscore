@@ -66,7 +66,7 @@ def sleepStatsView(context, renderContent='html'):
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    metricsToDisplay = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev','consistent']
+    metricsToDisplay = ['zScore','avg','stDev','consistent', 'consistent2']
     metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
     context = {'global': sleeper.movingStats(),
             'weekly': sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today()),
