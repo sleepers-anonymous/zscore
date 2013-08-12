@@ -564,7 +564,12 @@ def createSleep(request):
     else:
         comments = ""
     # Create the Sleep instance
-    Sleep.objects.create(user=request.user, start_time=start, end_time=end, comments=comments, date=date,timezone=timezone)
+    s = Sleep(user=request.user, start_time=start, end_time=end, comments=comments, date=date,timezone=timezone)
+    try:
+        s.validate_unique()
+        s.save()
+    except ValidationError:
+        return HttpResponseBadRequest('')
     return HttpResponse('')
 
 @login_required
