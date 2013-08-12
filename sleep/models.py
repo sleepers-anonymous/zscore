@@ -16,16 +16,15 @@ from operator import add
 
 from zscore import settings
 from sleep import utils
+from cache.decorators import cache_function
+from cache.utils import authStatus, expireTemplateCache
 
 TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 
 class SleepManager(models.Manager):
+    @cache_function(lambda self, user=None, group=None: () if user is None and group is None else None)
     def totalSleep(self, user=None,group=None):
         if user is None and group is None:
-            cacheKey='totalSleep'
-            cached = cache.get(cacheKey)
-            if cached is not None:
-                return cached
             sleeps = Sleep.objects.all()
         elif user is None:
             sleeps = Sleep.objects.filter(user__sleepergroups=group)
@@ -33,10 +32,7 @@ class SleepManager(models.Manager):
             sleeps = Sleep.objects.filter(user=user)
         else:
             raise ValueError, "Can't compute totalSleep with both a user and a group."
-        total = sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
-        if user is None and group is None:
-            cache.set(cacheKey,total)
-        return total
+        return sum((sleep.end_time - sleep.start_time for sleep in sleeps),datetime.timedelta(0))
 
     def sleepTimes(self,res=1, user = None, group = None):
         if user is None and group is None:
@@ -133,6 +129,8 @@ class Sleep(models.Model):
 
     quality = models.SmallIntegerField(choices=((0,"0 - awful"), (1,"1"),(2,"2"),(3,"3 - meh"),(4,"4"),(5,"5 - awesome")),default=4)
 
+    active = models.BooleanField(default=True)
+
     def __unicode__(self):
         tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
         return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
@@ -184,9 +182,9 @@ class Sleep(models.Model):
         seconds = self.length().total_seconds()
         self.sleepcycles = seconds//5400
         cache.delete('decayStats:%s' % self.user_id)
-        cache.delete('bestByTime')
-        cache.delete('sorted_sleepers')
-        cache.delete('totalSleep')
+        cache.delete('bestByTime:')
+        cache.delete('sorted_sleepers:')
+        cache.delete('totalSleep:')
         super(Sleep, self).save(*args,**kwargs)
 
 class Allnighter(models.Model):
@@ -206,8 +204,8 @@ class Allnighter(models.Model):
 
     def save(self, *args, **kwargs):
         cache.delete('decayStats:%s' % self.user_id)
-        cache.delete('bestByTime')
-        cache.delete('sorted_sleepers')
+        cache.delete('bestByTime:')
+        cache.delete('sorted_sleepers:')
         super(Allnighter, self).save(*args,**kwargs)
 
 class SchoolOrWorkPlace(models.Model):
@@ -294,8 +292,8 @@ class SleeperProfile(models.Model):
     idealSleepTimeWeekday = models.TimeField(default = datetime.time(23))
 
     def save(self, *args, **kwargs):
-        cache.delete('bestByTime')
-        cache.delete('sorted_sleepers')
+        cache.delete('bestByTime:')
+        cache.delete('sorted_sleepers:')
         super(SleeperProfile, self).save(*args,**kwargs)
 
     def activateEmail(self, sha):
@@ -436,19 +434,8 @@ class SleeperProfile(models.Model):
         return "SleeperProfile for user %s" % self.user
 
 class SleeperManager(models.Manager):
+    @cache_function(lambda self,sortBy='zScore',user=None,group=None: (sortBy,authStatus(user)) if group is None else None,())
     def sorted_sleepers(self,sortBy='zScore',user=None,group=None):
-        if group is None:
-            cacheUser = user.is_authenticated() if 'is_authenticated' in dir(user) else user
-            groupKey = 'sorted_sleepers'
-            cacheKey = 'sorted_sleepers:%s:%s' % (sortBy,cacheUser)
-            print cacheKey
-            cacheGroup = cache.get(groupKey,set())
-            if cacheKey in cacheGroup:
-                cached = cache.get(cacheKey)
-                if cached is not None:
-                    return cached
-                else:
-                    cache.set(groupKey,cacheGroup.difference(cacheKey))
         if group is None:
             sleepers = Sleeper.objects.all()
             sleepers=sleepers.select_related('sleeperprofile','sleeperprofile__user').prefetch_related('sleep_set','allnighter_set')
@@ -492,27 +479,10 @@ class SleeperManager(models.Manager):
         for i in xrange(len(scored)):
             scored[i]['rank']=i+1
         scored.extend(extra)
-        if group is None:
-            cache.set(cacheKey,scored)
-            cacheGroup = cache.get(groupKey,set())
-            cacheGroup.add(cacheKey)
-            cache.set(groupKey,cacheGroup)
         return scored
 
+    @cache_function(lambda self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None: (start.strftime('%Y-%m-%d-%H'),end.strftime('%Y-%m-%d-%H'),authStatus(user)),())
     def bestByTime(self,start=datetime.datetime.min,end=datetime.datetime.max,user=None,group=None):
-        if group is None:
-            replaceArgs = {'second': 0, 'minute': 0, 'microsecond': 0}
-            cacheUser = user.is_authenticated() if 'is_authenticated' in dir(user) else user
-            groupKey = 'bestByTime'
-            cacheKey = 'bestByTime:%s:%s:%s' % (start.replace(**replaceArgs).isoformat(),end.replace(**replaceArgs).isoformat(),cacheUser)
-            print cacheKey
-            cacheGroup = cache.get(groupKey,set())
-            if cacheKey in cacheGroup:
-                cached = cache.get(cacheKey)
-                if cached is not None:
-                    return cached
-                else:
-                    cache.set(groupKey,cacheGroup.difference(cacheKey))
         if group is None:
             sleepers = Sleeper.objects.all()
             sleepers=sleepers.select_related('sleeperprofile','sleeperprofile__user').prefetch_related('sleep_set','allnighter_set')
@@ -543,17 +513,16 @@ class SleeperManager(models.Manager):
                 scored.append(d)
         scored.sort(key=lambda x: -x['time'])
         for i in xrange(len(scored)): scored[i]['rank']=i+1
-        if group is None:
-            cache.set(cacheKey,scored)
-            cacheGroup = cache.get(groupKey,set())
-            cacheGroup.add(cacheKey)
-            cache.set(groupKey,cacheGroup)
         return scored
 
 class FriendRequest(models.Model):
     requestor = models.ForeignKey(SleeperProfile)
     requestee = models.ForeignKey(User)
     accepted = models.NullBooleanField()
+
+    def save(self,*args,**kwargs):
+        expireTemplateCache('header',self.requestee.username)
+        super(FriendRequest,self).save(*args,**kwargs)
         
 
 class Sleeper(User):
@@ -772,17 +741,8 @@ class Sleeper(User):
             w = w*(len(data)-1.5)/len(data)
         return s/w
 
+    @cache_function(lambda self,end=datetime.date.max,hl=4: (self.id,end.isoformat(),hl), lambda self,end=datetime.date.max,hl=4: (self,))
     def decayStats(self,end=datetime.date.max,hl=4):
-        groupKey = 'decayStats:%s' % self.id
-        cacheKey = 'decayStats:%s:%s:%s' % (self.id, end.isoformat(),hl)
-        group = cache.get(groupKey,set())
-        if cacheKey in group:
-            cached = cache.get(cacheKey)
-            if cached is not None:
-                return cached
-            else:
-                cache.set(groupKey,group.difference(cacheKey))
-
         sleep = self.sleepPerDay(datetime.date.min,end)
         ideal = int(self.sleeperprofile.getFloatIdealSleep()*3600)
         d = {}
@@ -816,10 +776,6 @@ class Sleeper(User):
                 d[k]=datetime.timedelta(0)
             else:
                 d[k]=datetime.timedelta(0,d[k])
-        cache.set(cacheKey,d)
-        group = cache.get(groupKey,set())
-        group.add(cacheKey)
-        cache.set(groupKey,group)
         return d
 
 class SleeperGroup(models.Model):
@@ -924,6 +880,10 @@ class GroupInvite(models.Model):
     def reject(self):
         self.accepted=False
         self.save()
+
+    def save(self,*args,**kwargs):
+        expireTemplateCache('header',self.user.username)
+        super(GroupInvite,self).save(*args,**kwargs)
 
 class GroupRequest(models.Model):
     user = models.ForeignKey(User)
