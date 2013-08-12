@@ -281,7 +281,7 @@ def manageGroup(request,gid):
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
-    if 'sort' not in request.GET or request.GET['sort'] not in ['zPScore','posStDev','zScore','avg','avgSqrt','avgLog','avgRecip','stDev', 'idealDev', 'consistent']:
+    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','stDev', 'consistent', 'consistent2']:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
