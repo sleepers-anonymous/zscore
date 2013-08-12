@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.db import IntegrityError
 from django.core.exceptions import *
 from django.utils.timezone import now
+from django.core.cache import cache
 
 from sleep.models import *
 from sleep.forms import *
@@ -313,7 +314,7 @@ def leaderboard(request,group=None):
     else:
         allUsers = Sleeper.objects.all()
     number = allUsers.filter(sleep__isnull=False).distinct().count()
-    metricsToDisplay = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev','consistent']
+    metricsToDisplay = ['zScore','avg','stDev','consistent','consistent2']
     metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
     context = {
             'group' : group,

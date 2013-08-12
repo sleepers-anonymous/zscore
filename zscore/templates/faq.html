@@ -15,6 +15,12 @@ Another way of accounting for consistent sleep is to have some sort of diminishi
 
 <p>The <b>consistent</b> metric measures how consistent the <i>times</i> when you slept were, not how consistent the length of your sleep was. This is the probability (multiplied by 1000) that if you pick a random point when you were asleep, and then pick a random day, you were asleep at that time on that day too. If you sleep at exactly the same time every day, your score will be 1000; otherwise, it will be less. </p>
 
+<p> The <b>consistent2</b> metric also measures how consistent the times when you slept were. It's the probability (multiplied by 1000) that if you pick two random days and a random time, you will either be asleep on both days or awake on both days at that time. This metric doesn't penalize those who get less sleep for their inconsistent sleep times as much as consistent does.</p>
+
+<p><i>Q: Why are so many metrics gone? </i></p>
+
+<p> We pruned several which had results that were nearly identical to those of other metrics. We're working on giving you the ability to choose which metrics to display.</p>
+
 <p><i>Q: Over what time period are the stats computed?  And what's this exponentially decaying thing?</i></p>
 <p>A: The exponentially decaying average is a weighted average over all time, where the sleep from <i>n</i> days ago has a weight of 2<sup>-<i>n</i>/4</sup>, i.e., the weights have a half-life of 4 days.  This counts all sleep, but counts recent sleep (the last week or so) for the most.  We also compute averages over all time ("global") and over the last 7 days ("weekly").  The leaderboard uses the exponentially decaying average.</p>
 
