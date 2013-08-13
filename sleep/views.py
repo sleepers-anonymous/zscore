@@ -221,6 +221,10 @@ def manageMember(request):
             raise Http404
         g=gs[0]
         u=us[0]
+        if not (request.user == u):
+            m = Membership.objects.filter(user=request.user, group=g)
+            if m.count() != 1: raise Http404
+            if m.role < m.ADMIN: raise PermissionDenied
         if 'action' in request.POST and request.POST["action"] == "remove":
             for m in Membership.objects.filter(user=u,group=g):
                 r = m.removeMember()
