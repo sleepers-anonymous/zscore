@@ -564,6 +564,7 @@ def createSleep(request):
     else:
         comments = ""
     # Create the Sleep instance
+    if start > end: start,end = end, start #if end is after start, flip them
     s = Sleep(user=request.user, start_time=start, end_time=end, comments=comments, date=date,timezone=timezone)
     try:
         s.validate_unique()
