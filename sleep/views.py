@@ -56,9 +56,9 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
                 try:
                     defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d")
                 except:
-                    defaultdate = now().astimezone(pytz.timezone(defaulttz)).replace(hour=0, minute=0, second=0, microsecond=0)
+                    defaultdate = prof.today()
             else:
-                defaultdate = now().astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
+                defaultdate = prof.today()
             form = AllNighterForm(request.user, initial={"date": str(defaultdate.date())})
     if request.method == "POST":
         if form.is_valid():
