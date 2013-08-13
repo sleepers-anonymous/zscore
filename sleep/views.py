@@ -222,8 +222,9 @@ def manageMember(request):
         g=gs[0]
         u=us[0]
         if not (request.user == u):
-            m = Membership.objects.filter(user=request.user, group=g)
-            if m.count() != 1: raise Http404
+            ms = Membership.objects.filter(user=request.user, group=g)
+            if ms.count() != 1: raise Http404
+            m = ms[0]
             if m.role < m.ADMIN: raise PermissionDenied
         if 'action' in request.POST and request.POST["action"] == "remove":
             for m in Membership.objects.filter(user=u,group=g):
@@ -268,6 +269,25 @@ def groupJoin(request):
         m = Membership(user = request.user, group = g, privacy = request.user.sleeperprofile.privacyLoggedIn)
         m.save()
         return HttpResponse('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
+def processRequest(request):
+    if'r' in request.POST and 'user' in request.POST:
+        rs = GroupRequest.objects.filter(id=request.POST["r"])
+        if rs.count() != 1: raise 404
+        r = rs[0]
+        us = User.objects.filter(id=request.POST["user"])
+        if us.count() != 1: raise 404
+        u = us[0]
+        if "action" in request.POST:
+            if request.POST["action"] == "accept":
+                r.accept()
+            elif request.POST["action"] == "reject":
+                r.reject()
+            return HttpResponse('')
+        return HttpResponseBadRequest('')
     else:
         return HttpResponseBadRequest('')
 
