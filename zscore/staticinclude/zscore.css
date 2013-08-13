@@ -32,6 +32,7 @@ div.navigation-bar ul li ul{
 
 div.navigation-bar ul li:hover ul{
 		display:block;
+		border:1px solid white;
 		background-color: #222222;
 		padding:10px;
 		margin: 10px 0px;
@@ -135,16 +136,6 @@ body.nighttime {
 		margin:0px;
 }
 
-body.daytime a.button-error:link {
-		color: red;
-		text-decoration:none;
-}
-
-body.nighttime a.button-error:link {
-		color: #ff8282;
-		text-decoration: none;
-}
-
 body.daytime a.hidden {
 		text-decoration:none;
 		color:black;
@@ -222,36 +213,55 @@ table.leaderboard{
 
 /* jquery tabs, daytime/nighttime */
 
-body.daytime .ui-tabs {
+body.daytime .ui-tabs, .ui-tabs-nav {
+		background-color:#d6f9ff;
+		background-image:none;
+}
+
+body.nighttime .ui-tabs, .ui-tabs-nav {
+		background-color:#08285C;
+		background-image:none;
+}
+
+body.nighttime button.ui-button {
+		color:black;
+		background-image: none;
+}
+
+div.ui-dialog-titlebar{
+		background:none;
+}
+
+body.daytime .ui-dialog {
 		background-color:#d6f9ff;
 }
 
-body.nighttime .ui-tabs {
-		background-color:#08285C;
+body.nighttime .ui-dialog {
+		background-color;#08285c;
 }
 
 body.daytime .ui-widget-header {
 		border: none;
-		background: none;
+		background-color: #d6f9ff;
 		color: #222222;
 		font-weight: bold;
 }
 
 body.nighttime .ui-widget-header {
 		border: none;
-		background: none;
+		background-color: #08285c;
 		color: white;
 		font-weight: bold;
 }
 
 body.daytime .ui-widget-content {
 		border: 1px solid black;
-		background: none;
+		background-color: #d6f9ff;
 }
 
 body.nighttime .ui-widget-content {
 		border: 1px solid black;
-		background: none;
+		background-color: #08285C;
 		color:white;
 }
 
@@ -296,4 +306,3 @@ body.nighttime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget
 		font-weight: normal;
 		color: white;
 }
-
