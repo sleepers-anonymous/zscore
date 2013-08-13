@@ -87,6 +87,27 @@ div.navigation-bar ul li.night:hover{
 		background:black;
 }
 
+/* sleep table formatting */
+
+table.sleep-list {
+		margin:0;
+		padding:0;
+}
+
+table.sleep-list tr {
+		margin: 2px 0px;
+		padding: 0;
+}
+
+table.sleep-list tr td {
+		margin: 0;
+		padding: 0;
+}
+
+table.sleep-list tr th {
+		float:right;
+}
+
 /* make footer smaller */
 div.footer {
 		text-align: center;
