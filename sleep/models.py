@@ -4,6 +4,8 @@ from django.core.exceptions import *
 from django.utils.timezone import now
 from django.core.mail import EmailMultiAlternatives
 from django.core.cache import cache
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 
 import pytz
 import datetime
@@ -187,6 +189,13 @@ class Sleep(models.Model):
         cache.delete('totalSleep:')
         super(Sleep, self).save(*args,**kwargs)
 
+    def delete(self, *args, **kwargs):
+        cache.delete('decayStats:%s' % self.user_id)
+        cache.delete('bestByTime:')
+        cache.delete('sorted_sleepers:')
+        cache.delete('totalSleep:')
+        super(Sleep, self).delete(*args,**kwargs)
+
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
     date = models.DateField()
@@ -201,6 +210,12 @@ class Allnighter(models.Model):
 
     def __unicode__(self):
         return "All-nighter on " + self.date.strftime("%x")
+
+    def delete(self, *args, **kwargs):
+        cache.delete('decayStats:%s' % self.user_id)
+        cache.delete('bestByTime:')
+        cache.delete('sorted_sleepers:')
+        super(Allnighter, self).delete(*args,**kwargs)
 
     def save(self, *args, **kwargs):
         cache.delete('decayStats:%s' % self.user_id)
@@ -294,6 +309,7 @@ class SleeperProfile(models.Model):
     def save(self, *args, **kwargs):
         cache.delete('bestByTime:')
         cache.delete('sorted_sleepers:')
+        cache.delete('getPermissions:')
         super(SleeperProfile, self).save(*args,**kwargs)
 
     def activateEmail(self, sha):
@@ -395,6 +411,7 @@ class SleeperProfile(models.Model):
         else:
             return self.privacy
 
+    @cache_function(lambda self, otherUser, otherUserGroupIDs=None: (self.id,otherUser.id),())
     def getPermissions(self, otherUser, otherUserGroupIDs=None):
         """Returns the permissions an other user should have for me.
         
@@ -432,6 +449,10 @@ class SleeperProfile(models.Model):
 
     def __unicode__(self):
         return "SleeperProfile for user %s" % self.user
+
+@receiver(m2m_changed,sender=SleeperProfile.friends.through)
+def expireGetPermissions(**kwargs):
+    cache.delete('getPermissions:')
 
 class SleeperManager(models.Manager):
     @cache_function(lambda self,sortBy='zScore',user=None,group=None: (sortBy,authStatus(user)) if group is None else None,())
@@ -617,6 +638,7 @@ class Sleeper(User):
     def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max, stdev = False):
         return self.sleepWakeTime('end',start,end, stdev = stdev)
 
+    @cache_function(lambda self,start=datetime.date.min,end=datetime.date.max: (self.id,start,end), lambda self,start=datetime.date.min,end=datetime.datetime.max: (self.id,))
     def movingStats(self,start=datetime.date.min,end=datetime.date.max):
         sleep = self.sleepPerDay(start,end)
         ideal = int(self.sleeperprofile.getFloatIdealSleep()*3600)
@@ -741,7 +763,7 @@ class Sleeper(User):
             w = w*(len(data)-1.5)/len(data)
         return s/w
 
-    @cache_function(lambda self,end=datetime.date.max,hl=4: (self.id,end.isoformat(),hl), lambda self,end=datetime.date.max,hl=4: (self,))
+    @cache_function(lambda self,end=datetime.date.max,hl=4: (self.id,end,hl), lambda self,end=datetime.date.max,hl=4: (self.id,))
     def decayStats(self,end=datetime.date.max,hl=4):
         sleep = self.sleepPerDay(datetime.date.min,end)
         ideal = int(self.sleeperprofile.getFloatIdealSleep()*3600)
@@ -860,6 +882,14 @@ class Membership(models.Model):
             self.delete()
         else:
             raise ValueError, "You appear to be the last member of this group. Care to delete it instead?"
+
+    def delete(self,*args,**kwargs):
+        cache.delete("getPermissions:")
+        super(Membership,self).delete(*args,**kwargs)
+
+    def save(self,*args,**kwargs):
+        cache.delete("getPermissions:")
+        super(Membership,self).save(*args,**kwargs)
 
 class GroupInvite(models.Model):
     user=models.ForeignKey(User)
