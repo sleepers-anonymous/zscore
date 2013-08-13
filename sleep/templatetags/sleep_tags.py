@@ -211,10 +211,14 @@ def displayMyGroup(group, amMember = 0):
 
 @register.inclusion_tag('inclusion/display_group_member.html',takes_context=True)
 def displayGroupMember(context,group,user):
+    ms = Membership.objects.filter(user = user, group = group)
+    if ms.count() >= 1:
+        m = ms[0]
+        context["member"] = True
+        context["admin"] = (m.role >= m.ADMIN)
     context.update({
             'group' : group,
             'user' : user,
-            'member' : user in group.members.all(),
             'canremove': context['isAdmin'] or context['request'].user == user,
             })
     return context

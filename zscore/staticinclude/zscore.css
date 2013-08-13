@@ -290,6 +290,16 @@ table.leaderboard{
 		padding:0px;
 }
 
+body.daytime div.content a.button-error{
+		color: red;
+		text-decoration:none;
+}
+
+body.nighttime div.content a.button-error{
+		color: #FF3333;
+		text-decoration:none;
+}
+
 /* jquery tabs, daytime/nighttime */
 
 body.daytime .ui-tabs, .ui-tabs-nav {
