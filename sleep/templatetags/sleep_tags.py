@@ -213,19 +213,21 @@ def displayUser(username):
 def displayMyGroup(group, amMember = 0):
     return {'group' : group, 'amMember' : amMember, 'isPublic': group.privacy >= group.PUBLIC}
 
-@register.inclusion_tag('inclusion/display_group_member.html',takes_context=True)
-def displayGroupMember(context,group,user):
+@register.inclusion_tag('inclusion/display_group_member.html', takes_context= True)
+def displayGroupMember(context, group,user):
     ms = Membership.objects.filter(user = user, group = group)
+    newcontext = {}
     if ms.count() >= 1:
         m = ms[0]
-        context["member"] = True
-        context["admin"] = (m.role >= m.ADMIN)
-    context.update({
+        newcontext["isMember"] = True
+        newcontext["admin"] = (m.role >= m.ADMIN)
+        newcontext["isAdmin"] = context["isAdmin"]
+    newcontext.update({
             'group' : group,
             'user' : user,
-            'canremove': context['isAdmin'] or context['request'].user == user,
+            'canremove': context['isAdmin'] or context["request"].user == user,
             })
-    return context
+    return newcontext
 
 @register.inclusion_tag('inclusion/display_invite.html')
 def displayInvite(invite):

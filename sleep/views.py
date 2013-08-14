@@ -306,7 +306,7 @@ def manageGroup(request,gid):
     if request.method == 'POST' and "SleeperSearchForm" in request.POST:
         searchForm=SleeperSearchForm(request.POST)
         if searchForm.is_valid():
-            us=User.objects.filter(username__icontains=searchForm.cleaned_data['username'])
+            us=User.objects.filter(username__icontains=searchForm.cleaned_data['username']).exclude(sleepergroups__id=g.id)
             context['results']=us
             context['showResults'] = True
             context['count']=us.count()
