@@ -203,7 +203,11 @@ def inviteMember(request):
             raise Http404
         g=gs[0]
         u=us[0]
-        g.invite(u,request.user)
+        rs = GroupRequest.objects.filter(user = u, group = g, accepted=None)
+        if rs.count() >= 1: #the user has made a request to join, accept them.
+            r[0].accept()
+        else:
+            g.invite(u,request.user)
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
@@ -253,6 +257,12 @@ def groupRequest(request):
         if gs.count() != 1: raise Http404
         g = gs[0]
         if g.privacy < SleeperGroup.REQUEST: raise PermissionDenied
+        if g.privacy <= SleeperGroup.PUBLIC: # it's a public group, allow user to join
+            m = Membership(user=request.user, group=g, privacy = request.user.sleeperprofile.privacyLoggedIn)
+            m.save()
+        invites = GroupInvites.objects.filter(user=request.user, group=g, accepted = None)
+        if invites.count() >= 1: # the user has already been invited, accept them.
+            invites[0].accept()
         g.request(request.user)
         return HttpResponse('')
     else:
@@ -286,7 +296,6 @@ def processRequest(request):
             elif request.POST["accepted"] == "False":
                 r.reject()
             return HttpResponse('')
-        print "hi"
         return HttpResponseBadRequest('')
     else:
         return HttpResponseBadRequest('')
@@ -684,7 +693,6 @@ def deleteAllnighter(request):
         if len(a) == 0: raise Http404
         a = a[0]
         if a.user != request.user: raise PermissionDenied
-        print "hi"
         a.delete()
         return HttpResponse('')
     return HttpResponseBadRequest('')
