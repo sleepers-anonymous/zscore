@@ -274,19 +274,19 @@ def groupJoin(request):
 
 @login_required
 def processRequest(request):
-    if'r' in request.POST and 'user' in request.POST:
-        rs = GroupRequest.objects.filter(id=request.POST["r"])
+    if 'id' in request.POST:
+        rs = GroupRequest.objects.filter(id=request.POST["id"])
         if rs.count() != 1: raise 404
         r = rs[0]
-        us = User.objects.filter(id=request.POST["user"])
-        if us.count() != 1: raise 404
-        u = us[0]
-        if "action" in request.POST:
-            if request.POST["action"] == "accept":
+        m = Membership.objects.get(group=r.group, user=request.user)
+        if m.role < m.ADMIN: raise PermissionDenied
+        if "accepted" in request.POST:
+            if request.POST["accepted"] == "True":
                 r.accept()
-            elif request.POST["action"] == "reject":
+            elif request.POST["accepted"] == "False":
                 r.reject()
             return HttpResponse('')
+        print "hi"
         return HttpResponseBadRequest('')
     else:
         return HttpResponseBadRequest('')
@@ -329,7 +329,7 @@ def manageGroup(request,gid):
     context['groupForm']=groupForm
     context['members']=g.members.all()
     if context['isAdmin']:
-        context['requests'] = g.grouprequest_set.all()
+        context['requests'] = g.grouprequest_set.filter(accepted=None)
         if 'page' not in context and context['requests'].count() > 0: context['page'] = 3
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 

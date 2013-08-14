@@ -118,6 +118,10 @@ def sleepListView(context, renderContent='html'):
             'use12HourTime': user.sleeperprofile.use12HourTime,
             }
 
+@register.inclusion_tag('inclusion/display_request.html')
+def displayRequest(r):
+    return {"user": r.user, "r": r}
+
 @register.inclusion_tag('inclusion/sleep_entry.html', takes_context=True)
 def sleepEntryView(context,renderContent='html'):
     return {'renderContent': renderContent,

@@ -926,7 +926,7 @@ class GroupRequest(models.Model):
 
     def accept(self, privacy = None):
         if privacy is None:
-            privacy = self.user.sleeperprofle.privacyLoggedIn
+            privacy = self.user.sleeperprofile.privacyLoggedIn
         m = Membership(user=self.user, group=self.group, privacy=privacy)
         m.save()
         self.accepted = True

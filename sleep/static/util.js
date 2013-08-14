@@ -151,3 +151,20 @@ function joinGroup(id, link) {
         });
 };
 
+function acceptRequest(id,link) {
+  $.post("/groups/request/process/", {
+      "id" : id,
+      "accepted" : "True",
+  }, function() {
+    link.innerHTML="accepted";
+  });
+};
+
+function rejectRequest(id,link) {
+  $.post("/groups/request/process/", {
+      "id" : id,
+      "accepted" : "False",
+  }, function() {
+    link.innerHTML="rejected";
+  });
+};
