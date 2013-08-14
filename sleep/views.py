@@ -54,12 +54,12 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
         else:
             if "withdate" in request.GET:
                 try:
-                    defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d")
+                    defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d").date()
                 except:
                     defaultdate = prof.today()
             else:
                 defaultdate = prof.today()
-            form = AllNighterForm(request.user, initial={"date": str(defaultdate.date())})
+            form = AllNighterForm(request.user, initial={"date": str(defaultdate)})
     if request.method == "POST":
         if form.is_valid():
             if "delete" in form.data and form.data["delete"] == "on":
