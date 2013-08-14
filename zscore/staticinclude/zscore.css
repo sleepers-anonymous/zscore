@@ -215,9 +215,14 @@ body.nighttime {
 		margin:0px;
 }
 
-body.daytime a.hidden {
+body.daytime div.content a.hidden:link,a.hidden:visited {
 		text-decoration:none;
 		color:black;
+}
+
+body.daytime div.content a.hidden:hover, a.hidden:active{
+		text-decoration:none;
+		color: #08285C;
 }
 
 body.daytime div.content a:link,a:visited {
