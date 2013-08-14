@@ -400,3 +400,11 @@ body.nighttime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget
 		font-weight: normal;
 		color: white;
 }
+
+body.nighttime a.sleep-delete-button:hover {
+		color:#FF3333;
+}
+
+body.daytime a.sleep-delete-button:hover {
+		color:red;
+}
