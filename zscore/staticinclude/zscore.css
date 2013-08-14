@@ -20,6 +20,7 @@ body.nighttime div.navigation-bar {
 		border-radius: 15px;
 		min-height:45px;
 		border: 1px solid white;
+		overflow:hidden;
 }
 
 body.daytime div.navigation-bar a:link{
@@ -128,7 +129,7 @@ div.navigation-bar ul ul ul {
 }
 
 div.navigation-bar ul li.day {
-		background: #d6f9ff;
+		background: white;
 		color:black;
 }
 
@@ -138,7 +139,7 @@ div.navigation-bar ul li.day:hover {
 }
 
 div.navigation-bar ul li.night {
-		background: #08285C;
+		background: #08083C;
 }
 
 div.navigation-bar ul li.night:hover{
@@ -202,7 +203,7 @@ table.form ul.errorlist li {
 /* body daytime/nighttime */
 
 body.daytime {
-		background: #d6f9ff;
+		background: white;
 		padding:0px;
 		margin:0px;
 		width:100%;
@@ -210,7 +211,7 @@ body.daytime {
 }
 
 body.nighttime {
-		background: #08285C;
+		background: #08083C;
 		color:white;
 		padding:0px;
 		margin:0px;
@@ -228,15 +229,15 @@ body.daytime div.content a.hidden:link,a.hidden:visited {
 
 body.daytime div.content a.hidden:hover, a.hidden:active{
 		text-decoration:none;
-		color: #08285C;
+		color: #08083C;
 }
 
 body.daytime div.content a:link,a:visited {
-		color: #08285C;
+		color: #08083C;
 }
 
 body.daytime div.footer a:link, a:visited {
-		color: #08285c;
+		color: #08083c;
 }
 
 body.nighttime a.hidden {
@@ -253,21 +254,23 @@ body.nighttime a:visited {
 }
 
 body.nighttime a:hover {
-		color: #d6f9ff;
+		color: yellow;
 }
 
 body.nighttime a:active {
-		color: #d6f9ff;
+		color: yellow;
 }
 
-body.daytime input,select,textarea {
+body.daytime input:not([type=submit]):not([type=file]),select,textarea {
 		background: white;
 		color: black;
+		border: 1px solid black;
 }
 
-body.nighttime input,select,textarea {
+body.nighttime input:not([type=submit]):not([type=file]),select,textarea {
 		background: black;
 		color: white;
+		border: 1px solid white;
 }
 
 div.global-wrapper {
@@ -314,12 +317,12 @@ body.nighttime div.content a.button-error{
 /* jquery tabs, daytime/nighttime */
 
 body.daytime .ui-tabs, .ui-tabs-nav {
-		background-color:#d6f9ff;
+		background-color: white;
 		background-image:none;
 }
 
 body.nighttime .ui-tabs, .ui-tabs-nav {
-		background-color:#08285C;
+		background-color:#08083C;
 		background-image:none;
 }
 
@@ -333,35 +336,35 @@ div.ui-dialog-titlebar{
 }
 
 body.daytime .ui-dialog {
-		background-color:#d6f9ff;
+		background-color:white;
 }
 
 body.nighttime .ui-dialog {
-		background-color;#08285c;
+		background-color;#08083c;
 }
 
 body.daytime .ui-widget-header {
 		border: none;
-		background-color: #d6f9ff;
+		background-color: white;
 		color: #222222;
 		font-weight: bold;
 }
 
 body.nighttime .ui-widget-header {
 		border: none;
-		background-color: #08285c;
+		background-color: #08083c;
 		color: white;
 		font-weight: bold;
 }
 
 body.daytime .ui-widget-content {
 		border: 1px solid black;
-		background-color: #d6f9ff;
+		background-color: white;
 }
 
 body.nighttime .ui-widget-content {
 		border: 1px solid black;
-		background-color: #08285C;
+		background-color: #08083C;
 		color:white;
 }
 
