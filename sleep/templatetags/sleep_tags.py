@@ -118,6 +118,10 @@ def sleepListView(context, renderContent='html'):
             'use12HourTime': user.sleeperprofile.use12HourTime,
             }
 
+@register.inclusion_tag('inclusion/display_request.html')
+def displayRequest(r):
+    return {"user": r.user, "r": r}
+
 @register.inclusion_tag('inclusion/sleep_entry.html', takes_context=True)
 def sleepEntryView(context,renderContent='html'):
     return {'renderContent': renderContent,
@@ -206,18 +210,24 @@ def displayUser(username):
     else: return username
 
 @register.inclusion_tag('inclusion/display_my_group.html')
-def displayMyGroup(group):
-    return {'group' : group}
+def displayMyGroup(group, amMember = 0):
+    return {'group' : group, 'amMember' : amMember, 'isPublic': group.privacy >= group.PUBLIC}
 
-@register.inclusion_tag('inclusion/display_group_member.html',takes_context=True)
-def displayGroupMember(context,group,user):
-    context.update({
+@register.inclusion_tag('inclusion/display_group_member.html', takes_context= True)
+def displayGroupMember(context, group,user):
+    ms = Membership.objects.filter(user = user, group = group)
+    newcontext = {}
+    if ms.count() >= 1:
+        m = ms[0]
+        newcontext["isMember"] = True
+        newcontext["admin"] = (m.role >= m.ADMIN)
+        newcontext["isAdmin"] = context["isAdmin"]
+    newcontext.update({
             'group' : group,
             'user' : user,
-            'member' : user in group.members.all(),
-            'canremove': context['isAdmin'] or context['request'].user == user,
+            'canremove': context['isAdmin'] or context["request"].user == user,
             })
-    return context
+    return newcontext
 
 @register.inclusion_tag('inclusion/display_invite.html')
 def displayInvite(invite):

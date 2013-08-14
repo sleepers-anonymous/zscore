@@ -1,18 +1,20 @@
-.sleep-entry-view
+div.sleep-entry-view
 {
     width: 96%;
     margin: 2%;
 }
-.sleep-stats-view
+div.sleep-stats-view
 {
     float: left;
-    width: 55%;
+    width: 45%;
     clear: left;
     margin: 2%;
+    min-width:500px;
 }
-.sleep-list-view
+div.sleep-list-view
 {
     float: right;
-    width: 35%;
+    width: 45%;
     margin: 2%;
+    min-width:500px;
 }

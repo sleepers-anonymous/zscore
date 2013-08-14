@@ -3,6 +3,7 @@
 {% load sleep_tags %}
 
 {% block content %}
+
 <h1>Groups</h1>
 
 {% if invites %}
@@ -14,12 +15,11 @@
 </table>
 {% endif %}
 
-
 {% if groups %}
 <h3>My Groups</h3>
 <table>
 {% for group in groups %}
-    {% displayMyGroup group %}
+    {% displayMyGroup group 1 %}
 {% endfor %}
 </table>
 {% else %}
@@ -30,16 +30,20 @@
 Create a group <a href="/groups/create/">here</a>.
 </p>
 
-<h3>Public Groups</h3>
+<h3>Public and Requestable Groups</h3>
 <form method="post">{% csrf_token %}
     {{form.as_p}}
     <p><input type="submit" value="Search"></p>
 </form>
 
 {% if results %}
-{% for g in results %}
-<p>{{g.name}}</p>
+<table>
+{% for group in results %}
+    {% displayMyGroup group 0 %}
 {% endfor %}
+</table>
+{% else %}
+{% if noresults %} No groups found matching that search, sorry.{% endif %}
 {% endif %}
 
 {% endblock %}

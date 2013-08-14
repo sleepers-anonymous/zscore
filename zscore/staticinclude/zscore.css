@@ -1,0 +1,451 @@
+/* navbar */
+body.daytime div.navigation-bar {
+		width:98%;
+		background: #424242;
+		color: white;
+		margin:10px auto;
+		-moz-border-radius: 15px;
+		border-radius: 15px;
+		min-height:45px;
+		border: 1px solid white;
+		overflow:hidden;
+}
+
+body.nighttime div.navigation-bar {
+		width:98%;
+		background: #424242;
+		color: white;
+		margin:10px auto;
+		-moz-border-radius: 15px;
+		border-radius: 15px;
+		min-height:45px;
+		border: 1px solid white;
+		overflow:hidden;
+}
+
+body.daytime div.navigation-bar a:link{
+		color:white;
+}
+
+body.nighttime div.navigation-bar a:link{
+		color:white;
+}
+body.daytime div.navigation-bar a:visited{
+		color:white;
+}
+
+body.nighttime div.navigation-bar a:visited{
+		color:white;
+}
+
+
+div.navigation-bar ul {
+		list-style-type:none;
+		margin:0;
+		padding:10px;
+		width:100%;
+		display: inline-table;
+}
+
+div.navigation-bar ul li {
+		padding:4px;
+		float:left;
+		margin-top:auto;
+		margin-bottom:0;
+}
+
+div.navigation-bar ul li ul{
+		display:none;
+		height: auto;
+		margin: 0px;
+		padding: 0px;
+		width: auto;
+}
+
+div.navigation-bar ul li:hover > ul{
+		display:block;
+		border:1px solid white;
+		background-color: #222222;
+		padding: 11px 0px;
+		margin: 4px 0px;
+		border-radius: 15px;
+		-moz-border-radius:15px;
+		z-index: 100;
+		position: absolute;
+}
+
+div.navigation-bar ul li ul li:hover > ul{
+		display:block;
+}
+
+div.navigation-bar >ul >li ul li {
+		float:none;
+		width:100%;
+		padding: 4px 0px;
+}
+
+div.navigation-bar ul li > ul li:hover {
+		background-color:black;
+}
+
+div.navigation-bar > ul > li > ul li a:link{
+		color:white;
+		text-decoration:none;
+		padding: 0px 4px;
+}
+
+body.daytime div.navigation-bar> ul> li > a:link {
+		color: white;
+		text-decoration:none;
+}
+
+body.daytime div.navigation-bar> ul> li > a:visited {
+		color: white;
+		text-decoration:none;
+}
+
+body.daytime div.navigation-bar> ul> li > a:hover, a:active {
+		color: white;
+		background: black;
+		padding: 10px 0px;
+}
+body.nighttime div.navigation-bar> ul> li > a:link, a:visited {
+		color: white;
+		text-decoration:none;
+}
+
+body.nighttime div.navigation-bar> ul> li > a:hover, a:active {
+		color: white;
+		background: black;
+		padding: 10px 0px;
+}
+div.navigation-bar ul ul ul {
+		position: absolute;
+		left:100%;
+		top:0;
+		margin:0;
+		float:none;
+		height:auto;
+		width:110px;
+		color:white;
+}
+
+div.navigation-bar ul li.day {
+		background: white;
+		color:black;
+}
+
+div.navigation-bar ul li.day:hover {
+		color:white;
+		background:black;
+}
+
+div.navigation-bar ul li.night {
+		background: #08083C;
+		color:white;
+}
+
+div.navigation-bar ul li.night:hover{
+		background:white;
+		color:black;
+}
+
+/* sleep table formatting */
+
+table.sleep-list {
+		margin:0;
+		padding:0;
+}
+
+table.sleep-list tr {
+		margin: 2px 0px;
+		padding: 0;
+}
+
+table.sleep-list tr td {
+		margin: 0;
+		padding: 0;
+}
+
+table.sleep-list tr th {
+		float:right;
+}
+
+/* make footer smaller */
+div.footer {
+		text-align: center;
+		clear: both;
+}
+
+div.footer p {
+		font-size:0.8em;
+}
+
+/* change error formatting for forms */
+table.form {
+		padding:10px;
+}
+
+table.form tr{
+		padding: 10px;
+}
+
+table.form th{
+		float:right;
+		padding: 10px;
+}
+table.form ul.errorlist {
+		list-style-type:none;
+		margin: 0px;
+		padding: 10px 0px;
+}
+
+table.form ul.errorlist li {
+		margin: 0px;
+}
+
+/* body daytime/nighttime */
+
+body.daytime {
+		background: white;
+		padding:0px;
+		margin:0px;
+		width:100%;
+		min-width:500px;
+}
+
+body.nighttime {
+		background: #08083C;
+		color:white;
+		padding:0px;
+		margin:0px;
+		min-width:500px;
+}
+
+div.global-wrapper{
+		min-width:500px;
+}
+
+body.daytime div.content a.hidden:link,a.hidden:visited {
+		text-decoration:none;
+		color:black;
+}
+
+body.daytime div.content a.hidden:hover, a.hidden:active{
+		text-decoration:none;
+		color: #08083C;
+}
+
+body.daytime div.content a:link,a:visited {
+		color: #08083C;
+}
+
+body.daytime div.footer a:link, a:visited {
+		color: #08083c;
+}
+
+body.nighttime a.hidden {
+		text-decoration:none;
+		color:white;
+}
+
+body.nighttime a:link {
+		color:white;
+}
+
+body.nighttime a:visited {
+		color:white;
+}
+
+body.nighttime a:hover {
+		color: yellow;
+}
+
+body.nighttime a:active {
+		color: yellow;
+}
+
+body.daytime div.content input:not([type=submit]):not([type=file]){
+		background: white;
+		color: black;
+		border: 1px solid black;
+		padding: 4px;
+}
+
+body.daytime div.content select{
+		background: white;
+		color: black;
+		border: 1px solid black;
+		padding:4px;
+}
+
+body.daytime div.content textarea{
+		background: white;
+		color: black;
+		border: 1px solid black;
+}
+
+body.nighttime div.content input:not([type=submit]):not([type=file]) {
+		background: black;
+		color: white;
+		border: 1px solid white;
+		padding: 4px;
+}
+
+body.nighttime div.content select {
+		background: black;
+		color: white;
+		border: 1px solid white;
+		padding: 4px;
+}
+
+body.nighttime div.content textarea {
+		background: black;
+		color: white;
+		border: 1px solid white;
+}
+
+div.global-wrapper {
+		margin:0;
+		padding:0;
+}
+
+div.content {
+		margin: 10px;
+		padding: 10px;
+}
+
+body.daytime table.leaderboard tr.me {
+		background-color:#f2b6ee;
+}
+
+body.nighttime table.leaderboard tr.me {
+		background-color:#73176d;
+}
+
+body.nighttime canvas {
+		background: white;
+}
+
+body.daytime canvas{
+		background: none;
+}
+
+table.leaderboard{
+		margin:0px;
+		padding:0px;
+}
+
+body.daytime div.content a.button-error{
+		color: red;
+		text-decoration:none;
+}
+
+body.nighttime div.content a.button-error{
+		color: #FF3333;
+		text-decoration:none;
+}
+
+/* jquery tabs, daytime/nighttime */
+
+body.daytime .ui-tabs, .ui-tabs-nav {
+		background-color: white;
+		background-image:none;
+}
+
+body.nighttime .ui-tabs, .ui-tabs-nav {
+		background-color:#08083C;
+		background-image:none;
+}
+
+body.nighttime button.ui-button {
+		color:black;
+		background-image: none;
+}
+
+div.ui-dialog-titlebar{
+		background:none;
+}
+
+body.daytime .ui-dialog {
+		background-color:white;
+}
+
+body.nighttime .ui-dialog {
+		background-color;#08083c;
+}
+
+body.daytime .ui-widget-header {
+		border: none;
+		background-color: white;
+		color: #222222;
+		font-weight: bold;
+}
+
+body.nighttime .ui-widget-header {
+		border: none;
+		background-color: #08083c;
+		color: white;
+		font-weight: bold;
+}
+
+body.daytime .ui-widget-content {
+		border: 1px solid black;
+		background-color: white;
+}
+
+body.nighttime .ui-widget-content {
+		border: 1px solid white;
+		background-color: #08083C;
+		color:white;
+}
+
+body.daytime .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+		border: 1px solid black;
+		background: #9bc4de;
+		font-weight: normal;
+		color: #555555;
+}
+
+body.daytime .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+		border: 1px solid black;
+		background: #63B0E0;
+		font-weight: normal;
+		color: #212121;
+}
+
+body.daytime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+		border: 1px solid black;
+		background: white;
+		font-weight: normal;
+		color: #212121;
+}
+
+body.nighttime .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+		border: 1px solid white;
+		background: #28578a;
+		font-weight: normal;
+		color: white;
+}
+
+body.nighttime .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+		border: 1px solid white;
+		background: #63B0E0;
+		font-weight: normal;
+		color: white;
+}
+
+body.nighttime .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+		border: 1px solid white;
+		background: black;
+		font-weight: normal;
+		color: white;
+}
+
+body.nighttime a.sleep-delete-button:hover {
+		color:#FF3333;
+}
+
+body.daytime a.sleep-delete-button:hover {
+		color:red;
+}

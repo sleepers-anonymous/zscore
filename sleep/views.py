@@ -54,12 +54,12 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
         else:
             if "withdate" in request.GET:
                 try:
-                    defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d")
+                    defaultdate = datetime.datetime.strptime(request.GET["withdate"], "%Y%m%d").date()
                 except:
-                    defaultdate = now().astimezone(pytz.timezone(defaulttz)).replace(hour=0, minute=0, second=0, microsecond=0)
+                    defaultdate = prof.today()
             else:
-                defaultdate = now().astimezone(pytz.timezone(defaulttz)).replace(hour=0,minute=0,second=0,microsecond=0)
-            form = AllNighterForm(request.user, initial={"date": str(defaultdate.date())})
+                defaultdate = prof.today()
+            form = AllNighterForm(request.user, initial={"date": str(defaultdate)})
     if request.method == "POST":
         if form.is_valid():
             if "delete" in form.data and form.data["delete"] == "on":
@@ -152,8 +152,9 @@ def groups(request):
     if request.method =="POST":
         form = GroupSearchForm(request.POST)
         if form.is_valid():
-            gs=SleeperGroup.objects.filter(name__icontains=form.cleaned_data['group'], privacy__gte=SleeperGroup.REQUEST)
+            gs=SleeperGroup.objects.filter(name__icontains=form.cleaned_data['group'], privacy__gte=SleeperGroup.REQUEST).exclude(members=request.user)
             context['results']=gs
+            if gs.count() == 0 : context["noresults"] = True
     else:
         form = GroupSearchForm()
     context["form"] = form
@@ -202,13 +203,17 @@ def inviteMember(request):
             raise Http404
         g=gs[0]
         u=us[0]
-        g.invite(u,request.user)
+        rs = GroupRequest.objects.filter(user = u, group = g, accepted=None)
+        if rs.count() >= 1: #the user has made a request to join, accept them.
+            r[0].accept()
+        else:
+            g.invite(u,request.user)
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
 
 @login_required
-def removeMember(request):
+def manageMember(request):
     if 'group' in request.POST and 'user' in request.POST:
         gid = request.POST['group']
         uid = request.POST['user']
@@ -220,9 +225,27 @@ def removeMember(request):
             raise Http404
         g=gs[0]
         u=us[0]
-        for m in Membership.objects.filter(user=u,group=g):
-            m.delete()
-        return HttpResponse('')
+        if not (request.user == u):
+            ms = Membership.objects.filter(user=request.user, group=g)
+            if ms.count() != 1: raise Http404
+            m = ms[0]
+            if m.role < m.ADMIN: raise PermissionDenied
+        if 'action' in request.POST and request.POST["action"] == "remove":
+            for m in Membership.objects.filter(user=u,group=g):
+                r = m.removeMember()
+                if r == "redirect": return HttpResponseRedirect("/groups")
+            return HttpResponse('')
+        if 'action' in request.POST and request.POST["action"] == "makeAdmin":
+            for m in Membership.objects.filter(user=u,group=g):
+                m.makeAdmin()
+            return HttpResponse('')
+        if 'action' in request.POST and request.POST["action"] == "removeAdmin":
+            for m in Membership.objects.filter(user=u, group=g):
+                try:
+                    m.makeMember()
+                except ValueError:
+                    return HttpResponseBadRequest('')
+            return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
 
@@ -234,6 +257,12 @@ def groupRequest(request):
         if gs.count() != 1: raise Http404
         g = gs[0]
         if g.privacy < SleeperGroup.REQUEST: raise PermissionDenied
+        if g.privacy <= SleeperGroup.PUBLIC: # it's a public group, allow user to join
+            m = Membership(user=request.user, group=g, privacy = request.user.sleeperprofile.privacyLoggedIn)
+            m.save()
+        invites = GroupInvites.objects.filter(user=request.user, group=g, accepted = None)
+        if invites.count() >= 1: # the user has already been invited, accept them.
+            invites[0].accept()
         g.request(request.user)
         return HttpResponse('')
     else:
@@ -254,6 +283,24 @@ def groupJoin(request):
         return HttpResponseBadRequest('')
 
 @login_required
+def processRequest(request):
+    if 'id' in request.POST:
+        rs = GroupRequest.objects.filter(id=request.POST["id"])
+        if rs.count() != 1: raise 404
+        r = rs[0]
+        m = Membership.objects.get(group=r.group, user=request.user)
+        if m.role < m.ADMIN: raise PermissionDenied
+        if "accepted" in request.POST:
+            if request.POST["accepted"] == "True":
+                r.accept()
+            elif request.POST["accepted"] == "False":
+                r.reject()
+            return HttpResponse('')
+        return HttpResponseBadRequest('')
+    else:
+        return HttpResponseBadRequest('')
+
+@login_required
 def manageGroup(request,gid):
     gs=SleeperGroup.objects.filter(id=gid)
     if len(gs)!=1:
@@ -261,11 +308,14 @@ def manageGroup(request,gid):
     g=gs[0]
     if request.user not in g.members.all():
         raise PermissionDenied
-    context={'group':g, 'isAdmin': (request.user.membership_set.get(group = g).role >= 50)}
+    context={
+            'group':g,
+            'isAdmin': (request.user.membership_set.get(group = g).role >= 50),
+            }
     if request.method == 'POST' and "SleeperSearchForm" in request.POST:
         searchForm=SleeperSearchForm(request.POST)
         if searchForm.is_valid():
-            us=User.objects.filter(username__icontains=searchForm.cleaned_data['username'])
+            us=User.objects.filter(username__icontains=searchForm.cleaned_data['username']).exclude(sleepergroups__id=g.id)
             context['results']=us
             context['showResults'] = True
             context['count']=us.count()
@@ -280,11 +330,16 @@ def manageGroup(request,gid):
                 g.delete()
                 return HttpResponseRedirect('/groups/')
             groupForm.save()
+        else:
+            context['page'] = 2
     else:
         groupForm = GroupForm(instance=g)
     context['searchForm']=searchForm
     context['groupForm']=groupForm
     context['members']=g.members.all()
+    if context['isAdmin']:
+        context['requests'] = g.grouprequest_set.filter(accepted=None)
+        if 'page' not in context and context['requests'].count() > 0: context['page'] = 3
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
@@ -638,7 +693,6 @@ def deleteAllnighter(request):
         if len(a) == 0: raise Http404
         a = a[0]
         if a.user != request.user: raise PermissionDenied
-        print "hi"
         a.delete()
         return HttpResponse('')
     return HttpResponseBadRequest('')

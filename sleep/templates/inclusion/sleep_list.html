@@ -28,7 +28,7 @@ function deleteAllnighter(id) {
 <div class="sleep-list" style="border: 1px solid black">
 		<h3>My Sleeps ({{numsleeps}} on {{numdates}} days)</h3>
 		<p><a href="/sleep/export/">Export sleeps</a></p>
-  <table>
+  <table class="sleep-list">
     {% for sleep in sleeps %}
 		{% displaySleep sleep showcomments=1 showedit=1 showTZ=1 use12HourTime=use12HourTime %}
     {% endfor %}

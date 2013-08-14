@@ -1,5 +1,14 @@
 <tr>
-<td>{{group.name}}</td>
-<td><a href="/leaderboard/{{group.id}}/">leaderboard</a></td>
-<td><a href="/groups/manage/{{group.id}}/">manage</a></td>
+		<td>{{group.name}}</td>
+		{% if amMember == 1 %}
+				<td><a href="/leaderboard/{{group.id}}/">leaderboard</a></td>
+				<td><a href="/groups/manage/{{group.id}}/">manage</a></td>
+		{% else %}
+				{% if isPublic %}
+						<td><a href="javascript:void(0);" class="group-join-button" onclick="joinGroup({{group.pk}}, this)">join</a></td>
+				{% else %}
+						<td><a href="javascript:void(0);" class="group-request-button" onclick="requestGroup({{group.pk}}, this)">request</a></td>
+				{% endif %}
+				<td>&nbsp;</td>
+		{% endif %}
 </tr>

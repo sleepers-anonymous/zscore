@@ -23,42 +23,66 @@
     {% block scripts %}
     <script src="/static/util.js" type="text/javascript"></script>
     {% endblock %}
-    {% block stylesheets %}{% endblock %}
+    <!-- Day/Night switching -->
+    <script src="/static/daynight.js" type="text/javascript"></script>
+    <!-- End Day/Night switching -->
+    {% block stylesheets %}
+        <link href="/static/zscore.css" rel="stylesheet">
+    {% endblock %}
     {% block meta %}
     <meta name="robots" content="none,noarchive"> <!--Asks search engines not to index us. -->
     <meta http-equiv="Content=Type" content="text/html; charset=UTF-8">
     {% endblock %}
   </head>
-  <body>
+  <body class="daytime" onload="set_style()">
     <div class="global-wrapper">
       {% block navbar %}
       {% cache 86400 header request.user.username %}
       <div class="navigation-bar">
-	<a href="/"><b>zScore</b></a><sup>[alpha]</sup>
-    <a href="/mysleep/">my sleep</a>
-    {% if request.user.is_authenticated %}
-    <a href="/mygraphs/">my graphs</a>
-    {% endif %}
-	<a href="/leaderboard/">leaderboard</a>
-	<a href="/graphs/">graphs</a>
-    <a href="/creep/">creep</a>
-	{% if request.user.is_staff %}
-	<a href="/admin/">admin</a>
-	{% endif %}
-	<a href="/faq/">FAQ</a>
-	{% if request.user.is_authenticated %}
-  logged in as {% displayUser request.user.username %} (<a href="/editprofile/">edit profile</a> <a href="/friends/">friends{% displayFriendRequests request.user %}</a> <a href="/groups/">groups{% displayInvites request.user %}</a> <a href="/accounts/logout">log out</a>)
-	{% else %}
-	<a href="/accounts/login">log in</a> <a href="/accounts/create">register</a> <br/>
-	{% endif %}
+          <ul>
+              <li><a href="/"><b>zScore</b></a><sup>[alpha]</sup></li>
+              <li><a href="/mysleep/">my sleep</a>
+              {% if request.user.is_authenticated %}
+              <ul>
+                  <li><a href="/mygraphs/">my graphs</a></li>
+              </ul>
+              {% endif %}
+              </li>
+              <li><a href="/leaderboard/">leaderboard</a>
+              <ul>
+                  <li><a href="/graphs/">graphs</a></li>
+              </ul>
+              </li>
+              <li><a href="/creep/">creep</a></li>
+	          {% if request.user.is_staff %}
+                <li><a href="/admin/">admin</a></li>
+	          {% endif %}
+              <li><a href="/faq/">FAQ</a></li>
+	          {% if request.user.is_authenticated %}
+              <li><a href="/creep/{{request.user.username}}">logged in as {{request.user.username}}</a>
+                <ul>
+                <li><a href="/editprofile/">edit profile</a></li>
+                <li><a href="/friends/">friends{% displayFriendRequests request.user %}</a></li>
+                <li><a href="/groups/">groups{% displayInvites request.user %}</a></li>
+                <li><a href="/accounts/logout">log out</a></li>
+                </ul>
+              </li>
+	          {% else %}
+                <li><a href="/accounts/login">log in</a> <a href="/accounts/create">register</a></li>
+                {% endif %}
+                <li class="day" onclick="switch_style('daytime')">D</li>
+                <li class="night" onclick="switch_style('nighttime')">N</li>
+          </ul>
       </div>
       {% endcache %}
       {% endblock %}
-      {% block content %}{% endblock %}
-
+      <div class="content">
+          {% block content %}{% endblock %}
+      </div>
+      
       {% block footer %}
       {% cache 864000 footer %}
-      <div class="footer" style="text-align:center;clear:both;">
+      <div class="footer">
           <p>&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;</p>
       </div>
       {% endcache %}
