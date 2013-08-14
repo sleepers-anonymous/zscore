@@ -50,6 +50,8 @@ div.navigation-bar ul {
 div.navigation-bar ul li {
 		padding:4px;
 		float:left;
+		margin-top:auto;
+		margin-bottom:0;
 }
 
 div.navigation-bar ul li ul{
@@ -140,10 +142,12 @@ div.navigation-bar ul li.day:hover {
 
 div.navigation-bar ul li.night {
 		background: #08083C;
+		color:white;
 }
 
 div.navigation-bar ul li.night:hover{
-		background:black;
+		background:white;
+		color:black;
 }
 
 /* sleep table formatting */
@@ -261,13 +265,27 @@ body.nighttime a:active {
 		color: yellow;
 }
 
-body.daytime input:not([type=submit]):not([type=file]),select,textarea {
+body.daytime div.content input:not([type=submit]):not([type=file]),select{
+		background: white;
+		color: black;
+		border: 1px solid black;
+		padding: 4px;
+}
+
+body.daytime div.content textarea{
 		background: white;
 		color: black;
 		border: 1px solid black;
 }
 
-body.nighttime input:not([type=submit]):not([type=file]),select,textarea {
+body.nighttime div.content input:not([type=submit]):not([type=file]),select,textarea {
+		background: black;
+		color: white;
+		border: 1px solid white;
+		padding: 4px;
+}
+
+body.nighttime div.content textarea {
 		background: black;
 		color: white;
 		border: 1px solid white;
@@ -363,7 +381,7 @@ body.daytime .ui-widget-content {
 }
 
 body.nighttime .ui-widget-content {
-		border: 1px solid black;
+		border: 1px solid white;
 		background-color: #08083C;
 		color:white;
 }
