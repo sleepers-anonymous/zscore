@@ -6,9 +6,9 @@ body.daytime div.navigation-bar {
 		margin:10px auto;
 		-moz-border-radius: 15px;
 		border-radius: 15px;
-		height:45px;
+		min-height:45px;
 		border: 1px solid white;
-		overflow-y:hidden;
+		overflow:hidden;
 }
 
 body.nighttime div.navigation-bar {
@@ -18,7 +18,7 @@ body.nighttime div.navigation-bar {
 		margin:10px auto;
 		-moz-border-radius: 15px;
 		border-radius: 15px;
-		height:45px;
+		min-height:45px;
 		border: 1px solid white;
 }
 
@@ -43,7 +43,6 @@ div.navigation-bar ul {
 		margin:0;
 		padding:10px;
 		width:100%;
-		position:absolute;
 		display: inline-table;
 }
 
@@ -69,6 +68,7 @@ div.navigation-bar ul li:hover > ul{
 		border-radius: 15px;
 		-moz-border-radius:15px;
 		z-index: 100;
+		position: absolute;
 }
 
 div.navigation-bar ul li ul li:hover > ul{
@@ -206,6 +206,7 @@ body.daytime {
 		padding:0px;
 		margin:0px;
 		width:100%;
+		min-width:500px;
 }
 
 body.nighttime {
@@ -213,6 +214,11 @@ body.nighttime {
 		color:white;
 		padding:0px;
 		margin:0px;
+		min-width:500px;
+}
+
+div.global-wrapper{
+		min-width:500px;
 }
 
 body.daytime div.content a.hidden:link,a.hidden:visited {
