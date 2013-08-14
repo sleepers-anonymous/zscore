@@ -59,14 +59,14 @@
 	          {% endif %}
               <li><a href="/faq/">FAQ</a></li>
 	          {% if request.user.is_authenticated %}
-              <li>logged in as {% displayUser request.user.username %}
+              <li><a href="/creep/{{request.user.username}}">logged in as {{request.user.username}}</a>
                 <ul>
                 <li><a href="/editprofile/">edit profile</a></li>
                 <li><a href="/friends/">friends{% displayFriendRequests request.user %}</a></li>
-                <li><a href="/groups/">groups{% displayInvites request.user %}</a><li>
+                <li><a href="/groups/">groups{% displayInvites request.user %}</a></li>
                 <li><a href="/accounts/logout">log out</a></li>
                 </ul>
-                </li>
+              </li>
 	          {% else %}
                 <li><a href="/accounts/login">log in</a> <a href="/accounts/create">register</a></li>
                 {% endif %}
