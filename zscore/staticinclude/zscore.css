@@ -265,11 +265,18 @@ body.nighttime a:active {
 		color: yellow;
 }
 
-body.daytime div.content input:not([type=submit]):not([type=file]),select{
+body.daytime div.content input:not([type=submit]):not([type=file]){
 		background: white;
 		color: black;
 		border: 1px solid black;
 		padding: 4px;
+}
+
+body.daytime div.content select{
+		background: white;
+		color: black;
+		border: 1px solid black;
+		padding:4px;
 }
 
 body.daytime div.content textarea{
@@ -278,7 +285,14 @@ body.daytime div.content textarea{
 		border: 1px solid black;
 }
 
-body.nighttime div.content input:not([type=submit]):not([type=file]),select,textarea {
+body.nighttime div.content input:not([type=submit]):not([type=file]) {
+		background: black;
+		color: white;
+		border: 1px solid white;
+		padding: 4px;
+}
+
+body.nighttime div.content select {
 		background: black;
 		color: white;
 		border: 1px solid white;
