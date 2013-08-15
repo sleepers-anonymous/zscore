@@ -137,21 +137,21 @@ div.navigation-bar ul ul ul {
 div.navigation-bar ul li.day {
 		background: white;
 		color:black;
+		text-decoration:none;
 }
 
 div.navigation-bar ul li.day:hover {
-		color:white;
-		background:black;
+		text-decoration:underline;
 }
 
 div.navigation-bar ul li.night {
 		background: #08083C;
 		color:white;
+		text-decoration:none;
 }
 
 div.navigation-bar ul li.night:hover{
-		background:white;
-		color:black;
+		text-decoration:underline;
 }
 
 /* sleep table formatting */
