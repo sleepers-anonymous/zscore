@@ -10,6 +10,7 @@ div.sleep-stats-view
     clear: left;
     margin: 2%;
     min-width:500px;
+    padding: 4px;
 }
 div.sleep-list-view
 {
@@ -17,4 +18,17 @@ div.sleep-list-view
     width: 45%;
     margin: 2%;
     min-width:500px;
+    padding:4px;
+}
+body.daytime div.sleep-stats-view {
+		border: 1px solid black;
+}
+body.nighttime div.sleep-stats-view {
+		border: 1px solid white;
+}
+body.daytime div.sleep-list-view {
+		border: 1px solid black;
+}
+body.nighttime div.sleep-list-view {
+		border: 1px solid white;
 }
