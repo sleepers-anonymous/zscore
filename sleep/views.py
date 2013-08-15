@@ -256,14 +256,15 @@ def groupRequest(request):
         gs = SleeperGroup.objects.filter(id=gid)
         if gs.count() != 1: raise Http404
         g = gs[0]
-        if g.privacy < SleeperGroup.REQUEST: raise PermissionDenied
-        if g.privacy <= SleeperGroup.PUBLIC: # it's a public group, allow user to join
+        if g.privacy < g.REQUEST: raise PermissionDenied
+        if g.privacy >= g.PUBLIC: # it's a public group, allow user to join
             m = Membership(user=request.user, group=g, privacy = request.user.sleeperprofile.privacyLoggedIn)
             m.save()
-        invites = GroupInvites.objects.filter(user=request.user, group=g, accepted = None)
+        invites = GroupInvite.objects.filter(user=request.user, group=g, accepted = None)
         if invites.count() >= 1: # the user has already been invited, accept them.
             invites[0].accept()
-        g.request(request.user)
+        else:
+            g.request(request.user)
         return HttpResponse('')
     else:
         return HttpResponseBadRequest('')
