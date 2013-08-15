@@ -544,7 +544,9 @@ class FriendRequest(models.Model):
     def save(self,*args,**kwargs):
         expireTemplateCache('header',self.requestee.username)
         super(FriendRequest,self).save(*args,**kwargs)
-        
+      
+    def __unicode__(self):
+        return "Friend request from %s to %s" % (self.requestor.user, self.requestee)
 
 class Sleeper(User):
     class Meta:
