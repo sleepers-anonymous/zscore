@@ -22,8 +22,6 @@ body.daytime div.content div.sleep-list-view {
     padding:4px;
     border: 1px solid black;
     display:block;
-    max-height: 1500px;
-    overflow:scroll;
 }
 body.nighttime div.content div.sleep-stats-view {
     float: left;
@@ -44,6 +42,4 @@ body.nighttime div.content div.sleep-list-view {
     padding:4px;
     border: 1px solid white;
     display:block;
-    max-height: 1500px;
-    overflow:scroll;
 }
