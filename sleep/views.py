@@ -225,7 +225,7 @@ def manageMember(request):
             raise Http404
         g=gs[0]
         u=us[0]
-        if not (request.user == u):
+        if not (request.user.pk == u.pk):
             ms = Membership.objects.filter(user=request.user, group=g)
             if ms.count() != 1: raise Http404
             m = ms[0]
