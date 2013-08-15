@@ -1,0 +1,8 @@
+{% load gravatar %}
+{% load sleep_tags %}
+<tr>
+		<td>{% gravatar request.user user 20 1 %}</td>
+		<td>{% displayUser user %}</td>
+		<td><a class="accept-request-button" href="javascript:void(0);" onclick="acceptRequest({{r.id}}, this)">accept</a></td>
+		<td><a class="reject-request-button" href="javascript:void(0);" onclick="rejectRequest({{r.id}}, this)">hide</a></td>
+</tr>

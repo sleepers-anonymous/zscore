@@ -1,18 +1,34 @@
-.sleep-entry-view
+div.sleep-entry-view
 {
     width: 96%;
     margin: 2%;
 }
-.sleep-stats-view
+div.sleep-stats-view
 {
     float: left;
-    width: 55%;
+    width: 45%;
     clear: left;
     margin: 2%;
+    min-width:500px;
+    padding: 4px;
 }
-.sleep-list-view
+div.sleep-list-view
 {
     float: right;
-    width: 35%;
+    width: 45%;
     margin: 2%;
+    min-width:500px;
+    padding:4px;
+}
+body.daytime div.sleep-stats-view {
+		border: 1px solid black;
+}
+body.nighttime div.sleep-stats-view {
+		border: 1px solid white;
+}
+body.daytime div.sleep-list-view {
+		border: 1px solid black;
+}
+body.nighttime div.sleep-list-view {
+		border: 1px solid white;
 }

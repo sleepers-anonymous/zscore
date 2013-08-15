@@ -1,13 +1,22 @@
 {% load gravatar %}
 
-<tr>
+<tr id="display-group-member">
     <td>{% gravatar request.user user 20 %}</td>
     <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
-    {% if member %}
+    {% if isMember %}
 				{% if canremove %}
 				<td><a class="remove-member-button" onclick="removeMember({{group.id}},{{user.id}},this)" href="javascript:void(0);">remove</a></td>
+						{% if isAdmin %}
+								{% if admin %}
+								<td><a class="remove-admin-button" onclick="removeAdmin({{group.id}},{{user.id}},this)" href="javascript:void(0);">unadminify</a></td>
+								{% else %}
+								<td><a class="make-admin-button" onclick="makeAdmin({{group.id}}, {{user.id}}, this)" href="javascript:void(0);">adminify</a></td>
+								{% endif %}
+						{% else %}
+						<td>&nbsp;</td>
+						{% endif %}
 				{% else %}
-				<td>&nbsp;</td>
+				<td>&nbsp;</td><td>&nbsp;</td>
 				{% endif %}
     {% else %}
     <td><a class="invite-member-button" onclick="inviteMember({{group.id}},{{user.id}},this)" href="javascript:void(0);">invite</a></td>

@@ -32,7 +32,7 @@
     border-right: 1px solid lightgray;
 }
 
-.sleep-box
+body.daytime .sleep-box
 {
     background-color: purple;
     position: relative; /* Floats the box on top of the table */
@@ -40,11 +40,26 @@
     width: 0;
     height: 10px;
 }
-.sleep-box.tentative
+
+body.nighttime .sleep-box
+{
+		background-color:white;
+		position: relative;
+		width:0;
+		height: 10px;
+}
+
+body.daytime .sleep-box.tentative
 {
     background-color: orange;
 }
-.sleep-box .start
+
+body.nighttime .sleep-box.tentative
+{
+		background-color: yellow;
+}
+
+body.daytime .sleep-box .start
 {
     border-radius: 5px;
     padding: 5px;
@@ -53,11 +68,28 @@
     background-color: purple;
     float: left;
 }
-.sleep-box .start.tentative
+
+body.nighttime .sleep-box .start
+{
+		border-radius: 5px;
+		padding: 5px;
+		margin-left: -5px;
+		margin-right: -5px;
+		background-color: white;
+		float: left;
+}
+
+body.daytime .sleep-box .start.tentative
 {
     background-color: orange;
 }
-.sleep-box .end
+
+body.nighttime .sleep-box .start.tentative
+{
+    background-color: yellow;
+}
+
+body.daytime .sleep-box .end
 {
     border-left: 10px solid purple;
     border-top: 5px solid transparent;
@@ -65,9 +97,26 @@
     float: right;
     margin-left: -10px;
 }
-.sleep-box .end.tentative
+
+body.nighttime .sleep-box .end
+{
+    border-left: 10px solid white;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    float: right;
+    margin-left: -10px;
+}
+
+body.daytime .sleep-box .end.tentative
 {
     border-left: 10px solid orange;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+body.nighttime .sleep-box .end.tentative
+{
+    border-left: 10px solid yellow;
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
 }

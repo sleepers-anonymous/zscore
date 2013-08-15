@@ -350,7 +350,7 @@ $(document).ready(function()
 	// Create a header for the row
 	var date = new Date(today);
 	date.setDate(date.getDate() - d);
-	var $td = $("<td></td>").html("<a style='text-decoration:none;color:black;' href='/sleep/allnighter/?withdate="+ $.datepicker.formatDate('yymmdd', date)+  "'>" + date.toLocaleDateString() + "</a>")
+	var $td = $("<td></td>").html("<a class='hidden' href='/sleep/allnighter/?withdate="+ $.datepicker.formatDate('yymmdd', date)+  "'>" + date.toLocaleDateString() + "</a>")
 	    .addClass("row-header");
 	$tr.append($td);
 	// Create a left and right cell per hour

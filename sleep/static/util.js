@@ -82,18 +82,45 @@ function inviteMember(gid,uid,link) {
   });
 };
 function removeMember(gid,uid,link) {
-  $.post("/groups/remove/", {
+  $.post("/groups/membership/", {
       "group" : gid,
-      "user" : uid
+      "user" : uid,
+      "action": "remove"
   }, function() {
     link.innerHTML="removed";
+  }).fail ( function() {
+      link.innerHTML = "cannot remove last admin";
+      link.className = "button-error"
   });
+};
+
+function makeAdmin(gid,uid, link) {
+    $.post("/groups/membership/", {
+        "group": gid,
+        "user": uid,
+        "action": "makeAdmin"
+    }, function() {
+        link.innerHTML = "adminified";
+    });
+};
+
+function removeAdmin(gid, uid, link) {
+    $.post("/groups/membership/", {
+        "group": gid,
+        "user": uid,
+        "action": "removeAdmin"
+    }, function() {
+        link.innerHTML = "unadminified";
+    }).fail( function() {
+        link.innerHTML = 'cannot remove last admin';
+        link.className = "button-error"
+    });
 };
 
 function acceptInvite(id,link) {
   $.post("/groups/accept/", {
       "id" : id,
-      "accepted" : "True", 
+      "accepted" : "True",
   }, function() {
     link.innerHTML="accepted";
   });
@@ -102,9 +129,42 @@ function acceptInvite(id,link) {
 function rejectInvite(id,link) {
   $.post("/groups/accept/", {
       "id" : id,
-      "accepted" : "False", 
+      "accepted" : "False",
   }, function() {
     link.innerHTML="rejected";
   });
 };
 
+function requestGroup(id, link) {
+    $.post("/groups/request/", {
+            "group": id
+            }, function() {
+            link.innerHTML = "requested";
+        });
+};
+
+function joinGroup(id, link) {
+    $.post("/groups/join/", {
+            "group": id
+            }, function() {
+            link.innerHTML = "joined";
+        });
+};
+
+function acceptRequest(id,link) {
+  $.post("/groups/request/process/", {
+      "id" : id,
+      "accepted" : "True",
+  }, function() {
+    link.innerHTML="accepted";
+  });
+};
+
+function rejectRequest(id,link) {
+  $.post("/groups/request/process/", {
+      "id" : id,
+      "accepted" : "False",
+  }, function() {
+    link.innerHTML="rejected";
+  });
+};
