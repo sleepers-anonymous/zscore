@@ -12,3 +12,8 @@
 				<td>&nbsp;</td>
 		{% endif %}
 </tr>
+{% if amMember == 0 %}
+<tr>
+		<td colspan=2 class="group-description">{{group.description}}</td>
+</tr>
+{% endif %}

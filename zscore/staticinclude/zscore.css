@@ -181,6 +181,13 @@ div.footer p {
 		font-size:0.8em;
 }
 
+/* stuff for groups */
+
+td.group-description {
+		padding-left: 15px;
+		font-style: italic;
+}
+
 /* change error formatting for forms */
 table.form {
 		padding:10px;
