@@ -288,6 +288,7 @@ class SleeperProfile(models.Model):
 
     #---------------------------User customification -------------------------
     useGravatar = models.BooleanField(default=True)
+    moreMetrics = models.BooleanField(default=True)
 
     #---------------------------Timezones------------------------------------
 
