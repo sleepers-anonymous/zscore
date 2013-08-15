@@ -142,6 +142,7 @@ div.navigation-bar ul li.day {
 
 div.navigation-bar ul li.day:hover {
 		text-decoration:underline;
+		cursor:pointer;
 }
 
 div.navigation-bar ul li.night {
@@ -152,6 +153,7 @@ div.navigation-bar ul li.night {
 
 div.navigation-bar ul li.night:hover{
 		text-decoration:underline;
+		cursor:pointer;
 }
 
 /* sleep table formatting */
