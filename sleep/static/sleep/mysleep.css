@@ -3,7 +3,7 @@ div.sleep-entry-view
     width: 96%;
     margin: 2%;
 }
-div.sleep-stats-view
+body.daytime div.sleep-stats-view
 {
     float: left;
     width: 45%;
@@ -11,24 +11,33 @@ div.sleep-stats-view
     margin: 2%;
     min-width:500px;
     padding: 4px;
+    border: 1px solid black;
 }
-div.sleep-list-view
+body.nighttime div.sleep-list-view
 {
     float: right;
     width: 45%;
     margin: 2%;
     min-width:500px;
     padding:4px;
+    border: 1px solid white;
 }
-body.daytime div.sleep-stats-view {
-		border: 1px solid black;
+body.daytime div.sleep-stats-view
+{
+    float: left;
+    width: 45%;
+    clear: left;
+    margin: 2%;
+    min-width:500px;
+    padding: 4px;
+    border: 1px solid black;
 }
-body.nighttime div.sleep-stats-view {
-		border: 1px solid white;
-}
-body.daytime div.sleep-list-view {
-		border: 1px solid black;
-}
-body.nighttime div.sleep-list-view {
-		border: 1px solid white;
+body.nighttime div.sleep-list-view
+{
+    float: right;
+    width: 45%;
+    margin: 2%;
+    min-width:500px;
+    padding:4px;
+    border: 1px solid white;
 }

@@ -15,7 +15,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'SleeperProfile.emailSHA1GenerationDate'
         db.add_column('sleep_sleeperprofile', 'emailSHA1GenerationDate',
-                      self.gf('django.db.models.fields.DateTimeField')(default=pytz.utc.localize(datetime.datetime(2013, 7, 16, 0, 0))),
+                      self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2013, 7, 16, 0, 0)),
                       keep_default=False)
 
         # Adding field 'SleeperProfile.emailActivated'
