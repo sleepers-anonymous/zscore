@@ -52,6 +52,7 @@ div.navigation-bar ul li {
 		float:left;
 		margin-top:auto;
 		margin-bottom:0;
+		border:none;
 }
 
 div.navigation-bar ul li ul{
@@ -72,6 +73,7 @@ div.navigation-bar ul li:hover > ul{
 		-moz-border-radius:15px;
 		z-index: 100;
 		position: absolute;
+		overflow:hidden;
 }
 
 div.navigation-bar ul li ul li:hover > ul{
@@ -82,10 +84,12 @@ div.navigation-bar >ul >li ul li {
 		float:none;
 		width:100%;
 		padding: 4px 0px;
+		border:none;
 }
 
 div.navigation-bar ul li > ul li:hover {
 		background-color:black;
+		border: 1px solid white;
 }
 
 div.navigation-bar > ul > li > ul li a:link{
