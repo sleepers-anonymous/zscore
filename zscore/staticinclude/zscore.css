@@ -108,7 +108,7 @@ body.daytime div.navigation-bar> ul> li > a:visited {
 		text-decoration:none;
 }
 
-`body.daytime div.navigation-bar> ul> li > a:hover, a:active {
+body.daytime div.navigation-bar> ul> li > a:hover {
 		color: white;
 		background: black;
 		padding: 10px 0px;
@@ -124,7 +124,12 @@ body.nighttime div.navigation-bar> ul> li > a:link, a:visited {
 		text-decoration:none;
 }
 
-body.nighttime div.navigation-bar> ul> li > a:hover, a:active {
+body.nighttime div.navigation-bar> ul> li > a:hover {
+		color: white;
+		background: black;
+		padding: 10px 0px;
+}
+body.nighttime div.navigation-bar> ul> li > a:active {
 		color: white;
 		background: black;
 		padding: 10px 0px;
