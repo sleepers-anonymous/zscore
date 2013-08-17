@@ -242,19 +242,23 @@ div.global-wrapper{
 body.daytime div.content a.hidden:link,a.hidden:visited {
 		text-decoration:none;
 		color:black;
+		background:none;
 }
 
 body.daytime div.content a.hidden:hover, a.hidden:active{
 		text-decoration:none;
 		color: #08083C;
+		background:none;
 }
 
 body.daytime div.content a:link,a:visited {
 		color: #08083C;
+		background:none;
 }
 
 body.daytime div.footer a:link, a:visited {
 		color: #08083c;
+		background:none;
 }
 
 body.nighttime a.hidden {
