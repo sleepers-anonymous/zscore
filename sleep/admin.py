@@ -1,12 +1,61 @@
 from django.contrib import admin
 from sleep.models import *
 
-admin.site.register(Allnighter)
-admin.site.register(PartialSleep)
-admin.site.register(Sleep)
-admin.site.register(SleeperProfile)
-admin.site.register(FriendRequest)
-admin.site.register(SleeperGroup)
-admin.site.register(Membership)
-admin.site.register(GroupInvite)
+class AllnighterAdmin(admin.ModelAdmin):
+    list_display = ('user', 'date')
+    search_fields = ['user']
+
+class PartialSleepAdmin(admin.ModelAdmin):
+    list_display = ('user','start_local_time')
+    
+
+class SleepAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields' : ['user']}),
+        ('Date/Time info', {'fields' : ['date', 'start_time', 'end_time','timezone']}),
+        ('Other', {'fields' : ['comments','quality','sleepcycles']})
+         ]
+    list_display = ('user', 'start_local_time', 'end_local_time')
+
+class SleeperProfileAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields' : ['user','timezone']}),
+        ('Friends', {'fields' : ['friends','follows']}),
+        ('Privacy Settings', {'fields' : [ 'privacy', 'privacyLoggedIn', 'privacyFriends', 'autoAcceptGroups']}),
+        ('Customizations', {'fields' : ['punchInDelay','useGravatar','moreMetrics', 'use12HourTime', 'mobile']}),
+        ('Ideal Settings', {'fields' : ['idealSleep','idealSleepTimeWeekday', 'idealSleepTimeWeekend','idealWakeupWeekday','idealWakeupWeekend']}),
+        ('Email Settings', {'fields' : ['emailreminders','emailTime','emailActivated']})
+        ]
+    list_display = ['user']
+    ordering = ('user',)
+    filter_horizontal = ('friends','follows')
+                               
+
+class FriendRequestAdmin(admin.ModelAdmin):
+    list_display = ('requestor', 'requestee', 'accepted')
+
+class MembershipInline(admin.TabularInline):
+    model = Membership
+
+class SleeperGroupAdmin(admin.ModelAdmin):
+    fields = ['name', 'description', 'privacy', 'defunctMembers']
+    list_display = ('name', 'description','privacy')
+    inlines = [MembershipInline]
+
+class GroupInviteAdmin(admin.ModelAdmin):
+    list_display = ('group', 'user', 'accepted')
+    ordering = ('accepted','group','user')
+
+class MembershipAdmin(admin.ModelAdmin):
+    list_display = ('group', 'user', 'role')
+
+
+admin.site.register(Allnighter, AllnighterAdmin)
+admin.site.register(PartialSleep, PartialSleepAdmin)
+admin.site.register(Sleep, SleepAdmin)
+admin.site.register(SleeperProfile, SleeperProfileAdmin)
+admin.site.register(FriendRequest, FriendRequestAdmin)
+admin.site.register(SleeperGroup, SleeperGroupAdmin)
+admin.site.register(Membership, MembershipAdmin)
+admin.site.register(GroupInvite, GroupInviteAdmin)
 admin.site.register(GroupRequest)
