@@ -3,10 +3,11 @@ from sleep.models import *
 
 class AllnighterAdmin(admin.ModelAdmin):
     list_display = ('user', 'date')
-    search_fields = ['user']
+    search_fields = ['user__username']
 
 class PartialSleepAdmin(admin.ModelAdmin):
     list_display = ('user','start_local_time')
+    search_fields = ('user__username',)
     
 
 class SleepAdmin(admin.ModelAdmin):
@@ -15,7 +16,9 @@ class SleepAdmin(admin.ModelAdmin):
         ('Date/Time info', {'fields' : ['date', 'start_time', 'end_time','timezone']}),
         ('Other', {'fields' : ['comments','quality','sleepcycles']})
          ]
-    list_display = ('user', 'start_local_time', 'end_local_time')
+    list_display = ('user', 'start_local_time', 'end_local_time','comments')
+    ordering = ('user','end_time',)
+    search_fields = ['user__username','comments']
 
 class SleeperProfileAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -29,10 +32,12 @@ class SleeperProfileAdmin(admin.ModelAdmin):
     list_display = ['user']
     ordering = ('user',)
     filter_horizontal = ('friends','follows')
+    search_fields = ['user__username']
                                
 
 class FriendRequestAdmin(admin.ModelAdmin):
     list_display = ('requestor', 'requestee', 'accepted')
+    search_fields = ['requestor__user__username','requestee__username']
 
 class MembershipInline(admin.TabularInline):
     model = Membership
@@ -41,14 +46,22 @@ class SleeperGroupAdmin(admin.ModelAdmin):
     fields = ['name', 'description', 'privacy', 'defunctMembers']
     list_display = ('name', 'description','privacy')
     inlines = [MembershipInline]
+    search_fields = ['name','description']
+    ordering = ('name',)
 
 class GroupInviteAdmin(admin.ModelAdmin):
     list_display = ('group', 'user', 'accepted')
     ordering = ('accepted','group','user')
+    search_fields = ['user__username','group__name']
 
 class MembershipAdmin(admin.ModelAdmin):
     list_display = ('group', 'user', 'role')
+    ordering = ('group','user','role')
+    search_fields = ['group__name', 'user__username']
 
+class GroupRequestAdmin(admin.ModelAdmin):
+    list_display = ('user','group', 'accepted')
+    search_fields = ('user__username','group__name')
 
 admin.site.register(Allnighter, AllnighterAdmin)
 admin.site.register(PartialSleep, PartialSleepAdmin)
@@ -58,4 +71,4 @@ admin.site.register(FriendRequest, FriendRequestAdmin)
 admin.site.register(SleeperGroup, SleeperGroupAdmin)
 admin.site.register(Membership, MembershipAdmin)
 admin.site.register(GroupInvite, GroupInviteAdmin)
-admin.site.register(GroupRequest)
+admin.site.register(GroupRequest, GroupRequestAdmin)
