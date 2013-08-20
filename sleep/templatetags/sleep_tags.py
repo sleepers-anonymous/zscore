@@ -4,7 +4,7 @@ from django.utils.timezone import now
 import datetime
 import pytz
 import numpy
-from numpy.fft import rfft
+import cmath
 register = template.Library()
 
 # Inclusion tags
@@ -87,10 +87,13 @@ def fourierStats(user,length=None):
         start=n-datetime.timedelta(length)
         end=n
     sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
+    weights = [2**(-n/4.0) for n in range(-len(sleepPerDay)+1,1)]
     if len(sleepPerDay)>3:
-        ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]
-        topModes = reversed(list(numpy.argsort(ft[1:])))
-        topModesPacked = [{'length' : len(sleepPerDay)/(i+1.), 'size': ft[i+1]} for i in topModes]
+        ft = [datetime.timedelta(0,abs(sum(cmath.exp(2j*math.pi*i/period)*w*s for (i,w,s) in zip(range(len(sleepPerDay)),weights,sleepPerDay)))/sum(weights)) for period in range(2,len(sleepPerDay)+1)]
+        # ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]
+        topModes = reversed(list(numpy.argsort(ft)))
+        # topModesPacked = [{'length' : len(sleepPerDay)/(i+1.), 'size': ft[i+1]} for i in topModes]
+        topModesPacked = [{'length' : i+2, 'size': ft[i]} for i in topModes]
         context = {
                 'ft' : ft,
                 'topModes' : topModesPacked,

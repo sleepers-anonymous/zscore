@@ -1,6 +1,6 @@
 {% load datetime_utils %}
 {% if ft %}
-<p>Top Fourier modes of your sleep (for the past 30 days):</p>
+<p>Top <a href="/faq/#fourier">Fourier modes</a> of your sleep (for the past 30 days):</p>
     <table>
         <tr> <th> Period </th> <th> Weight </th> </tr>
         {% for m in topModes|slice:":5" %}
