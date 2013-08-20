@@ -2,7 +2,7 @@ import functools
 
 from django.core.cache import cache
 
-def cache_function(cacheKeyGenerator,groupKeyGenerator=None):
+def cache_function(cacheKeyGenerator,groupKeyGenerator=None,timeout=cache.default_timeout):
     def _dec(func):
         def _wrapped(*args,**kwargs):
             keyParts = cacheKeyGenerator(*args,**kwargs) if '__call__' in dir(cacheKeyGenerator) else cacheKeyGenerator
@@ -16,10 +16,10 @@ def cache_function(cacheKeyGenerator,groupKeyGenerator=None):
                     if cached is not None:
                         return cached
                 answer = func(*args,**kwargs)
-                cache.set(cacheKey,answer)
+                cache.set(cacheKey,answer,timeout=timeout)
                 cacheGroup = cache.get(groupKey,set())
                 cacheGroup.add(cacheKey)
-                cache.set(groupKey,cacheGroup)
+                cache.set(groupKey,cacheGroup,timeout=timeout)
                 return answer
             elif keyParts is not None:
                 cacheKey = func.__name__ + ":" + ":".join(map(str,keyParts))
@@ -27,7 +27,7 @@ def cache_function(cacheKeyGenerator,groupKeyGenerator=None):
                 if cached is not None:
                     return cached
                 answer = func(*args,**kwargs)
-                cache.set(cacheKey,answer)
+                cache.set(cacheKey,answer,timeout=timeout)
                 return answer
             else:
                 return func(*args,**kwargs)
