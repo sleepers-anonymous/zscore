@@ -11,7 +11,7 @@
 <h1> Leaderboard </h1>
 {% endif %}
 
-<p>{{number}} {% if group %}{{group.name}} members {% else %} zScore users {% endif %} have slept a total of {{total|printYDHM}}!</p>
+<p>{{number}} {% if group %}{{group.name}} members {% else %} zScore users {% endif %} ({{numLeaderboard}} on the leaderboard) have slept a total of {{total|printYDHM}}!</p>
 
 <table class="leaderboard">
     <tr>

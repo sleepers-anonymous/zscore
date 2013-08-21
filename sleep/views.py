@@ -361,6 +361,7 @@ def leaderboard(request,group=None):
         lbSize=nmembers if nmembers<4 else min(10,nmembers//2)
     ss = Sleeper.objects.sorted_sleepers(sortBy=sortBy,user=request.user,group=group)
     top = [ s for s in ss if s['rank']<=lbSize or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
+    numLeaderboard = len([s for s in ss if s['rank']!='n/a'])
     n = now()
     recentWinner = Sleeper.objects.bestByTime(start=n-datetime.timedelta(3),end=n,user=request.user,group=group)[0]
     if group:
@@ -376,6 +377,7 @@ def leaderboard(request,group=None):
             'recentWinner' : recentWinner,
             'total' : Sleep.objects.totalSleep(group=group),
             'number' : number,
+            'numLeaderboard' : numLeaderboard,
             'leaderboard_valid' : len(ss),
             'metricsToDisplay' : metricsToDisplay,
             'metricsDisplayedAsTimes' : metricsDisplayedAsTimes
