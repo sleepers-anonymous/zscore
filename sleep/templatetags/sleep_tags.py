@@ -67,7 +67,7 @@ def sleepStatsView(context, renderContent='html'):
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    userMetrics = SleeperProfile.objects.get(user=user).metrics.all()
+    userMetrics = user.sleeperprofile.metrics.all()
     context = {'global': sleeper.movingStats(),
             'weekly': sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today()),
             'decaying': sleeper.decayStats(),

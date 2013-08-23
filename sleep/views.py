@@ -345,7 +345,7 @@ def manageGroup(request,gid):
 
 def leaderboard(request,group=None):
     if request.user.is_authenticated():
-        userMetrics = SleeperProfile.objects.get(user=request.user).metrics.all()
+        userMetrics = request.user.sleeperprofile.metrics.all()
     else:
         userMetrics = Metric.objects.filter(show_by_default=True)
     if 'sort' not in request.GET or request.GET['sort'] not in userMetrics:
