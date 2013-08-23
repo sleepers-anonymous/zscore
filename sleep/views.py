@@ -344,7 +344,10 @@ def manageGroup(request,gid):
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
-    userMetrics = SleeperProfile.objects.get(user=request.user).metrics.all()
+    if request.user.is_authenticated():
+        userMetrics = SleeperProfile.objects.get(user=request.user).metrics.all()
+    else:
+        userMetrics = Metric.objects.filter(show_by_default=True)
     if 'sort' not in request.GET or request.GET['sort'] not in userMetrics:
         sortBy='zScore'
     else:
