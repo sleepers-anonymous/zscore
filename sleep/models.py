@@ -23,6 +23,26 @@ from cache.utils import authStatus, expireTemplateCache
 
 TIMEZONES = [ (i,i) for i in pytz.common_timezones]
 
+class Metric(models.Model):
+    name = models.CharField(max_length=40, unique=True)
+    asHHMM, asInt = 'asHHMM', 'asInt'
+    DISPLAY_STYLE_CHOICES = (
+        (asHHMM, 'As HH:MM'),
+        (asInt, 'As integer'))
+    display_style = models.CharField(max_length = 6,
+                                     choices = DISPLAY_STYLE_CHOICES,
+                                     default = asHHMM)
+    priority =  models.IntegerField(unique=True)
+    # decides order in which metrics are displayed
+    show_by_default = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['-priority']
+
+
 class SleepManager(models.Manager):
     @cache_function(lambda self, user=None, group=None: () if user is None and group is None else None)
     def totalSleep(self, user=None,group=None):
@@ -266,6 +286,9 @@ class SleeperProfile(models.Model):
     autoAcceptGroups = models.SmallIntegerField(choices=AUTO_ACCEPT_CHOICES, default=AUTO_ACCEPT_FRIENDS, verbose_name="People from whom you will automatically accept group invites.")
     
     use12HourTime = models.BooleanField(default=False)
+
+    #----------------------------------------Metrics to show--------------------------
+    metrics = models.ManyToManyField(Metric, blank=True)
 
     #----------------------------------------Mobile settings--------------------------
     FORCE_MOBILE = 2
@@ -938,3 +961,4 @@ class GroupRequest(models.Model):
     def reject(self):
         self.accepted=False
         self.save()
+

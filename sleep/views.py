@@ -344,7 +344,8 @@ def manageGroup(request,gid):
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
-    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','stDev', 'consistent', 'consistent2']:
+    userMetrics = SleeperProfile.objects.get(user=request.user).metrics.all()
+    if 'sort' not in request.GET or request.GET['sort'] not in userMetrics:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
@@ -369,8 +370,6 @@ def leaderboard(request,group=None):
     else:
         allUsers = Sleeper.objects.all()
     number = allUsers.filter(sleep__isnull=False).distinct().count()
-    metricsToDisplay = ['zScore','avg','stDev','consistent','consistent2']
-    metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
     context = {
             'group' : group,
             'top' : top,
@@ -379,8 +378,7 @@ def leaderboard(request,group=None):
             'number' : number,
             'numLeaderboard' : numLeaderboard,
             'leaderboard_valid' : len(ss),
-            'metricsToDisplay' : metricsToDisplay,
-            'metricsDisplayedAsTimes' : metricsDisplayedAsTimes
+            'userMetrics' : userMetrics
             }
     return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
 

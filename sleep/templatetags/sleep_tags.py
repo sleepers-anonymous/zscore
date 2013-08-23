@@ -2,6 +2,7 @@ from django import template
 from sleep.models import *
 from django.utils.timezone import now
 import datetime
+import datetime_utils
 import pytz
 import numpy
 import cmath
@@ -66,13 +67,11 @@ def sleepStatsView(context, renderContent='html'):
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    metricsToDisplay = ['zScore','avg','stDev','consistent', 'consistent2']
-    metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
+    userMetrics = SleeperProfile.objects.get(user=user).metrics.all()
     context = {'global': sleeper.movingStats(),
             'weekly': sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today()),
             'decaying': sleeper.decayStats(),
-            'metricsToDisplay': metricsToDisplay,
-            'metricsDisplayedAsTimes': metricsDisplayedAsTimes
+            'userMetrics': userMetrics
     }
     return context
 
@@ -265,6 +264,12 @@ def displayFriendRequests(user):
 @register.filter
 def getScore(statdict, metric):
     try:
-        return statdict[metric]
+        v = statdict[metric.name]
+        if metric.display_style == 'asHHMM':
+            return datetime_utils.printHHMM(v)
+        elif metric.display_style == 'asInt':
+            return v
+        else:
+            return ''
     except:
         return ''

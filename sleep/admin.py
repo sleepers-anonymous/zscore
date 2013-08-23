@@ -22,7 +22,7 @@ class SleepAdmin(admin.ModelAdmin):
 
 class SleeperProfileAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields' : ['user','timezone']}),
+        (None, {'fields' : ['user','timezone','metrics']}),
         ('Friends', {'fields' : ['friends','follows']}),
         ('Privacy Settings', {'fields' : [ 'privacy', 'privacyLoggedIn', 'privacyFriends', 'autoAcceptGroups']}),
         ('Customizations', {'fields' : ['punchInDelay','useGravatar','moreMetrics', 'use12HourTime', 'mobile']}),
@@ -31,7 +31,7 @@ class SleeperProfileAdmin(admin.ModelAdmin):
         ]
     list_display = ['user']
     ordering = ('user',)
-    filter_horizontal = ('friends','follows')
+    filter_horizontal = ('friends','follows','metrics')
     search_fields = ['user__username']
                                
 
@@ -63,6 +63,11 @@ class GroupRequestAdmin(admin.ModelAdmin):
     list_display = ('user','group', 'accepted')
     search_fields = ('user__username','group__name')
 
+class MetricAdmin(admin.ModelAdmin):
+    list_display = ('name', 'display_style', 'priority', 'show_by_default')
+    ordering = ('-priority',)
+    search_fields = ('name',)
+
 admin.site.register(Allnighter, AllnighterAdmin)
 admin.site.register(PartialSleep, PartialSleepAdmin)
 admin.site.register(Sleep, SleepAdmin)
@@ -72,3 +77,4 @@ admin.site.register(SleeperGroup, SleeperGroupAdmin)
 admin.site.register(Membership, MembershipAdmin)
 admin.site.register(GroupInvite, GroupInviteAdmin)
 admin.site.register(GroupRequest, GroupRequestAdmin)
+admin.site.register(Metric,MetricAdmin)

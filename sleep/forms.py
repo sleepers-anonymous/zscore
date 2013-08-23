@@ -22,7 +22,7 @@ class SleeperProfileForm(forms.ModelForm):
     class Meta:
         model = SleeperProfile
         fields = ['privacy','privacyLoggedIn','privacyFriends', 'use12HourTime', 'idealSleep', 'timezone', 'useGravatar', 'autoAcceptGroups',
-                'idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekday', 'idealSleepTimeWeekend', 'mobile', 'punchInDelay']
+                'idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekday', 'idealSleepTimeWeekend', 'mobile', 'punchInDelay', 'metrics']
 
     def __init__(self, fmt, *args, **kwargs):
         self.fmt = fmt

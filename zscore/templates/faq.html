@@ -19,7 +19,7 @@ Another way of accounting for consistent sleep is to have some sort of diminishi
 
 <a name="gone"></a><p><i>Q: Why are so many metrics gone? </i></p>
 
-<p> We pruned several which had results that were nearly identical to those of other metrics. We're working on giving you the ability to choose which metrics to display.</p>
+<p> We removed some from being shown by default because we thought there were too many redundant metrics. You can choose which metrics are displayed in your profile settings.</p>
 
 <a name="time"></a><p><i>Q: Over what time period are the stats computed?  And what's this exponentially decaying thing?</i></p>
 <p>A: The exponentially decaying average is a weighted average over all time, where the sleep from <i>n</i> days ago has a weight of 2<sup>-<i>n</i>/4</sup>, i.e., the weights have a half-life of 4 days.  This counts all sleep, but counts recent sleep (the last week or so) for the most.  We also compute averages over all time ("global") and over the last 7 days ("weekly").  The leaderboard uses the exponentially decaying average.</p>
