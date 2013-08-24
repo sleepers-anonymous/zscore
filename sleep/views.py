@@ -348,7 +348,7 @@ def leaderboard(request,group=None):
         userMetrics = request.user.sleeperprofile.metrics.all()
     else:
         userMetrics = Metric.objects.filter(show_by_default=True)
-    if 'sort' not in request.GET or request.GET['sort'] not in userMetrics:
+    if 'sort' not in request.GET or request.GET['sort'] not in [m.name for m in userMetrics]:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
