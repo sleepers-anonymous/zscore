@@ -92,8 +92,8 @@ def fourierStats(user,length=None):
         avg = sum(sleepPerDay)/n
         # ft = [datetime.timedelta(0,abs(sum(cmath.exp(2j*math.pi*i/period)*w*s for (i,w,s) in zip(range(len(sleepPerDay)),weights,sleepPerDay)))/sum(weights)) for period in range(2,len(sleepPerDay)+1)]
         # ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]
-        deviations = [s-avg for s in sleepPerDay]
-        autocorrel = numpy.correlate(sleepPerDay,sleepPerDay,"full")
+        deviations = [abs(s-avg) for s in sleepPerDay]
+        autocorrel = numpy.correlate(deviations,deviations,"full")
         # now remove the 0-day and 1-day modes, and normalize by the 0-day correlation
         autocorrel = [a*math.sqrt(n/(n-2-i))/autocorrel[n-1] for i, a in enumerate(autocorrel[n+1:])]
         topModes = reversed(list(numpy.argsort(autocorrel)))
