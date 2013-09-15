@@ -78,23 +78,28 @@ def sleepStatsTable(user):
 @register.inclusion_tag('inclusion/fourier_stats.html')
 def fourierStats(user,length=None):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    n = now()
+    no = now()
     if length is None:
         start=datetime.date.min
         end=datetime.date.max
     else:
-        start=n-datetime.timedelta(length)
-        end=n
+        start=no-datetime.timedelta(length)
+        end=no
     sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
-    weights = [2**(-n/4.0) for n in range(-len(sleepPerDay)+1,1)]
-    if len(sleepPerDay)>3:
-        ft = [datetime.timedelta(0,abs(sum(cmath.exp(2j*math.pi*i/period)*w*s for (i,w,s) in zip(range(len(sleepPerDay)),weights,sleepPerDay)))/sum(weights)) for period in range(2,len(sleepPerDay)+1)]
+    # weights = [2**(-n/4.0) for n in range(-len(sleepPerDay)+1,1)]
+    n = len(sleepPerDay)
+    if n>3:
+        # ft = [datetime.timedelta(0,abs(sum(cmath.exp(2j*math.pi*i/period)*w*s for (i,w,s) in zip(range(len(sleepPerDay)),weights,sleepPerDay)))/sum(weights)) for period in range(2,len(sleepPerDay)+1)]
         # ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]
-        topModes = reversed(list(numpy.argsort(ft)))
+        autocorrel = numpy.correlate(sleepPerDay,sleepPerDay,"full")
+        # now remove the 0-day and 1-day modes, and normalize by the 0-day correlation
+        autocorrel = [a*math.sqrt(n/(n-2-i))/autocorrel[n-1] for i, a in enumerate(autocorrel[n+1:])]
+        topModes = reversed(list(numpy.argsort(autocorrel)))
         # topModesPacked = [{'length' : len(sleepPerDay)/(i+1.), 'size': ft[i+1]} for i in topModes]
-        topModesPacked = [{'length' : i+2, 'size': ft[i]} for i in topModes]
+        # note: indices should start at 2
+        topModesPacked = [{'length' : i+2, 'size': autocorrel[i]} for i in topModes]
         context = {
-                'ft' : ft,
+                'ft' : autocorrel,
                 'topModes' : topModesPacked,
                 }
     else:
