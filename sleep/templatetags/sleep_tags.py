@@ -100,7 +100,7 @@ def fourierStats(user,length=None):
         deviationsAlways = [s-avg if s is not None else 0 for s in sleepPerDayAlways]
         autocorrel = numpy.correlate(deviationsAlways,deviations,"full")
         # now remove the 0-day and 1-day modes, and normalize by the 0-day correlation
-        autocorrel = [a*(n/(n-i))/autocorrel[-n] for i, a in enumerate(autocorrel[-n+2:-n*0.2])]
+        autocorrel = [a/autocorrel[-n] for i, a in enumerate(autocorrel[-n+2:-n*0.2])]
         topModes = reversed(list(numpy.argsort(autocorrel)))
         # topModesPacked = [{'length' : len(sleepPerDay)/(i+1.), 'size': ft[i+1]} for i in topModes]
         # note: indices should start at 2
