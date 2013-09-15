@@ -172,7 +172,9 @@ class Sleep(models.Model):
         return datetime.timedelta(seconds=score)
 
     def validate_unique(self, exclude=None):
-        overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
+        overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user)
+        if self.pk is not None:
+            overlaps = overlaps.exclude(pk = self.pk)
         if overlaps:
             raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
 
