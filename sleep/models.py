@@ -614,9 +614,15 @@ class Sleeper(User):
             if hours:
                 byDays = map(lambda x: x/3600,byDays)
             if packDates:
-                return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i]} for i in range(0,n) if byDays[i]>0 or first + datetime.timedelta(i) in allnighters or includeMissing]
+                if includeMissing:
+                    return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i] or (0 if first + datetime.timedelta(i) in allnighters else None) } for i in range(0,n)]
+                else:
+                    return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i] } for i in range(0,n) if byDays[i]>0 or first + datetime.timedelta(i) in allnighters]
             else:
-                return [byDays[i] for i in range(0,n) if byDays[i]>0 or first+datetime.timedelta(i) in allnighters or includeMissing]
+                if includeMissing:
+                    return [byDays[i] or (0 if first+datetime.timedelta(i) in allnighters else None) for i in range(0,n)]
+                else:
+                    return [byDays[i] for i in range(0,n) if byDays[i]>0 or first+datetime.timedelta(i) in allnighters]
         else:
             return []
 

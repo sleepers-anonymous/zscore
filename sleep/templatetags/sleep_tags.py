@@ -89,13 +89,14 @@ def fourierStats(user,length=None):
     # weights = [2**(-n/4.0) for n in range(-len(sleepPerDay)+1,1)]
     n = len(sleepPerDay)
     if n>3:
-        avg = sum(sleepPerDay)/n
+        sleepPerDayNoMissing = [x for x in sleepPerDay if x is not None]
+        avg = sum(sleepPerDayNoMissing)/len(sleepPerDayNoMissing)
         # ft = [datetime.timedelta(0,abs(sum(cmath.exp(2j*math.pi*i/period)*w*s for (i,w,s) in zip(range(len(sleepPerDay)),weights,sleepPerDay)))/sum(weights)) for period in range(2,len(sleepPerDay)+1)]
         # ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]
-        deviations = [abs(s-avg) for s in sleepPerDay]
+        deviations = [s-avg if s is not None else 0 for s in sleepPerDay]
         autocorrel = numpy.correlate(deviations,deviations,"full")
         # now remove the 0-day and 1-day modes, and normalize by the 0-day correlation
-        autocorrel = [a*math.sqrt(n/(n-2-i))/autocorrel[n-1] for i, a in enumerate(autocorrel[n+1:3*n/2+1])]
+        autocorrel = [a*(n/(n-i))/autocorrel[n-1] for i, a in enumerate(autocorrel[n+1:-n*0.2])]
         topModes = reversed(list(numpy.argsort(autocorrel)))
         # topModesPacked = [{'length' : len(sleepPerDay)/(i+1.), 'size': ft[i+1]} for i in topModes]
         # note: indices should start at 2
