@@ -29,7 +29,7 @@ def displayPartialButton(context, user, path = "/", size = 1):
 @register.inclusion_tag('inclusion/is_asleep.html', takes_context=True)
 def isAsleep(context, you, them):
     p = them.sleeperprofile
-    if you.pk == them.pk and "as" in context["request"].GET:
+    if not you.is_anonymous() and you.pk == them.pk and "as" in context["request"].GET:
         priv = p.getPermissions(context["request"].GET["as"])
     else:
         priv = p.getPermissions(you)
