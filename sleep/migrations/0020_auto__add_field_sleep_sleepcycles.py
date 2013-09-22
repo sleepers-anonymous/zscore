@@ -13,10 +13,11 @@ class Migration(SchemaMigration):
         db.add_column('sleep_sleep', 'sleepcycles',
                       self.gf('django.db.models.fields.SmallIntegerField')(default=2),
                       keep_default=False)
-        for sleep in orm.Sleep.objects.all():
-            seconds = (sleep.end_time - sleep.start_time).total_seconds()
-            sleep.sleepcyles = seconds//5400
-            sleep.save()
+        if not db.dry_run:
+            for sleep in orm.Sleep.objects.all():
+                seconds = (sleep.end_time - sleep.start_time).total_seconds()
+                sleep.sleepcyles = seconds//5400
+                sleep.save()
 
     def backwards(self, orm):
         # Deleting field 'Sleep.sleepcycles'
