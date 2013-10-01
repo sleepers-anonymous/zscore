@@ -81,7 +81,10 @@ class SleepForm(forms.ModelForm):
     def clean(self):
         if 'delete' in self.data and self.data['delete'] =='on': return {'delete': 'on' } #Skip validation, I don't actually care if I'm deleting
         cleaned_data = super(SleepForm,self).clean()
-        a = self.user.allnighter_set.filter(date=cleaned_data["date"])
+        if "date" in cleaned_data:
+            a = self.user.allnighter_set.filter(date=cleaned_data["date"])
+        else:
+            a = []
         if 'timezone' in cleaned_data and 'start_time' in cleaned_data and 'end_time' in cleaned_data:
             tz = pytz.timezone(cleaned_data['timezone'])
             for k in ['start_time','end_time']:
