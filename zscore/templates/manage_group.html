@@ -20,6 +20,7 @@ $(function() {
 
     <ul>
         <li><a href="#tabs-manage">Manage {{group.name}}</a></li>
+        <li><a href="#tabs-privacy">Privacy</a></li>
         {% if isAdmin %}
         <li {% if page == 2 %}class="ui-tabs-active"{% endif %}><a href="#tabs-edit">Edit Group Settings</a></li>
         {% if requests %}<li {% if page == 3 %}class="ui-tabs-active"{% endif %}><a href="#tabs-requests">Accept/Reject Requests</a></li>{% endif %}
@@ -55,6 +56,15 @@ $(function() {
                 No users found.
             {% endif %}
             {% endif %}
+    </div>
+
+    <div id="tabs-privacy">
+        <form method="post">{% csrf_token %}
+            <table>
+                {{membershipForm.as_table}}
+            </table>
+            <p><input type="submit" value="Save" name="MembershipForm"/></p>
+        </form>
     </div>
 
 {% if isAdmin %}

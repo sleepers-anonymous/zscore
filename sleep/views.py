@@ -313,6 +313,7 @@ def manageGroup(request,gid):
             'group':g,
             'isAdmin': (request.user.membership_set.get(group = g).role >= 50),
             }
+    m = request.user.membership_set.get(group = g)
     if request.method == 'POST' and "SleeperSearchForm" in request.POST:
         searchForm=SleeperSearchForm(request.POST)
         if searchForm.is_valid():
@@ -335,8 +336,15 @@ def manageGroup(request,gid):
             context['page'] = 2
     else:
         groupForm = GroupForm(instance=g)
+    if request.method == 'POST' and "MembershipForm" in request.POST:
+        membershipForm = MembershipForm(request.POST, instance=m)
+        if membershipForm.is_valid():
+            membershipForm.save()
+    else:
+        membershipForm = MembershipForm(instance=m)
     context['searchForm']=searchForm
     context['groupForm']=groupForm
+    context['membershipForm'] = membershipForm
     context['members']=g.members.all()
     if context['isAdmin']:
         context['requests'] = g.grouprequest_set.filter(accepted=None)
