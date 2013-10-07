@@ -253,6 +253,7 @@ class SleeperProfile(models.Model):
     # all other fields should have a default
 
     #--------------------------------------Privacy Settings -----------------------
+    PRIVACY_MIN = -100
     PRIVACY_HIDDEN = -100
     PRIVACY_REDACTED = -50
     PRIVACY_NORMAL = 0
@@ -437,22 +438,29 @@ class SleeperProfile(models.Model):
         else:
             return self.privacy
 
+    def checkPermissions(self, asOther):
+        """Returns the permissions a specific type of user should have for me."""
+
+        otherD = {
+                "friends" : "privacyFriends",
+                "user": "privacyLoggedIn",
+                "anon": "privacy",
+                }
+
+        if asOther in otherD: # we've passed in one of the given strings; the code calling us should check that we're allowed to do this.
+            return getattr(self, otherD[asOther])
+        return self.PRIVACY_MIN
+
+
     @cache_function(lambda self, otherUser, otherUserGroupIDs=None: (self.id,otherUser.id),())
     def getPermissions(self, otherUser, otherUserGroupIDs=None):
         """Returns the permissions an other user should have for me.
         
-        Pass either a user, or a string, like "friends", "user", "anon", if the user should be allowed to override.
+        Pass in a user
 
         Use otherUserGroups iff you know what you're doing for efficiency.
         """
-        otherD = {
-                "friends": "privacyFriends",
-                "user":"privacyLoggedIn",
-                "anon": "privacy",
-                }
-        if otherUser in otherD: #we've passed one of the given strings; the code calling us should check that we're allowed to do this.
-            return getattr(self, otherD[otherUser])
-        elif otherUser == None or otherUser.is_anonymous():
+        if otherUser == None or otherUser.is_anonymous():
             return self.privacy
         elif otherUser.id == self.user_id:
             return self.PRIVACY_MAX

@@ -30,7 +30,7 @@ def displayPartialButton(context, user, path = "/", size = 1):
 def isAsleep(context, you, them):
     p = them.sleeperprofile
     if you.is_authenticated() and them.is_authenticated() and you.pk == them.pk and "as" in context["request"].GET:
-        priv = p.getPermissions(context["request"].GET["as"])
+        priv = p.checkPermissions(context["request"].GET["as"])
     else:
         priv = p.getPermissions(you)
     if priv >= p.PRIVACY_MAX: #In case, for some goddamn reason, someone defines a privacy setting higher than PRIVACY_MAX

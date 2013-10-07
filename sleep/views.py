@@ -441,7 +441,7 @@ def creep(request,username=None):
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
             if p.user_id == request.user.id and "as" in request.GET:
-                priv = p.getPermissions(request.GET['as'])
+                priv = p.checkPermissions(request.GET['as'])
             else:
                 priv = p.getPermissions(request.user)
             if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True
