@@ -228,7 +228,7 @@ def displayMyGroup(group, amMember = 0):
     return {'group' : group, 'amMember' : amMember, 'isPublic': group.privacy >= group.PUBLIC}
 
 @register.inclusion_tag('inclusion/display_group_member.html', takes_context= True)
-def displayGroupMember(context, group,user):
+def displayGroupMember(context, group, user):
     ms = Membership.objects.filter(user = user, group = group)
     newcontext = {}
     if ms.count() >= 1:
@@ -240,6 +240,7 @@ def displayGroupMember(context, group,user):
             'group' : group,
             'user' : user,
             'canremove': context['isAdmin'] or context["request"].user == user,
+            'you': context["request"].user,
             })
     return newcontext
 
