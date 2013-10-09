@@ -287,7 +287,7 @@ def groupJoin(request):
 def processRequest(request):
     if 'id' in request.POST:
         rs = GroupRequest.objects.filter(id=request.POST["id"])
-        if rs.count() != 1: raise 404
+        if rs.count() != 1: raise Http404
         r = rs[0]
         m = Membership.objects.get(group=r.group, user=request.user)
         if m.role < m.ADMIN: raise PermissionDenied
