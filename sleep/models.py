@@ -21,7 +21,7 @@ from sleep import utils
 from cache.decorators import cache_function
 from cache.utils import authStatus, expireTemplateCache
 
-TIMEZONES = [ (i,i) for i in pytz.common_timezones]
+TIMEZONES = zip(pytz.common_timezones, pytz.common_timezones)
 
 class Metric(models.Model):
     name = models.CharField(max_length=40, unique=True)
