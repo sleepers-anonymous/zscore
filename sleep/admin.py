@@ -2,13 +2,15 @@ from django.contrib import admin
 from sleep.models import *
 
 class AllnighterAdmin(admin.ModelAdmin):
-    list_display = ('user', 'date')
+    list_display = ('user', 'date', 'comments')
+    list_filter = ('user', 'date')
+    ordering = ('user',)
     search_fields = ['user__username']
 
 class PartialSleepAdmin(admin.ModelAdmin):
     list_display = ('user','start_local_time')
     search_fields = ('user__username',)
-    
+    list_filter = ('user', 'start_time')
 
 class SleepAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -17,6 +19,7 @@ class SleepAdmin(admin.ModelAdmin):
         ('Other', {'fields' : ['comments','quality','sleepcycles']})
          ]
     list_display = ('user', 'start_local_time', 'end_local_time','comments')
+    list_filter = ('user','end_time')
     ordering = ('user','end_time',)
     search_fields = ['user__username','comments']
 
@@ -38,6 +41,7 @@ class SleeperProfileAdmin(admin.ModelAdmin):
 class FriendRequestAdmin(admin.ModelAdmin):
     list_display = ('requestor', 'requestee', 'accepted')
     search_fields = ['requestor__user__username','requestee__username']
+    list_filter = ('requestor__user','requestee')
 
 class MembershipInline(admin.TabularInline):
     model = Membership
@@ -58,6 +62,7 @@ class MembershipAdmin(admin.ModelAdmin):
     list_display = ('group', 'user', 'role')
     ordering = ('group','user','role')
     search_fields = ['group__name', 'user__username']
+    list_filter = ('group', 'user')
 
 class GroupRequestAdmin(admin.ModelAdmin):
     list_display = ('user','group', 'accepted')
