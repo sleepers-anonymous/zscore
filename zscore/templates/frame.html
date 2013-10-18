@@ -5,7 +5,11 @@
 {% load cache %}
 <html lang="en">
   <head>
-    <title>{% block title %}zScore{% endblock %}</title>
+      <title>{% block title %}zScore{% endblock %}</title>
+      {% block favicon %}
+        <link rel="SHORTCUT ICON" href="/static/favicon.ico">
+        <link rel="icon" href="/static/favicon.ico" type="image/ico">
+      {% endblock %}
     {% block jquery %}
     <script src="http://code.jquery.com/jquery-1.9.1.js" type="text/javascript"></script>
     <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
