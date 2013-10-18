@@ -205,7 +205,7 @@ def inviteMember(request):
         u=us[0]
         rs = GroupRequest.objects.filter(user = u, group = g, accepted=None)
         if rs.count() >= 1: #the user has made a request to join, accept them.
-            r[0].accept()
+            rs[0].accept()
         else:
             g.invite(u,request.user)
         return HttpResponse('')
