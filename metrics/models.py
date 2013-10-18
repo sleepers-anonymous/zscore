@@ -53,6 +53,9 @@ class MetricsInstance(models.Model):
 
     comments = models.TextField(blank=True, null=True)
 
+    def __unicode__(self):
+        return "MetricsInstance for " + str(self.user) + " at " + str(self.time)
+
 class SingleMetricsInstance(models.Model):
     category = models.ForeignKey(MetricsCategory)
     instance = models.ForeignKey(MetricsInstance)
@@ -62,4 +65,4 @@ class SingleMetricsInstance(models.Model):
     comments = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
-        return "SingleMetricsInstance from " + str(self.time) + " for " + str(self.user) + ", " + str(self.category) + " (" + str(self.value) + ")"
+        return "SingleMetricsInstance from " + str(self.instance) + ", " + str(self.category) + " (" + str(self.value) + ")"
