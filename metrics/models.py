@@ -48,9 +48,18 @@ class MetricsCategory(models.Model):
 class MetricsInstance(models.Model):
     time = models.DateTimeField()
     user = models.ForeignKey(User)
+
+    values = models.ManyToManyField(MetricsCategory, through='SingleMetricsInstance')
+
+    comments = models.TextField(blank=True, null=True)
+
+class SingleMetricsInstance(models.Model):
     category = models.ForeignKey(MetricsCategory)
-    
+    instance = models.ForeignKey(MetricsInstance)
+
     value = models.SmallIntegerField(blank=True, null=True)
 
+    comments = models.TextField(blank=True, null=True)
+
     def __unicode__(self):
-        return "MetricsInstance from " + str(self.time) + " for " + str(self.user) + ", " + str(self.category) + " (" + str(self.value) + ")"
+        return "SingleMetricsInstance from " + str(self.time) + " for " + str(self.user) + ", " + str(self.category) + " (" + str(self.value) + ")"
