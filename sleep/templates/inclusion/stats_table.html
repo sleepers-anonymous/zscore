@@ -5,7 +5,7 @@
     <tr>
 				<th>&nbsp;</th>
 	{% for metric in userMetrics %}
-	<th>{{metric}}</th>
+	<th>{{metric.withAbbrDesc|safe}}</th>
 	{% endfor %}
     </tr>
   <tr>

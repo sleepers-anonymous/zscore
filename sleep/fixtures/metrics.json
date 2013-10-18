@@ -3,7 +3,8 @@
         {"priority": 1000,
          "display_style": "asHHMM",
          "show_by_default": true,
-         "name": "zScore"}},
+         "name": "zScore",
+         "short_description": "average minus standard deviation"}},
     {"pk": 2, "model": "sleep.metric", "fields":
         {"priority": 900,
          "display_style": "asHHMM",
@@ -14,7 +15,8 @@
         {"priority": 800,
          "display_style": "asHHMM",
          "show_by_default": true,
-         "name": "stDev"}},
+         "name": "stDev",
+         "short_description": "standard deviation"}},
     {"pk": 4, "model": "sleep.metric", "fields":
         {"priority": 700,
          "display_style": "asInt",

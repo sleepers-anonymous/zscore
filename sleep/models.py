@@ -42,6 +42,12 @@ class Metric(models.Model):
     def __unicode__(self):
         return self.name
 
+    def withAbbrDesc(self):
+        if self.short_description:
+            return '<abbr title="' + self.short_description + '">' + self.name + '</abbr>'
+        else:
+            return self.name
+
     class Meta:
         ordering = ['-priority']
 
