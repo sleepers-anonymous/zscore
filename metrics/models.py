@@ -12,7 +12,16 @@ class MetricsProfile(models.Model):
 
     #all other fields should have a default
 
+class MetricsCategory(models.Model):
+    PRIVACY_MIN = -100
+    PRIVACY_HIDDEN = -100
+    PRIVACY_NORMAL = 0
+    PRIVACY_MAX = 0
+
+
 class MetricsInstance(models.Model):
     time = models.DateTimeField()
-
+    user = models.ForeignKey(User)
     #all other fields should be nullable
+
+
