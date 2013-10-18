@@ -15,24 +15,27 @@ class MetricsProfile(models.Model):
     #all other fields should have a default
 
 class MetricsCategory(models.Model):
-    PRIVACY_MIN = -100
-    PRIVACY_HIDDEN = -100
-    PRIVACY_NORMAL = 0
-    PRIVACY_MAX = 0
+    METRIC_TYPE_BOOL = 0
+    METRIC_TYPE_INT = 1
 
-    PRIVACY_CHOICES = (
-            (PRIVACY_HIDDEN, "Hidden"),
-            (PRIVACY_NORMAL, "Normal"),
-        )
-
-    privacy = models.SmallIntegerField(choices = PRIVACY_CHOICES, default = PRIVACY_NORMAL, editable=False)
+    METRIC_TYPE_CHOICES = (
+            (METRIC_TYPE_BOOL, "boolean"),
+            (METRIC_TYPE_INT, "int"),
+        }
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
     creator = models.ForeignKey(User, blank=True, null=True, editable = False) # is this a personal metric associated with a specific user, or a default metric for all users?
+
+    metrictype = models.SmallIntegerField(choices = METRIC_TYPE_CHOICES, default=METRIC_TYPE_INT, editable=False)
+
+    config = models.CharField(max_length = 255, null=True, blank=True)
 
 class MetricsInstance(models.Model):
     time = models.DateTimeField()
     user = models.ForeignKey(User)
     category = models.ForeignKey(MetricsCategory)
-            
-    #all other fields should be nullable
+    
+    value = models.SmallIntegerField(blank=True, null=True)
 
+    #all other fields should be nullable
 
