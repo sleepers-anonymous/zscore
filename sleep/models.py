@@ -36,6 +36,9 @@ class Metric(models.Model):
     # decides order in which metrics are displayed
     show_by_default = models.BooleanField(default=True)
 
+    description = models.TextField(blank=True)
+    short_description = models.TextField(blank=True)
+
     def __unicode__(self):
         return self.name
 
