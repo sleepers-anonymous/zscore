@@ -20,7 +20,13 @@ class MetricsCategory(models.Model):
     PRIVACY_NORMAL = 0
     PRIVACY_MAX = 0
 
-    creator = models.ForeignKey(User, blank=True, null=True) # is this a personal metric associated with a specific user, or a default metric for all users? 
+    PRIVACY_CHOICES = (
+            (PRIVACY_HIDDEN, "Hidden"),
+            (PRIVACY_NORMAL, "Normal"),
+        )
+
+    privacy = models.SmallIntegerField(choices = PRIVACY_CHOICES, default = PRIVACY_NORMAL, editable=False)
+    creator = models.ForeignKey(User, blank=True, null=True, editable = False) # is this a personal metric associated with a specific user, or a default metric for all users?
 
 class MetricsInstance(models.Model):
     time = models.DateTimeField()
