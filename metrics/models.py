@@ -21,14 +21,17 @@ class MetricsCategory(models.Model):
     METRIC_TYPE_CHOICES = (
             (METRIC_TYPE_BOOL, "boolean"),
             (METRIC_TYPE_INT, "int"),
-        }
+        )
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     creator = models.ForeignKey(User, blank=True, null=True, editable = False) # is this a personal metric associated with a specific user, or a default metric for all users?
 
-    metrictype = models.SmallIntegerField(choices = METRIC_TYPE_CHOICES, default=METRIC_TYPE_INT, editable=False)
+    metrictype = models.SmallIntegerField(choices = METRIC_TYPE_CHOICES, default=METRIC_TYPE_INT)
 
-    config = models.CharField(max_length = 255, null=True, blank=True)
+    minLabel = models.CharField(max_length = 255, null=True, blank=True)
+    maxLabel = models.CharField(max_length = 255, null=True, blank=True)
+
+    metricMax = models.SmallIntegerField(default=7)
 
 class MetricsInstance(models.Model):
     time = models.DateTimeField()
@@ -36,6 +39,3 @@ class MetricsInstance(models.Model):
     category = models.ForeignKey(MetricsCategory)
     
     value = models.SmallIntegerField(blank=True, null=True)
-
-    #all other fields should be nullable
-
