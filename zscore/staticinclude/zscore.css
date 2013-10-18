@@ -499,3 +499,13 @@ p {
 		font-family: serif;
 		font-size:1em;
 }
+
+a {
+		font-family: serif;
+		font-size:1em;
+}
+
+input, select,  textarea,  button {
+		font-family: serif;
+		font-size:1em;
+}
