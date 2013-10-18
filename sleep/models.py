@@ -135,8 +135,9 @@ class PartialSleep(models.Model):
         return self.start_time.astimezone(tz)
 
     def gen_potential_wakeup(self):
-        d = user.sleeperprofile.getPunchInDelay()
-        raise NotImplemented
+        d = self.user.sleeperprofile.getPunchInDelay()
+        s = self.start_local_time()
+        return [s + d + (i*datetime.timedelta(hours=1.5)) for i in xrange(1,6)]
 
 class Sleep(models.Model):
     objects = SleepManager()
