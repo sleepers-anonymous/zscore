@@ -48,6 +48,8 @@ userAgentsTestMatchRegex = re.compile(userAgentsTestMatch, re.IGNORECASE)
 userAgentsTestSearchRegex = re.compile(userAgentsTestSearch, re.IGNORECASE)
 userAgentsExceptionSearchRegex = re.compile(userAgentsException, re.IGNORECASE)
 
+#--------------------------Still broken sunset/sunrise calculator-----------------------
+
 #def sunriseset(date, lat, lon):
 #    """Takes a Gregorian calendar date and calculates the sunrise and sunset times"""
 #    j = julian(date)

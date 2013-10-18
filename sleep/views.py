@@ -205,7 +205,7 @@ def inviteMember(request):
         u=us[0]
         rs = GroupRequest.objects.filter(user = u, group = g, accepted=None)
         if rs.count() >= 1: #the user has made a request to join, accept them.
-            r[0].accept()
+            rs[0].accept()
         else:
             g.invite(u,request.user)
         return HttpResponse('')
@@ -287,7 +287,7 @@ def groupJoin(request):
 def processRequest(request):
     if 'id' in request.POST:
         rs = GroupRequest.objects.filter(id=request.POST["id"])
-        if rs.count() != 1: raise 404
+        if rs.count() != 1: raise Http404
         r = rs[0]
         m = Membership.objects.get(group=r.group, user=request.user)
         if m.role < m.ADMIN: raise PermissionDenied
@@ -313,6 +313,7 @@ def manageGroup(request,gid):
             'group':g,
             'isAdmin': (request.user.membership_set.get(group = g).role >= 50),
             }
+    m = request.user.membership_set.get(group = g)
     if request.method == 'POST' and "SleeperSearchForm" in request.POST:
         searchForm=SleeperSearchForm(request.POST)
         if searchForm.is_valid():
@@ -335,8 +336,15 @@ def manageGroup(request,gid):
             context['page'] = 2
     else:
         groupForm = GroupForm(instance=g)
+    if request.method == 'POST' and "MembershipForm" in request.POST:
+        membershipForm = MembershipForm(request.POST, instance=m)
+        if membershipForm.is_valid():
+            membershipForm.save()
+    else:
+        membershipForm = MembershipForm(instance=m)
     context['searchForm']=searchForm
     context['groupForm']=groupForm
+    context['membershipForm'] = membershipForm
     context['members']=g.members.all()
     if context['isAdmin']:
         context['requests'] = g.grouprequest_set.filter(accepted=None)
@@ -344,7 +352,11 @@ def manageGroup(request,gid):
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
-    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','stDev', 'consistent', 'consistent2']:
+    if request.user.is_authenticated():
+        userMetrics = request.user.sleeperprofile.metrics.all()
+    else:
+        userMetrics = Metric.objects.filter(show_by_default=True)
+    if 'sort' not in request.GET or request.GET['sort'] not in [m.name for m in userMetrics]:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
@@ -369,8 +381,6 @@ def leaderboard(request,group=None):
     else:
         allUsers = Sleeper.objects.all()
     number = allUsers.filter(sleep__isnull=False).distinct().count()
-    metricsToDisplay = ['zScore','avg','stDev','consistent','consistent2']
-    metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
     context = {
             'group' : group,
             'top' : top,
@@ -379,8 +389,7 @@ def leaderboard(request,group=None):
             'number' : number,
             'numLeaderboard' : numLeaderboard,
             'leaderboard_valid' : len(ss),
-            'metricsToDisplay' : metricsToDisplay,
-            'metricsDisplayedAsTimes' : metricsDisplayedAsTimes
+            'userMetrics' : userMetrics
             }
     return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
 
@@ -440,7 +449,7 @@ def creep(request,username=None):
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
             if p.user_id == request.user.id and "as" in request.GET:
-                priv = p.getPermissions(request.GET['as'])
+                priv = p.checkPermissions(request.GET['as'])
             else:
                 priv = p.getPermissions(request.user)
             if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True

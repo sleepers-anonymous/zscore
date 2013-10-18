@@ -21,7 +21,36 @@ from sleep import utils
 from cache.decorators import cache_function
 from cache.utils import authStatus, expireTemplateCache
 
-TIMEZONES = [ (i,i) for i in pytz.common_timezones]
+TIMEZONES = zip(pytz.common_timezones, pytz.common_timezones)
+
+class Metric(models.Model):
+    name = models.CharField(max_length=40, unique=True)
+    asHHMM, asInt = 'asHHMM', 'asInt'
+    DISPLAY_STYLE_CHOICES = (
+        (asHHMM, 'As HH:MM'),
+        (asInt, 'As integer'))
+    display_style = models.CharField(max_length = 6,
+                                     choices = DISPLAY_STYLE_CHOICES,
+                                     default = asHHMM)
+    priority =  models.IntegerField(unique=True)
+    # decides order in which metrics are displayed
+    show_by_default = models.BooleanField(default=True)
+
+    description = models.TextField(blank=True)
+    short_description = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def withAbbrDesc(self):
+        if self.short_description:
+            return '<abbr title="' + self.short_description + '">' + self.name + '</abbr>'
+        else:
+            return self.name
+
+    class Meta:
+        ordering = ['-priority']
+
 
 class SleepManager(models.Manager):
     @cache_function(lambda self, user=None, group=None: () if user is None and group is None else None)
@@ -115,8 +144,9 @@ class PartialSleep(models.Model):
         return self.start_time.astimezone(tz)
 
     def gen_potential_wakeup(self):
-        d = user.sleeperprofile.getPunchInDelay()
-        raise NotImplemented
+        d = self.user.sleeperprofile.getPunchInDelay()
+        s = self.start_local_time()
+        return [s + d + (i*datetime.timedelta(hours=1.5)) for i in xrange(1,6)]
 
 class Sleep(models.Model):
     objects = SleepManager()
@@ -152,7 +182,9 @@ class Sleep(models.Model):
         return datetime.timedelta(seconds=score)
 
     def validate_unique(self, exclude=None):
-        overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user).exclude(pk = self.pk)
+        overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user)
+        if self.pk is not None:
+            overlaps = overlaps.exclude(pk = self.pk)
         if overlaps:
             raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
 
@@ -231,6 +263,7 @@ class SleeperProfile(models.Model):
     # all other fields should have a default
 
     #--------------------------------------Privacy Settings -----------------------
+    PRIVACY_MIN = -100
     PRIVACY_HIDDEN = -100
     PRIVACY_REDACTED = -50
     PRIVACY_NORMAL = 0
@@ -266,6 +299,9 @@ class SleeperProfile(models.Model):
     autoAcceptGroups = models.SmallIntegerField(choices=AUTO_ACCEPT_CHOICES, default=AUTO_ACCEPT_FRIENDS, verbose_name="People from whom you will automatically accept group invites.")
     
     use12HourTime = models.BooleanField(default=False)
+
+    #----------------------------------------Metrics to show--------------------------
+    metrics = models.ManyToManyField(Metric, blank=True)
 
     #----------------------------------------Mobile settings--------------------------
     FORCE_MOBILE = 2
@@ -412,22 +448,29 @@ class SleeperProfile(models.Model):
         else:
             return self.privacy
 
+    def checkPermissions(self, asOther):
+        """Returns the permissions a specific type of user should have for me."""
+
+        otherD = {
+                "friends" : "privacyFriends",
+                "user": "privacyLoggedIn",
+                "anon": "privacy",
+                }
+
+        if asOther in otherD: # we've passed in one of the given strings; the code calling us should check that we're allowed to do this.
+            return getattr(self, otherD[asOther])
+        return self.PRIVACY_MIN
+
+
     @cache_function(lambda self, otherUser, otherUserGroupIDs=None: (self.id,otherUser.id),())
     def getPermissions(self, otherUser, otherUserGroupIDs=None):
         """Returns the permissions an other user should have for me.
         
-        Pass either a user, or a string, like "friends", "user", "anon", if the user should be allowed to override.
+        Pass in a user
 
         Use otherUserGroups iff you know what you're doing for efficiency.
         """
-        otherD = {
-                "friends": "privacyFriends",
-                "user":"privacyLoggedIn",
-                "anon": "privacy",
-                }
-        if otherUser in otherD: #we've passed one of the given strings; the code calling us should check that we're allowed to do this.
-            return getattr(self, otherD[otherUser])
-        elif otherUser == None or otherUser.is_anonymous():
+        if otherUser == None or otherUser.is_anonymous():
             return self.privacy
         elif otherUser.id == self.user_id:
             return self.PRIVACY_MAX
@@ -591,9 +634,15 @@ class Sleeper(User):
             if hours:
                 byDays = map(lambda x: x/3600,byDays)
             if packDates:
-                return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i]} for i in range(0,n) if byDays[i]>0 or first + datetime.timedelta(i) in allnighters or includeMissing]
+                if includeMissing:
+                    return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i] or (0 if first + datetime.timedelta(i) in allnighters else None) } for i in range(0,n)]
+                else:
+                    return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i] } for i in range(0,n) if byDays[i]>0 or first + datetime.timedelta(i) in allnighters]
             else:
-                return [byDays[i] for i in range(0,n) if byDays[i]>0 or first+datetime.timedelta(i) in allnighters or includeMissing]
+                if includeMissing:
+                    return [byDays[i] or (0 if first+datetime.timedelta(i) in allnighters else None) for i in range(0,n)]
+                else:
+                    return [byDays[i] for i in range(0,n) if byDays[i]>0 or first+datetime.timedelta(i) in allnighters]
         else:
             return []
 
@@ -938,3 +987,4 @@ class GroupRequest(models.Model):
     def reject(self):
         self.accepted=False
         self.save()
+

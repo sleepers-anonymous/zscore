@@ -4,42 +4,30 @@
 <table>
     <tr>
 				<th>&nbsp;</th>
-	{% for metric in metricsToDisplay %}
-	<th>{{metric}}</th>
+	{% for metric in userMetrics %}
+	<th>{{metric.withAbbrDesc|safe}}</th>
 	{% endfor %}
     </tr>
   <tr>
     <td> all time </td>
-    {% for metric in metricsToDisplay %}
-    {% if metric in metricsDisplayedAsTimes %}
-    <td> {{ global|getScore:metric|printHHMM }} </td>
-    {% elif metric in metricsToDisplay  %}
+    {% for metric in userMetrics %}
     <td> {{ global|getScore:metric }} </td>
-    {% endif %}
     {% endfor %}
   </tr>
 
 
   <tr>
     <td> past week </td>
-    {% for metric in metricsToDisplay %}
-    {% if metric in metricsDisplayedAsTimes %}
-    <td> {{ weekly|getScore:metric|printHHMM }} </td>
-    {% elif metric in metricsToDisplay  %}
+    {% for metric in userMetrics %}
     <td> {{ weekly|getScore:metric }} </td>
-    {% endif %}
     {% endfor %}
   </tr>
 
 
   <tr>
     <td> exponentially decaying </td>
-    {% for metric in metricsToDisplay %}
-    {% if metric in metricsDisplayedAsTimes %}
-    <td> {{ decaying|getScore:metric|printHHMM }} </td>
-    {% elif metric in metricsToDisplay  %}
+    {% for metric in userMetrics %}
     <td> {{ decaying|getScore:metric }} </td>
-    {% endif %}
     {% endfor %}
   </tr>
 

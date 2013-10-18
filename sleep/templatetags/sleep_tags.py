@@ -2,6 +2,7 @@ from django import template
 from sleep.models import *
 from django.utils.timezone import now
 import datetime
+import datetime_utils
 import pytz
 import numpy
 import cmath
@@ -28,8 +29,8 @@ def displayPartialButton(context, user, path = "/", size = 1):
 @register.inclusion_tag('inclusion/is_asleep.html', takes_context=True)
 def isAsleep(context, you, them):
     p = them.sleeperprofile
-    if you.pk == them.pk and "as" in context["request"].GET:
-        priv = p.getPermissions(context["request"].GET["as"])
+    if you.is_authenticated() and them.is_authenticated() and you.pk == them.pk and "as" in context["request"].GET:
+        priv = p.checkPermissions(context["request"].GET["as"])
     else:
         priv = p.getPermissions(you)
     if priv >= p.PRIVACY_MAX: #In case, for some goddamn reason, someone defines a privacy setting higher than PRIVACY_MAX
@@ -66,36 +67,46 @@ def sleepStatsView(context, renderContent='html'):
 @register.inclusion_tag('inclusion/stats_table.html')
 def sleepStatsTable(user):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    metricsToDisplay = ['zScore','avg','stDev','consistent', 'consistent2']
-    metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
+    userMetrics = user.sleeperprofile.metrics.all()
     context = {'global': sleeper.movingStats(),
             'weekly': sleeper.movingStats(datetime.date.today()-datetime.timedelta(7),datetime.date.today()),
             'decaying': sleeper.decayStats(),
-            'metricsToDisplay': metricsToDisplay,
-            'metricsDisplayedAsTimes': metricsDisplayedAsTimes
+            'userMetrics': userMetrics
     }
     return context
 
 @register.inclusion_tag('inclusion/fourier_stats.html')
 def fourierStats(user,length=None):
     sleeper = Sleeper.objects.get(pk=user.pk)
-    n = now()
+    no = now()
     if length is None:
         start=datetime.date.min
         end=datetime.date.max
+        sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
+        sleepPerDayAlways = sleepPerDay
     else:
-        start=n-datetime.timedelta(length)
-        end=n
-    sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
-    weights = [2**(-n/4.0) for n in range(-len(sleepPerDay)+1,1)]
-    if len(sleepPerDay)>3:
-        ft = [datetime.timedelta(0,abs(sum(cmath.exp(2j*math.pi*i/period)*w*s for (i,w,s) in zip(range(len(sleepPerDay)),weights,sleepPerDay)))/sum(weights)) for period in range(2,len(sleepPerDay)+1)]
+        start=no-datetime.timedelta(length)
+        end=no
+        sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
+        sleepPerDayAlways = sleeper.sleepPerDay(start=datetime.datetime.min,end=datetime.datetime.max,includeMissing=True)
+    # weights = [2**(-n/4.0) for n in range(-len(sleepPerDay)+1,1)]
+    n = len(sleepPerDay)
+    if n>3:
+        sleepPerDayNoMissing = [x for x in sleepPerDay if x is not None]
+        avg = sum(sleepPerDayNoMissing)/len(sleepPerDayNoMissing)
+        # ft = [datetime.timedelta(0,abs(sum(cmath.exp(2j*math.pi*i/period)*w*s for (i,w,s) in zip(range(len(sleepPerDay)),weights,sleepPerDay)))/sum(weights)) for period in range(2,len(sleepPerDay)+1)]
         # ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]
-        topModes = reversed(list(numpy.argsort(ft)))
+        deviations = [s-avg if s is not None else 0 for s in sleepPerDay]
+        deviationsAlways = [s-avg if s is not None else 0 for s in sleepPerDayAlways]
+        autocorrel = numpy.correlate(deviationsAlways,deviations,"full")
+        # now remove the 0-day and 1-day modes, and normalize by the 0-day correlation
+        autocorrel = [a/autocorrel[-n] for i, a in enumerate(autocorrel[-n+2:-n*0.2])]
+        topModes = reversed(list(numpy.argsort(autocorrel)))
         # topModesPacked = [{'length' : len(sleepPerDay)/(i+1.), 'size': ft[i+1]} for i in topModes]
-        topModesPacked = [{'length' : i+2, 'size': ft[i]} for i in topModes]
+        # note: indices should start at 2
+        topModesPacked = [{'length' : i+2, 'size': autocorrel[i]} for i in topModes]
         context = {
-                'ft' : ft,
+                'ft' : autocorrel,
                 'topModes' : topModesPacked,
                 }
     else:
@@ -217,7 +228,7 @@ def displayMyGroup(group, amMember = 0):
     return {'group' : group, 'amMember' : amMember, 'isPublic': group.privacy >= group.PUBLIC}
 
 @register.inclusion_tag('inclusion/display_group_member.html', takes_context= True)
-def displayGroupMember(context, group,user):
+def displayGroupMember(context, group, user):
     ms = Membership.objects.filter(user = user, group = group)
     newcontext = {}
     if ms.count() >= 1:
@@ -229,6 +240,7 @@ def displayGroupMember(context, group,user):
             'group' : group,
             'user' : user,
             'canremove': context['isAdmin'] or context["request"].user == user,
+            'you': context["request"].user,
             })
     return newcontext
 
@@ -265,6 +277,12 @@ def displayFriendRequests(user):
 @register.filter
 def getScore(statdict, metric):
     try:
-        return statdict[metric]
+        v = statdict[metric.name]
+        if metric.display_style == 'asHHMM':
+            return datetime_utils.printHHMM(v)
+        elif metric.display_style == 'asInt':
+            return v
+        else:
+            return ''
     except:
         return ''
