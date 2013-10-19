@@ -17,6 +17,10 @@ class MetricsProfile(models.Model):
     def __unicode__(self):
         return "Metrics Profile for " + str(self.user)
 
+    def metricTypes(self):
+        """Returns my metric types and also the default metric types"""
+        return MetricsCategory.objects.filter(models.Q(creator=None) | models.Q(creator=self.user))
+
 class MetricsCategory(models.Model):
     METRIC_TYPE_BOOL = 0
     METRIC_TYPE_INT = 1
@@ -27,7 +31,7 @@ class MetricsCategory(models.Model):
         )
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    creator = models.ForeignKey(User, blank=True, null=True, editable = False) # is this a personal metric associated with a specific user, or a default metric for all users?
+    creator = models.ForeignKey(User, blank=True, null=True, editable = False, default=None) # is this a personal metric associated with a specific user, or a default metric for all users?
 
     metrictype = models.SmallIntegerField(choices = METRIC_TYPE_CHOICES, default=METRIC_TYPE_INT)
 
@@ -41,9 +45,9 @@ class MetricsCategory(models.Model):
 
     def __unicode__(self):
         if self.creator:
-            return "Metric " + self.name + " made by " + self.creator
+            return self.name + " made by " + self.creator
         else:
-            return "Metric " + self.name
+            return self.name
 
 class MetricsInstance(models.Model):
     time = models.DateTimeField()

@@ -1,0 +1,16 @@
+[
+    {"pk": 1, "model": "metrics.metricscategory", "fields": {
+            "name": "Wakefullness",
+            "description": "How awake do you feel?",
+            "metrictype" : 1,
+            "minLabel" : "Falling asleep standing up!",
+            "maxLabel" : "Totally awake!",
+            "metricMax" : 7}},
+    {"pk": 2, "model": "metrics.metricscategory", "fields": {
+            "name": "Concentration",
+            "description": "How capable of concentrating are you?",
+            "metrictype": 1,
+            "minLabel": "Not at all",
+            "maxLabel": "Very capable",
+            "metricMax" : 7 }}
+]
