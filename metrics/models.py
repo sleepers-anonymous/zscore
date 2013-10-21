@@ -23,10 +23,12 @@ class MetricsProfile(models.Model):
 
 class MetricsCategory(models.Model):
     METRIC_TYPE_BOOL = 0
-    METRIC_TYPE_INT = 1
+    METRIC_TYPE_RADIO = 1
+    METRIC_TYPE_INT = 2
 
     METRIC_TYPE_CHOICES = (
             (METRIC_TYPE_BOOL, "boolean"),
+            (METRIC_TYPE_RADIO, "radio"),
             (METRIC_TYPE_INT, "int"),
         )
     name = models.CharField(max_length=255)
@@ -38,7 +40,7 @@ class MetricsCategory(models.Model):
     minLabel = models.CharField(max_length = 255, null=True, blank=True)
     maxLabel = models.CharField(max_length = 255, null=True, blank=True)
 
-    metricMax = models.SmallIntegerField(default=7)
+    metricMax = models.SmallIntegerField(null=True, blank=True)
 
     class Meta:
         unique_together = ('creator', 'name')

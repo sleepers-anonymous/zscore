@@ -236,6 +236,7 @@ body.daytime {
 		margin:0px;
 		width:100%;
 		min-width:500px;
+		color:black;
 }
 
 body.nighttime {
@@ -244,6 +245,7 @@ body.nighttime {
 		padding:0px;
 		margin:0px;
 		min-width:500px;
+		width:100%;
 }
 
 div.global-wrapper{

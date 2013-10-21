@@ -12,5 +12,10 @@
             "metrictype": 1,
             "minLabel": "Not at all",
             "maxLabel": "Very capable",
-            "metricMax" : 7 }}
+            "metricMax" : 7 }},
+    {"pk": 3, "model": "metrics.metricscategory", "fields": {
+            "name": "Caffeine",
+            "description": "I just had coffee, so now I can do stupid things faster!",
+            "metrictype": 2,
+            "maxLabel": "cup(s)"}}
 ]
