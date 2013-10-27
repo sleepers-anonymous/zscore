@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, render_to_response
 from django.core import serializers
 from django.db.models import Q
-from django.db import IntegrityError
 from django.core.exceptions import *
 from django.utils.timezone import now
 from django.core.cache import cache
@@ -642,36 +641,24 @@ def createSleep(request):
 
 @login_required
 def createPartialSleep(request):
-    prof = request.user.sleeperprofile
-    timezone = prof.timezone
-    start = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0) + prof.getPunchInDelay()
-    try:
-        p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
-        p.save()
-        if "next" in request.GET: return HttpResponseRedirect(request.GET["next"])
-        return HttpResponseRedirect("/")
-    except IntegrityError:
-        return HttpResponseBadRequest('')
+    created = PartialSleep.create_new_for_user(request.user)
+    if created:
+        if "next" in request.GET:
+            return HttpResponseRedirect(request.GET["next"])
+        else:
+            return HttpResponseRedirect("/")
+    else:
+        return HttpResponseBadRequest("")
 
 @login_required
 def finishPartialSleep(request):
-    timezone = request.user.sleeperprofile.timezone
-    pytztimezone = pytz.timezone(timezone)
     try:
-        p = request.user.partialsleep
-        start = p.start_time.astimezone(pytztimezone)
-        end = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
-        date = end.date()
-        s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
-        try:
-            s.validate_unique()
-            s.save()
-            p.delete()
-            return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
-        except ValidationError:
-            return HttpResponseRedirect("/sleep/simple/?error=partial")
+        s = PartialSleep.finish_for_user(request.user)
+        return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
+    except ValidationError:
+        return HttpResponseRedirect("/sleep/simple/?error=partial")
     except PartialSleep.DoesNotExist:
-        return HttpResponseBadRequest('')
+        return HttpResponseBadRequest("")
 
 @login_required
 def deletePartialSleep(request):
