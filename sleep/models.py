@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import *
@@ -147,6 +148,42 @@ class PartialSleep(models.Model):
         d = self.user.sleeperprofile.getPunchInDelay()
         s = self.start_local_time()
         return [s + d + (i*datetime.timedelta(hours=1.5)) for i in xrange(1,6)]
+
+    @classmethod
+    def create_new_for_user(cls, user):
+        prof = user.sleeperprofile
+        timezone = prof.timezone
+        start = now().astimezone(pytz.timezone(timezone)).replace(microsecond=0) + prof.getPunchInDelay()
+        try:
+            p = PartialSleep(user=user, start_time=start, timezone=timezone)
+            p.save()
+            return True
+        except IntegrityError:
+            return False
+
+    @classmethod
+    def finish_for_user(cls, user):
+        """Finish a user's partial sleep.
+
+        Throws (partial list):
+            - ValidationError
+            - PartialSleep.DoesNotExist
+        """
+        timezone = user.sleeperprofile.timezone
+        pytztimezone = pytz.timezone(timezone)
+        p = user.partialsleep
+        start = p.start_time.astimezone(pytztimezone)
+        end = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
+        date = end.date()
+        s = Sleep(user=user,
+            start_time=start, end_time=end, date=date, timezone=timezone,
+            comments="",
+        )
+        s.validate_unique()
+        s.save()
+        p.delete()
+        return s
+
 
 class Sleep(models.Model):
     objects = SleepManager()
