@@ -247,7 +247,7 @@ class Sleep(models.Model):
 
     def getTZShortName(self):
         """Gets the short of a time zone"""
-        return self.getSleepTZ().tzname(self.end_time)
+        return self.getSleepTZ().tzname(self.end_local_time())
 
     def save(self, *args, **kwargs):
         seconds = self.length().total_seconds()
