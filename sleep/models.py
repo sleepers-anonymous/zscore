@@ -16,6 +16,7 @@ import hashlib
 import random
 import time
 from operator import add
+import numpy as np
 
 from zscore import settings
 from sleep import utils
@@ -690,6 +691,49 @@ class Sleeper(User):
         while d <= end:
             yield d
             d += datetime.timedelta(1)
+
+    def sleepMatrix(self, res=1, start=datetime.date.min, end=datetime.date.max, packDates=False, includeMissing=False):
+        if start==datetime.date.min and end==datetime.date.max:
+            sleeps = self.sleep_set.all()
+            allnighters = self.allnighter_set.all()
+        else:
+            sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
+            allnighters = self.allnighter_set.filter(date__gte=start,date__lte=end)
+        if not sleeps:
+            return np.zeros((0, 24 * 60 // res))
+        dates = set(x.date for x in itertools.chain(sleeps, allnighters))
+        first = min(dates)
+        last = max(dates)
+        n = (last - first).days + 1
+        dateRange = [first + datetime.timedelta(i) for i in range(n)]
+        byDateTime = np.zeros((n, 24 * 60 // res))
+        tickLength = 60 * res
+        for sleep in sleeps:
+            sleepDate = (sleep.date - first).days
+            startLocal = sleep.start_local_time()
+            endLocal = sleep.end_local_time()
+            startTick, startFrac = divmod(startLocal.hour * 3600 + startLocal.minute * 60 + startLocal.second, tickLength)
+            endTick, endFrac = divmod(endLocal.hour * 3600 + endLocal.minute * 60 + endLocal.second, tickLength)
+            daysInRange = (endLocal.date() - startLocal.date()).days
+            if daysInRange == 0:
+                if startTick == endTick:
+                    byDateTime[sleepDate,startTick] += endFrac - startFrac
+                else:
+                    byDateTime[sleepDate,startTick] += tickLength - startFrac
+                    byDateTime[sleepDate,startTick+1:endTick] += tickLength
+                    byDateTime[sleepDate,endTick] += endFrac
+            else:
+                byDateTime[sleepDate,startTick] += tickLength  - startFrac
+                byDateTime[sleepDate,startTick+1:] += tickLength
+                byDateTime[sleepDate,:] += (daysInRange - 1) * tickLength
+                byDateTime[sleepDate,:endTick] += tickLength
+                byDateTime[sleepDate,endTick] += endFrac
+        dateMask = np.array([date in dates for date in dateRange])
+        if includeMissing:
+            byDateTime[~dateMask, :] = np.nan
+        else:
+            byDateTime = byDateTime[dateMask, :]
+        return byDateTime
 
     def sleepWakeTime(self,t='end',start=datetime.date.today(),end=datetime.date.today(), stdev = False):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
