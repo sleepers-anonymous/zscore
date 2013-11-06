@@ -252,6 +252,7 @@ class Sleep(models.Model):
     def save(self, *args, **kwargs):
         seconds = self.length().total_seconds()
         self.sleepcycles = seconds//5400
+        cache.delete('movingStats:%s' % self.user_id)
         cache.delete('decayStats:%s' % self.user_id)
         cache.delete('bestByTime:')
         cache.delete('sorted_sleepers:')
@@ -259,6 +260,7 @@ class Sleep(models.Model):
         super(Sleep, self).save(*args,**kwargs)
 
     def delete(self, *args, **kwargs):
+        cache.delete('movingStats:%s' % self.user_id)
         cache.delete('decayStats:%s' % self.user_id)
         cache.delete('bestByTime:')
         cache.delete('sorted_sleepers:')
