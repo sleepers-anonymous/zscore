@@ -662,35 +662,32 @@ class Sleeper(User):
         else:
             sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
             allnighters = self.allnighter_set.filter(date__gte=start,date__lte=end)
-        if sleeps:
-            allnighters=[x.date for x in iter(allnighters)] #map(lambda x: x.date,allnighters)
-            sleeps=list(iter(sleeps))
-            dates=[x.date for x in sleeps] #map(lambda x: x.date, sleeps)
-            first = min(itertools.chain(dates,allnighters))
-            last = max(itertools.chain(dates,allnighters))
-            n = (last-first).days + 1
-            dateRange = [first + datetime.timedelta(i) for i in range(0,n)]
-            byDays = [sum([s.length().total_seconds() for s in sleeps if s.date==d]) for d in dateRange]
-            if hours:
-                byDays = map(lambda x: x/3600,byDays)
-            if packDates:
-                if includeMissing:
-                    return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i] or (0 if first + datetime.timedelta(i) in allnighters else None) } for i in range(0,n)]
-                else:
-                    return [{'date' : first + datetime.timedelta(i), 'slept' : byDays[i] } for i in range(0,n) if byDays[i]>0 or first + datetime.timedelta(i) in allnighters]
-            else:
-                if includeMissing:
-                    return [byDays[i] or (0 if first+datetime.timedelta(i) in allnighters else None) for i in range(0,n)]
-                else:
-                    return [byDays[i] for i in range(0,n) if byDays[i]>0 or first+datetime.timedelta(i) in allnighters]
-        else:
+        if not sleeps:
             return []
-
-    def genDays(start,end):
-        d=start
-        while d <= end:
-            yield d
-            d += datetime.timedelta(1)
+        dates = set(x.date for x in itertools.chain(sleeps, allnighters))
+        first = min(dates)
+        last = max(dates)
+        n = (last - first).days + 1
+        dateRange = [first + datetime.timedelta(i) for i in range(n)]
+        byDays = [0] * n
+        for sleep in sleeps:
+            sleepDate = (sleep.date - first).days
+            byDays[sleepDate] += sleep.length().total_seconds()
+        if hours:
+            byDays = map(lambda x: x/3600, byDays)
+        for i in range(n):
+            if dateRange[i] not in dates:
+                byDays[i] = None
+        if packDates:
+            if includeMissing:
+                return [{'date' : date, 'slept' : slept } for date, slept in zip(dateRange, byDays)]
+            else:
+                return [{'date' : date, 'slept' : slept } for date, slept in zip(dateRange, byDays) if slept is not None]
+        else:
+            if includeMissing:
+                return byDays
+            else:
+                return filter(None, byDays)
 
     def sleepMatrix(self, res=1, start=datetime.date.min, end=datetime.date.max, packDates=False, includeMissing=False):
         if start==datetime.date.min and end==datetime.date.max:
