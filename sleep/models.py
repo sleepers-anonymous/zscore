@@ -778,7 +778,7 @@ class Sleeper(User):
         sleep = self.sleepPerDay(start,end)
         ideal = int(self.sleeperprofile.getFloatIdealSleep()*3600)
         d = {}
-        try:
+        if sleep:
             avg = sum(sleep)/len(sleep)
             d['avg']=avg
             if len(sleep)>2:
@@ -790,11 +790,6 @@ class Sleeper(User):
                 d['zPScore']=avg-posStDev
                 idealized = max(ideal, avg)
                 d['idealDev'] = math.sqrt(sum(map(lambda x: (x-idealized)**2, sleep))/(len(sleep)-1.5))
-                d['consistent'] = self.consistencyStat(start = start, end = end)
-                d['consistent2'] = self.consistencyStat2(start = start, end = end)
-        except:
-            pass
-        try:
             offset = 60*60.
             avgRecip = 1/(sum(map(lambda x: 1/(offset+x),sleep))/len(sleep))-offset
             d['avgRecip']=avgRecip
@@ -802,92 +797,42 @@ class Sleeper(User):
             d['avgSqrt']=avgSqrt
             avgLog = math.exp(sum(map(lambda x: math.log(x+offset),sleep))/len(sleep))-offset
             d['avgLog']=avgLog
-        except:
-            pass
-        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
+        consistencyStats = self.consistencyStats(start=start, end=end)
+        d['consistent'] = consistencyStats[0]
+        d['consistent2'] = consistencyStats[1]
+        d['cScore'] = consistencyStats[2]
+        d['cScore1'] = consistencyStats[3]
+        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev', 'cScore', 'cScore1']:
             if k not in d:
-                d[k]=datetime.timedelta(0)
+                d[k] = datetime.timedelta(0)
             else:
-                d[k]=datetime.timedelta(0,d[k])
+                d[k] = datetime.timedelta(0,d[k])
+        for k in ['consistent', 'consistent2']:
+            if k in d and 0 <= d[k] <= 1:
+                d[k] = int(1000 * d[k])
+            else:
+                d[k] = 0
         return d
 
-    def consistencyStat(self,res=1, start = datetime.date.min, end = datetime.date.max, decay = False, hl = 4):
-        sleeps = self.sleep_set.all()
-        atTime = [0] * (24 * 60 / res)
-        sleepdates = set([sleep.date for sleep in sleeps if sleep.date >= start and sleep.date <= end])
-        if len(sleepdates) < 2:
-            return 0
-        maxdate = max(sleepdates)
-        if len([day for day in sleepdates if (maxdate-day).days < 14]) < 3:
-            return 0
-        for sleep in sleeps:
-            if sleep.date <= end and sleep.date >= start:
-                startDate = sleep.start_local_time().date()
-                endDate = sleep.end_local_time().date()
-                dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
-                for d in dr:
-                    if d == startDate:
-                        startTime = sleep.start_local_time().time()
-                    else:
-                        startTime = datetime.time(0)
-                    if d == endDate:
-                        endTime = sleep.end_local_time().time()
-                    else:
-                        endTime = datetime.time(23,59)
-                    for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
-                        if decay:
-                            atTime[i] += 2**(-(maxdate-sleep.date).days/float(hl))
-                        else:
-                            atTime[i]+=1
-        numerator = sum(map(lambda x: x**2, atTime))
+    def consistencyStats(self, res=1, start=datetime.date.min, end=datetime.date.max, decay=False, hl=4):
+        atDateTime = self.sleepMatrix(res=res, start=start, end=end)
+        if len(atDateTime) < 2:
+            return (0, 0, 0, 0)
         if decay:
-            numDays = sum([2**(-((maxdate-day).days/float(hl))) for day in sleepdates])
+            atTime = self.decaying(atDateTime, hl=hl)
         else:
-            numDays = len(sleepdates)
-        denominator = sum(atTime) * numDays
-        try:
-            if int(1000 * float(numerator)/denominator) <= 1000:
-                return int(1000 * float(numerator)/denominator)
-            else:
-                return 0
-        except:
-            return 0
+            atTime = np.mean(atDateTime, axis=0)
+        atTimeP = atTime/(60 * res)
+        consistent1 = np.sum(atTimeP*atTimeP)/np.sum(atTimeP)
+        consistent2 = np.mean(atTimeP**2 + (1-atTimeP)**2)
+        cScore = np.sum(atTime*atTimeP)
+        overlap = np.sum(atDateTime[:-1,:] * atDateTime[1:,:], axis=1)
+        if decay:
+            cScore1 = self.decaying(overlap, hl=hl)/(60 * res)
+        else:
+            cScore1 = np.mean(overlap)/(60 * res)
+        return consistent1, consistent2, cScore, cScore1
 
-    def consistencyStat2(self,res=1, start = datetime.date.min, end = datetime.date.max, decay = False, hl = 4):
-        sleeps = self.sleep_set.all()
-        atTime = [0] * (24 * 60 / res)
-        sleepdates = set([sleep.date for sleep in sleeps if sleep.date >= start and sleep.date <= end])
-        if len(sleepdates) < 2:
-            return 0
-        maxdate = max(sleepdates)
-        if len([day for day in sleepdates if (maxdate-day).days < 14]) < 3:
-            return 0
-        for sleep in sleeps:
-            if sleep.date <= end and sleep.date >= start:
-                startDate = sleep.start_local_time().date()
-                endDate = sleep.end_local_time().date()
-                dr = [startDate + datetime.timedelta(i) for i in range((endDate-startDate).days + 1)]
-                for d in dr:
-                    if d == startDate:
-                        startTime = sleep.start_local_time().time()
-                    else:
-                        startTime = datetime.time(0)
-                    if d == endDate:
-                        endTime = sleep.end_local_time().time()
-                    else:
-                        endTime = datetime.time(23,59)
-                    for i in range((startTime.hour * 60 + startTime.minute) / res, (endTime.hour * 60 + endTime.minute + 1) / res):
-                        if decay:
-                            atTime[i] += 2**(-(maxdate-sleep.date).days/float(hl))
-                        else:
-                            atTime[i]+=1
-        if decay:
-            numDays = sum([2**(-((maxdate-day).days/float(hl))) for day in sleepdates])
-        else:
-            numDays = len(sleepdates)
-        return int(1000 * sum([(float(i)/numDays) ** 2 + (1-float(i)/numDays) ** 2 for i in atTime]) / (24 * 60))
-        
-        
     def decaying(self,data,hl,stDev=False):
         s = 0
         w = 0
@@ -903,22 +848,18 @@ class Sleeper(User):
         sleep = self.sleepPerDay(datetime.date.min,end)
         ideal = int(self.sleeperprofile.getFloatIdealSleep()*3600)
         d = {}
-        try:
+        if sleep:
             avg = self.decaying(sleep,hl)
             d['avg']=avg
-            stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl,True))
-            posStDev = math.sqrt(self.decaying(map(lambda x: min(0,x-avg)**2,sleep),hl,True))
-            d['stDev']=stDev
-            d['posStDev']=posStDev
-            d['zScore']=avg-stDev
-            d['zPScore']=avg-posStDev
-            idealized = max(ideal, avg)
-            d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
-            d['consistent'] = self.consistencyStat(end = end, decay = True, hl = hl)
-            d['consistent2'] = self.consistencyStat2(end = end, decay = True, hl = hl)
-        except:
-            pass
-        try:
+            if len(sleep)>2:
+                stDev = math.sqrt(self.decaying(map(lambda x: (x-avg)**2,sleep),hl,True))
+                posStDev = math.sqrt(self.decaying(map(lambda x: min(0,x-avg)**2,sleep),hl,True))
+                d['stDev']=stDev
+                d['posStDev']=posStDev
+                d['zScore']=avg-stDev
+                d['zPScore']=avg-posStDev
+                idealized = max(ideal, avg)
+                d['idealDev']=math.sqrt(self.decaying(map(lambda x: (x - idealized)**2 , sleep),hl, True))
             offset = 60*60.
             avgRecip = 1/(self.decaying(map(lambda x: 1/(offset+x),sleep),hl))-offset
             d['avgRecip']=avgRecip
@@ -926,13 +867,21 @@ class Sleeper(User):
             d['avgSqrt']=avgSqrt
             avgLog = math.exp(self.decaying(map(lambda x: math.log(x+offset),sleep),hl))-offset
             d['avgLog']=avgLog
-        except:
-            pass
-        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev']:
+        consistencyStats = self.consistencyStats(end=end, decay=True, hl=hl)
+        d['consistent'] = consistencyStats[0]
+        d['consistent2'] = consistencyStats[1]
+        d['cScore'] = consistencyStats[2]
+        d['cScore1'] = consistencyStats[3]
+        for k in ['avg','posStDev','zPScore','stDev','zScore','avgSqrt','avgLog','avgRecip', 'idealDev', 'cScore', 'cScore1']:
             if k not in d:
-                d[k]=datetime.timedelta(0)
+                d[k] = datetime.timedelta(0)
             else:
-                d[k]=datetime.timedelta(0,d[k])
+                d[k] = datetime.timedelta(0,d[k])
+        for k in ['consistent', 'consistent2']:
+            if k in d and 0 <= d[k] <= 1:
+                d[k] = int(1000 * d[k])
+            else:
+                d[k] = 0
         return d
 
 class SleeperGroup(models.Model):
