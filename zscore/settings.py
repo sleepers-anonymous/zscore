@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'south',
     'cache',
     'metrics',
+    'sheeple',
 )
 
 CACHES = {

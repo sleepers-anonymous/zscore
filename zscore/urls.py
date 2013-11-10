@@ -87,4 +87,5 @@ urlpatterns = patterns('',
     url(r'^faq/$', 'sleep.views.faq'),
     url(r'^privacy/$', 'sleep.views.privacy'),
     url(r'^sleep/export/$', 'sleep.views.exportSleeps'),
+    url(r'^sheeple/$', 'sheeple.views.sheeple'),
 )

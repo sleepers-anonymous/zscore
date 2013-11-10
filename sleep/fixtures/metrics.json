@@ -56,5 +56,15 @@
         {"priority": 480,
          "display_style": "asHHMM",
          "show_by_default": false,
-         "name": "posStDev"}}
+         "name": "posStDev"}},
+    {"pk": 12, "model": "sleep.metric", "fields":
+        {"priority": 400,
+         "display_style": "asHHMM",
+         "show_by_default": true,
+         "name": "cScore"}},
+    {"pk": 13, "model": "sleep.metric", "fields":
+        {"priority": 380,
+         "display_style": "asHHMM",
+         "show_by_default": true,
+         "name": "cScore1"}}
 ]

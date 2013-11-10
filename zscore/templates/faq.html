@@ -15,7 +15,11 @@ Another way of accounting for consistent sleep is to have some sort of diminishi
 
 <p>The <b>consistent</b> metric measures how consistent the <i>times</i> when you slept were, not how consistent the length of your sleep was. This is the probability (multiplied by 1000) that if you pick a random point when you were asleep, and then pick a random day, you were asleep at that time on that day too. If you sleep at exactly the same time every day, your score will be 1000; otherwise, it will be less. </p>
 
-<p> The <b>consistent2</b> metric also measures how consistent the times when you slept were. It's the probability (multiplied by 1000) that if you pick two random days and a random time, you will either be asleep on both days or awake on both days at that time. This metric doesn't penalize those who get less sleep for their inconsistent sleep times as much as consistent does.</p>
+<p>The <b>consistent2</b> metric also measures how consistent the times when you slept were. It's the probability (multiplied by 1000) that if you pick two random days and a random time, you will either be asleep on both days or awake on both days at that time. This metric doesn't penalize those who get less sleep for their inconsistent sleep times as much as consistent does.</p>
+
+<p>The <b>cScore</b> metric is a way of combining amount of sleep with consistency: it's the product of avg and consistent. Another way to look at this is that it's an average of your sleep weighted by time of day, where the weight associated with a time corresponds to the probability that you were asleep at that time on a random day.</p>
+
+<p>The <b>cScore1</b> metric is another way of combining sleep with consistency. This is the average of your sleep only counting when you were asleep at the same time of day twice in a row, or equivalently, how much your sleep times overlap from each day to the next. So named because it's a variant on cScore where the weight only depends on the times you were asleep on the previous day, rather than your distribution of sleep over all days.</p>
 
 <a name="gone"></a><p><i>Q: Why are so many metrics gone? </i></p>
 
