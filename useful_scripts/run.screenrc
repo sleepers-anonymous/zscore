@@ -1,0 +1,6 @@
+#run with screen -c run.screenrc
+
+source ~/.screenrc
+zombie kr
+screen -t run /zscore/useful_scripts/run.sh
+
