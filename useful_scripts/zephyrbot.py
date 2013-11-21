@@ -4,6 +4,7 @@ import datetime
 import os
 import sys
 import zephyr
+import random
 
 if __name__ == '__main__':
     cur_file = os.path.abspath(__file__)
@@ -49,13 +50,13 @@ def handle_zgram(zgram):
     reply = build_reply(zgram)
     try:
         user = fetch_user_from_zgram(zgram)
-        if 'gnight' in zgram.message:
+        if 'gnight' in zgram.message or 'goodnight' in zgram.message:
             success = sleep.models.PartialSleep.create_new_for_user(user)
             if success:
                 msg = 'Sleep well!'
             else:
                 msg = "Hmm, I can't seem to record you as asleep."
-        elif 'awake' in zgram.message:
+        elif 'awake' in zgram.message or "mornin'" in zgram.message:
             try:
                 s = sleep.models.PartialSleep.finish_for_user(user)
                 tmpl = "Good morning!\nYou slept from %s to %s.\n(That's %s.)"
@@ -64,6 +65,8 @@ def handle_zgram(zgram):
                 msg = "Sorry, you don't seem to have been asleep."
             except ValidationError as e:
                 msg = e.messages[0]
+        elif 'meow' in zgram.message.lower():
+            msg = random.choice(['meow!', "purrrr", "*barks*"])
         else:
             msg = "I'm sorry -- I don't understand."
     except LookupError as e:
@@ -90,7 +93,7 @@ def main():
         if zgram.opcode.lower() == 'auto':
             print "  -> auto; ignoring"
             continue
-
+        
         handle_zgram(zgram)
 
 if __name__ == '__main__':
