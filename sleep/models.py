@@ -860,7 +860,7 @@ class Sleeper(User):
             offset = 60*60.
             avgRecip = 1/(self.decaying(map(lambda x: 1/(offset+x),sleep),hl))-offset
             d['avgRecip']=avgRecip
-            avgSqrt = self.decaying(map(lambda x: math.sqrt(x),sleep),hl)**2
+            avgSqrt = self.decaying(map(lambda x: math.sqrt(max(0,x)),sleep),hl)**2
             d['avgSqrt']=avgSqrt
             avgLog = math.exp(self.decaying(map(lambda x: math.log(x+offset),sleep),hl))-offset
             d['avgLog']=avgLog
