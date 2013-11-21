@@ -687,7 +687,7 @@ class Sleeper(User):
             if includeMissing:
                 return byDays
             else:
-                return filter(None, byDays)
+                return filter(lamda x: x!=None, byDays)
 
     def sleepMatrix(self, res=1, start=datetime.date.min, end=datetime.date.max, packDates=False, includeMissing=False):
         if start==datetime.date.min and end==datetime.date.max:
