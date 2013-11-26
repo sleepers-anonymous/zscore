@@ -365,6 +365,7 @@ class SleeperProfile(models.Model):
     #---------------------------User customification -------------------------
     useGravatar = models.BooleanField(default=True)
     moreMetrics = models.BooleanField(default=True)
+    isPro = models.BooleanField(default=False)
 
     #---------------------------Timezones------------------------------------
 
@@ -387,6 +388,7 @@ class SleeperProfile(models.Model):
         cache.delete('bestByTime:')
         cache.delete('sorted_sleepers:')
         cache.delete('getPermissions:')
+        expireTemplateCache('header',self.requestee.username)
         super(SleeperProfile, self).save(*args,**kwargs)
 
     def activateEmail(self, sha):
