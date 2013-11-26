@@ -65,10 +65,12 @@ def handle_zgram(zgram):
                 msg = "Sorry, you don't seem to have been asleep."
             except ValidationError as e:
                 msg = e.messages[0]
+        elif 'help' in zgram.message.lower():
+            msg = "Hi! Message me 'gnight' when you want to sleep\nand 'awake' when you wake up!"
         elif 'meow' in zgram.message.lower():
             msg = random.choice(['meow!', "purrrr", "*barks*"])
         else:
-            msg = "I'm sorry -- I don't understand."
+            msg = "I'm sorry -- I don't understand. Msg 'help' for a list of commands I respond to."
     except LookupError as e:
         msg = "I'm sorry -- I can't find an account for you: %s" % (e.message, )
     reply.fields[1] = msg
