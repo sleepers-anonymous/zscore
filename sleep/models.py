@@ -388,7 +388,7 @@ class SleeperProfile(models.Model):
         cache.delete('bestByTime:')
         cache.delete('sorted_sleepers:')
         cache.delete('getPermissions:')
-        expireTemplateCache('header',self.requestee.username)
+        #expireTemplateCache('header',self.requestee.username) #this is breaking things, benkraft. I'm too tired to figure out why.
         super(SleeperProfile, self).save(*args,**kwargs)
 
     def activateEmail(self, sha):
