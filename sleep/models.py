@@ -416,7 +416,7 @@ class SleeperProfile(models.Model):
             self.user.save()
         text = "<html> Hi " + self.user.username + "! <br /><br />"
         text += "Click on the following link in order to activate your email! <br /><br />"
-        text += "<a href='http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha +"</a></html>"
+        text += "<a href='http://zscore.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.mit.edu/accounts/emailconfirm/" + sha +"</a></html>"
         msg = EmailMultiAlternatives("zScore email activation", "", "zscore.noreply@gmail.com", [self.user.email])
         msg.attach_alternative(text, "text/html")
         msg.send()
