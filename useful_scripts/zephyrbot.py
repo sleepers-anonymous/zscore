@@ -65,6 +65,8 @@ def handle_zgram(zgram):
                 msg = "Sorry, you don't seem to have been asleep."
             except ValidationError as e:
                 msg = e.messages[0]
+        elif 'help' in zgram.message:
+            msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning"
         elif 'meow' in zgram.message.lower():
             msg = random.choice(['meow!', "purrrr", "*barks*"])
         else:
