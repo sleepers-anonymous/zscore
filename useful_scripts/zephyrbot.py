@@ -20,7 +20,7 @@ import sleep.models
 def setup():
     zephyr.init()
     subs = zephyr.Subscriptions()
-    subs.add(('message', '*', '%me%'))
+    subs.add(('message', '*', '%me%'), ('zscore', '*', '*')
 
 def fetch_user_from_zgram(zgram):
     if not zgram.auth:
@@ -48,31 +48,34 @@ def build_reply(zgram):
 
 def handle_zgram(zgram):
     reply = build_reply(zgram)
-    try:
-        user = fetch_user_from_zgram(zgram)
-        if 'gnight' in zgram.message or 'goodnight' in zgram.message:
-            success = sleep.models.PartialSleep.create_new_for_user(user)
-            if success:
-                msg = 'Sleep well!'
+    if z.cls == 'zscore':
+        pass
+    else:
+        try:
+            user = fetch_user_from_zgram(zgram)
+            if 'gnight' in zgram.message or 'goodnight' in zgram.message:
+                success = sleep.models.PartialSleep.create_new_for_user(user)
+                if success:
+                    msg = 'Sleep well!'
+                else:
+                    msg = "Hmm, I can't seem to record you as asleep."
+            elif 'awake' in zgram.message or "mornin'" in zgram.message:
+                try:
+                    s = sleep.models.PartialSleep.finish_for_user(user)
+                    tmpl = "Good morning!\nYou slept from %s to %s.\n(That's %s.)"
+                    msg = tmpl % (s.start_time, s.end_time, s.length())
+                except sleep.models.PartialSleep.DoesNotExist:
+                    msg = "Sorry, you don't seem to have been asleep."
+                except ValidationError as e:
+                    msg = e.messages[0]
+            elif 'help' in zgram.message:
+                msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning"
+            elif 'meow' in zgram.message.lower():
+                msg = random.choice(['meow!', "purrrr", "*barks*"])
             else:
-                msg = "Hmm, I can't seem to record you as asleep."
-        elif 'awake' in zgram.message or "mornin'" in zgram.message:
-            try:
-                s = sleep.models.PartialSleep.finish_for_user(user)
-                tmpl = "Good morning!\nYou slept from %s to %s.\n(That's %s.)"
-                msg = tmpl % (s.start_time, s.end_time, s.length())
-            except sleep.models.PartialSleep.DoesNotExist:
-                msg = "Sorry, you don't seem to have been asleep."
-            except ValidationError as e:
-                msg = e.messages[0]
-        elif 'help' in zgram.message:
-            msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning"
-        elif 'meow' in zgram.message.lower():
-            msg = random.choice(['meow!', "purrrr", "*barks*"])
-        else:
-            msg = "I'm sorry -- I don't understand."
-    except LookupError as e:
-        msg = "I'm sorry -- I can't find an account for you: %s" % (e.message, )
+                msg = "I'm sorry -- I don't understand."
+        except LookupError as e:
+            msg = "I'm sorry -- I can't find an account for you: %s" % (e.message, )
     reply.fields[1] = msg
     reply.send()
 
