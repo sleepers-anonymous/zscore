@@ -74,7 +74,7 @@ def handle_zgram(zgram):
             elif 'meow' in zgram.message.lower():
                 msg = random.choice(['meow!', "purrrr", "*barks*"])
             else:
-                msg = "I'm sorry -- I don't understand."
+                msg = "I'm sorry -- I don't understand. Message me 'help' for more information."
         except LookupError as e:
             msg = "I'm sorry -- I can't find an account for you: %s" % (e.message, )
         reply.fields[1] = msg
