@@ -47,10 +47,10 @@ def build_reply(zgram):
     return z
 
 def handle_zgram(zgram):
-    reply = build_reply(zgram)
     if z.cls == 'zscore':
         pass
     else:
+        reply = build_reply(zgram)
         try:
             user = fetch_user_from_zgram(zgram)
             if 'gnight' in zgram.message or 'goodnight' in zgram.message:
@@ -76,8 +76,8 @@ def handle_zgram(zgram):
                 msg = "I'm sorry -- I don't understand."
         except LookupError as e:
             msg = "I'm sorry -- I can't find an account for you: %s" % (e.message, )
-    reply.fields[1] = msg
-    reply.send()
+        reply.fields[1] = msg
+        reply.send()
 
 def main():
     setup()
