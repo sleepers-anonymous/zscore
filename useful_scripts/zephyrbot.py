@@ -20,7 +20,8 @@ import sleep.models
 def setup():
     zephyr.init()
     subs = zephyr.Subscriptions()
-    subs.add(('message', '*', '%me%'), ('zscore', '*', '*')
+    subs.add(('message', '*', '%me%'))
+    subs.add(('zscore', '*', '*'))
 
 def fetch_user_from_zgram(zgram):
     if not zgram.auth:
@@ -47,7 +48,7 @@ def build_reply(zgram):
     return z
 
 def handle_zgram(zgram):
-    if z.cls == 'zscore':
+    if zgram.cls == 'zscore':
         pass
     else:
         reply = build_reply(zgram)
