@@ -792,7 +792,7 @@ class Sleeper(User):
             offset = 60*60.
             avgRecip = 1/(sum(map(lambda x: 1/(offset+x),sleep))/len(sleep))-offset
             d['avgRecip']=avgRecip
-            avgSqrt = (sum(map(lambda x: math.sqrt(x),sleep))/len(sleep))**2
+            avgSqrt = (sum(map(lambda x: math.sqrt(max(0,x)),sleep))/len(sleep))**2
             d['avgSqrt']=avgSqrt
             avgLog = math.exp(sum(map(lambda x: math.log(x+offset),sleep))/len(sleep))-offset
             d['avgLog']=avgLog
