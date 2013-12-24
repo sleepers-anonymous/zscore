@@ -384,6 +384,10 @@ class SleeperProfile(models.Model):
     idealSleepTimeWeekend = models.TimeField(default = datetime.time(0))
     idealSleepTimeWeekday = models.TimeField(default = datetime.time(23))
 
+    #--------------------------Random stuff----------------------------------------
+
+    goodOrBad = models.NullBooleanField()
+
     def save(self, *args, **kwargs):
         cache.delete('bestByTime:')
         cache.delete('sorted_sleepers:')
