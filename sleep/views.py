@@ -711,7 +711,7 @@ def getSleepsJSON(request):
 @login_required
 def goodOrBad(request):
     p = request.user.sleeperprofile
-    if 'good' in request.POST['goodOrBad']:
+    if request.method=='POST' and 'goodOrBad' in request.POST and 'good' in request.POST['goodOrBad']:
         p.goodOrBad = True
     else:
         p.goodOrBad = False
