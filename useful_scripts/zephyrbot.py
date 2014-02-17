@@ -84,7 +84,8 @@ def handle_zgram(zgram):
                     if 'decaying' in zgram.message or (len(msglist)==0):
                         msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(sleeper.decayStats()), usermetrics)
                     msg = '\n\n'.join(msglist)
-                except:
+                except all as e:
+                    print e
                     msg = 'Something went wrong! Zephyr -c zscore for help!'
             else:
                 msg = "I'm sorry -- I don't understand. Message me 'help' for more information."
