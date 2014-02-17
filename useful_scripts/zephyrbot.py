@@ -16,6 +16,7 @@ import django.contrib.auth.models
 from django.core.exceptions import ValidationError
 
 import sleep.models
+import sleep.utils
 
 def setup():
     zephyr.init()
@@ -73,6 +74,16 @@ def handle_zgram(zgram):
                 msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning"
             elif 'meow' in zgram.message.lower():
                 msg = random.choice(['meow!', "purrrr", "*barks*"])
+            elif 'stats' in zgram.message:
+                try:
+                    msglist = []
+                    if 'global' in zgram.message or 'all-time' in zgram.message:
+                        msglist.append("Your All-Time stats\n" + sleep.utils.zephyrDisplay(user.movingStats()))
+                    if 'decaying' in zgram.message or (len(msglist)==0):
+                        msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(user.decayStats()))
+                    msg = '\n\n'.join(msglist)
+                except:
+                    msg = 'Something went wrong! Zephyr -c zscore for help!'
             else:
                 msg = "I'm sorry -- I don't understand. Message me 'help' for more information."
         except LookupError as e:
