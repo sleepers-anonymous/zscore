@@ -16,12 +16,9 @@ def julian(date):
     return date.day + (153*m + 2)//5 +365*y +y//4 - y//100 + y//400 - 32045
 
 
-def zephyrDisplay(stats, usermetrics = None):
+def zephyrDisplay(stats, um = None):
     """Takes a table of stats and displays it in a zephyr-friendly pretty way."""
-    if usermetrics == None:
-        usermetrics = stats.keys()
-    else:
-        usermetrics = set([str(m) for m in usermetrics]) & stats.viewkeys()
+    usermetrics = stats.keys() if um == None else set(str(m) for m in usermetrics) & stats.viewkeys()
     return '\n'.join((i + ": ").rjust(15) + str(stats[i]) for i in usermetrics)
 
 #------------------------------Regexes for mobile detection ------------------------------
