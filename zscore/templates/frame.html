@@ -13,16 +13,16 @@
         {% endblock %}
   
         {% block jquery %}
-            <script src="http://code.jquery.com/jquery-1.9.1.js" type="text/javascript"></script>
-            <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
+            <script src="//code.jquery.com/jquery-1.9.1.js" type="text/javascript"></script>
+            <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
             <script src="{% static 'jquery/jquery-ui-timepicker-addon.js' %}" type="text/javascript"></script>
             <script src="{% static 'jquery/jquery.cookie.js' %}" type="text/javascript"></script>
-            <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" type="text/css"/>
+            <link rel="stylesheet" href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" type="text/css"/>
             <link rel="stylesheet" href="{% static 'jquery/jquery-ui-timepicker-addon.css' %}" type="text/css"/>
         {% endblock %}
 
         {% block chartjs %}
-            <script src="http://chartjs.org/docs/Chart.js" type="text/javascript"></script>
+            <script src="/static/Chart.js" type="text/javascript"></script>
         {% endblock %}
     
         {% block momentjs %}
@@ -54,7 +54,7 @@
             {% cache 86400 header request.user.username %}
             <div class="navigation-bar">
             <ul>
-                <li><a href="/"><b>zScore</b></a><sup>[alpha]</sup></li>
+                <li><a href="/"><b>zScore</b></a><sup>[{% if request.user.sleeperprofile.isPro %}<i><b>pro</b></i>{% elif request.user.is_superuser %}<i>dev</i>{% else %}alpha{% endif %}]</sup></li>
                 <li><a href="/mysleep/">my sleep</a>
                     {% if request.user.is_authenticated %}
                     <ul>
@@ -88,8 +88,32 @@
                 <li class="night" onclick="switch_style('nighttime')">N</li>
             </ul>
             </div>
+                {% if request.user.is_authenticated and request.user.sleeperprofile.goodOrBad == None %}
+                    <div id="good-or-bad" class="content">
+                        <p>
+                        zScore knows when you are sleeping, we know when you're awake.  Tell us if you've been bad or good!
+                        <br/>
+                        <input id="good-button" type="submit" value="I've been good!"></input>
+                        <input id="bad-button" type="submit" value="I've been bad!"></input>
+                        <script type="text/javascript">
+                            function submitGoodOrBad(goodOrBad) {
+                                $.post("/goodorbad/", {'goodOrBad' : goodOrBad},
+                                        function () {
+                                        $("#good-or-bad").css("display","none");
+                                        $("#good-or-bad-thanks").css("display","");
+                                        });
+                            };
+                            $("#good-button").click(function () { submitGoodOrBad("good") });
+                            $("#bad-button").click(function () { submitGoodOrBad("bad") });
+                        </script>
+                    </div>
+                    <div id="good-or-bad-thanks" class="content" style="display: none;">
+                        Thanks!  Stay tuned for Santa zScore's report.
+                    </div>
+                {% endif %}
             {% endcache %}
         {% endblock %}
+
 
         <div class="content">
             {% block content %}{% endblock %}

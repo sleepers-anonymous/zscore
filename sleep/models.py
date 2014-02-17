@@ -365,6 +365,7 @@ class SleeperProfile(models.Model):
     #---------------------------User customification -------------------------
     useGravatar = models.BooleanField(default=True)
     moreMetrics = models.BooleanField(default=True)
+    isPro = models.BooleanField(default=False)
 
     #---------------------------Timezones------------------------------------
 
@@ -383,10 +384,15 @@ class SleeperProfile(models.Model):
     idealSleepTimeWeekend = models.TimeField(default = datetime.time(0))
     idealSleepTimeWeekday = models.TimeField(default = datetime.time(23))
 
+    #--------------------------Random stuff----------------------------------------
+
+    goodOrBad = models.NullBooleanField()
+
     def save(self, *args, **kwargs):
         cache.delete('bestByTime:')
         cache.delete('sorted_sleepers:')
         cache.delete('getPermissions:')
+        expireTemplateCache('header',self.user.username)
         super(SleeperProfile, self).save(*args,**kwargs)
 
     def activateEmail(self, sha):
@@ -414,7 +420,7 @@ class SleeperProfile(models.Model):
             self.user.save()
         text = "<html> Hi " + self.user.username + "! <br /><br />"
         text += "Click on the following link in order to activate your email! <br /><br />"
-        text += "<a href='http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.xvm.mit.edu/accounts/emailconfirm/" + sha +"</a></html>"
+        text += "<a href='http://zscore.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.mit.edu/accounts/emailconfirm/" + sha +"</a></html>"
         msg = EmailMultiAlternatives("zScore email activation", "", "zscore.noreply@gmail.com", [self.user.email])
         msg.attach_alternative(text, "text/html")
         msg.send()
@@ -687,7 +693,7 @@ class Sleeper(User):
             if includeMissing:
                 return byDays
             else:
-                return filter(None, byDays)
+                return filter(lambda x: x!=None, byDays)
 
     def sleepMatrix(self, res=1, start=datetime.date.min, end=datetime.date.max, packDates=False, includeMissing=False):
         if start==datetime.date.min and end==datetime.date.max:
@@ -790,7 +796,7 @@ class Sleeper(User):
             offset = 60*60.
             avgRecip = 1/(sum(map(lambda x: 1/(offset+x),sleep))/len(sleep))-offset
             d['avgRecip']=avgRecip
-            avgSqrt = (sum(map(lambda x: math.sqrt(x),sleep))/len(sleep))**2
+            avgSqrt = (sum(map(lambda x: math.sqrt(max(0,x)),sleep))/len(sleep))**2
             d['avgSqrt']=avgSqrt
             avgLog = math.exp(sum(map(lambda x: math.log(x+offset),sleep))/len(sleep))-offset
             d['avgLog']=avgLog

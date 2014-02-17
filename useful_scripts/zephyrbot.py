@@ -16,11 +16,13 @@ import django.contrib.auth.models
 from django.core.exceptions import ValidationError
 
 import sleep.models
+import sleep.utils
 
 def setup():
     zephyr.init()
     subs = zephyr.Subscriptions()
     subs.add(('message', '*', '%me%'))
+    subs.add(('zscore', '*', '*'))
 
 def fetch_user_from_zgram(zgram):
     if not zgram.auth:
@@ -47,34 +49,50 @@ def build_reply(zgram):
     return z
 
 def handle_zgram(zgram):
-    reply = build_reply(zgram)
-    try:
-        user = fetch_user_from_zgram(zgram)
-        if 'gnight' in zgram.message or 'goodnight' in zgram.message:
-            success = sleep.models.PartialSleep.create_new_for_user(user)
-            if success:
-                msg = 'Sleep well!'
+    if zgram.cls == 'zscore':
+        pass
+    else:
+        reply = build_reply(zgram)
+        try:
+            user = fetch_user_from_zgram(zgram)
+            if 'gnight' in zgram.message or 'goodnight' in zgram.message:
+                success = sleep.models.PartialSleep.create_new_for_user(user)
+                if success:
+                    msg = 'Sleep well!'
+                else:
+                    msg = "Hmm, I can't seem to record you as asleep."
+            elif 'awake' in zgram.message or "mornin'" in zgram.message:
+                try:
+                    s = sleep.models.PartialSleep.finish_for_user(user)
+                    tmpl = "Good morning!\nYou slept from %s to %s.\n(That's %s.)"
+                    msg = tmpl % (s.start_time, s.end_time, s.length())
+                except sleep.models.PartialSleep.DoesNotExist:
+                    msg = "Sorry, you don't seem to have been asleep."
+                except ValidationError as e:
+                    msg = e.messages[0]
+            elif 'help' in zgram.message:
+                msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning.\n\nFor stats, message me 'stats'"
+            elif 'meow' in zgram.message.lower():
+                msg = random.choice(['meow!', "purrrr", "*barks*"])
+            elif 'stats' in zgram.message:
+                try:
+                    sleeper = sleep.models.Sleeper.objects.get(pk = user.pk)
+                    usermetrics = sleeper.sleeperprofile.metrics.all()
+                    msglist = []
+                    if 'global' in zgram.message or 'all-time' in zgram.message:
+                        msglist.append("Your All-Time stats\n" + sleep.utils.zephyrDisplay(sleeper.movingStats(), usermetrics))
+                    if 'decaying' in zgram.message or (len(msglist)==0):
+                        msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(sleeper.decayStats(), usermetrics))
+                    msg = '\n\n'.join(msglist)
+                except all as e:
+                    print e
+                    msg = 'Something went wrong! Zephyr -c zscore for help!'
             else:
-                msg = "Hmm, I can't seem to record you as asleep."
-        elif 'awake' in zgram.message or "mornin'" in zgram.message:
-            try:
-                s = sleep.models.PartialSleep.finish_for_user(user)
-                tmpl = "Good morning!\nYou slept from %s to %s.\n(That's %s.)"
-                msg = tmpl % (s.start_time, s.end_time, s.length())
-            except sleep.models.PartialSleep.DoesNotExist:
-                msg = "Sorry, you don't seem to have been asleep."
-            except ValidationError as e:
-                msg = e.messages[0]
-        elif 'help' in zgram.message.lower():
-            msg = "Hi! Message me 'gnight' when you want to sleep\nand 'awake' when you wake up!"
-        elif 'meow' in zgram.message.lower():
-            msg = random.choice(['meow!', "purrrr", "*barks*"])
-        else:
-            msg = "I'm sorry -- I don't understand. Msg 'help' for a list of commands I respond to."
-    except LookupError as e:
-        msg = "I'm sorry -- I can't find an account for you: %s" % (e.message, )
-    reply.fields[1] = msg
-    reply.send()
+                msg = "I'm sorry -- I don't understand. Message me 'help' for more information."
+        except LookupError as e:
+            msg = "I'm sorry -- I can't find an account for you: %s" % (e.message, )
+        reply.fields[1] = msg
+        reply.send()
 
 def main():
     setup()
