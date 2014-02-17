@@ -11,14 +11,14 @@
 <h1> Leaderboard </h1>
 {% endif %}
 
-<p>{{number}} {% if group %}{{group.name}} members {% else %} zScore users {% endif %} have slept a total of {{total|printYDHM}}!</p>
+<p>{{number}} {% if group %}{{group.name}} members {% else %} zScore users {% endif %} ({{numLeaderboard}} on the leaderboard) have slept a total of {{total|printYDHM}}!</p>
 
 <table class="leaderboard">
     <tr>
         <th>Rank</th>
         <th colspan="2">Username</th>
-	{% for metric in metricsToDisplay %}
-	<th><a href="?sort={{metric}}">{{metric}}</a></th>
+	{% for metric in userMetrics %}
+	<th><a href="?sort={{metric}}">{{metric.withAbbrDesc|safe}}</a></th>
 	{% endfor %}
     </tr>
 
@@ -28,12 +28,8 @@
     <td> {{s.rank}} </td>
     <td> {% gravatar request.user s.user 20 1 %} </td>
     <td> {% displayUser s.user.displayName %} </td>
-    {% for metric in metricsToDisplay %}
-    {% if metric in metricsDisplayedAsTimes %}
-    <td> {{ s|getScore:metric|printHHMM }} </td>
-    {% elif metric in metricsToDisplay  %}
+    {% for metric in userMetrics %}
     <td> {{ s|getScore:metric }} </td>
-    {% endif %}
     {% endfor %}
   </tr>
   {% endfor %}
@@ -45,7 +41,7 @@
 
 <h3>Notes</h3>
 <p>
-The leaderboard shows users with at least 3 days of sleep, including at least one of the last 5 days. <i>It now ranks by exponentially-weighted decaying scores</i>, that is, today is weighted at 1, yesterday at some factor &lambda;, the day before that at &lambda;<sup>2</sup>, and so on.  Hidden users do not count towards rank.  The number of users at the top counts all users with at least 1 day of sleep.
+The leaderboard shows users with at least 3 days of sleep, including at least one of the last 5 days. <i>It now ranks by exponentially-weighted decaying scores</i>, that is, today is weighted at 1, yesterday at some factor &lambda;, the day before that at &lambda;<sup>2</sup>, and so on.  Hidden users do not count towards rank.  The number of users at the top counts all users with at least 1 day of sleep. You can select which metrics to display when you edit your profile settings.
 </p>
 <p>
 {% if group %}

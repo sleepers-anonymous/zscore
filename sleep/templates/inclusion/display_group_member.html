@@ -1,7 +1,7 @@
 {% load gravatar %}
 
 <tr id="display-group-member">
-    <td>{% gravatar request.user user 20 %}</td>
+    <td>{% gravatar you user 20 %}</td>
     <td><a href="/creep/{{user.username}}">{{user.username}}</a></td>
     {% if isMember %}
 				{% if canremove %}

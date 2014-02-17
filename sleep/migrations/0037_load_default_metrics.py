@@ -1,28 +1,22 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 import datetime
 from south.db import db
-from south.v2 import SchemaMigration
+from south.v2 import DataMigration
 from django.db import models
+from sleep.models import SleeperProfile
+from sleep.models import Metric
 
-
-class Migration(SchemaMigration):
+class Migration(DataMigration):
 
     def forwards(self, orm):
-        # Adding field 'Sleep.sleepcycles'
-        import datetime
-        db.add_column('sleep_sleep', 'sleepcycles',
-                      self.gf('django.db.models.fields.SmallIntegerField')(default=2),
-                      keep_default=False)
-        if not db.dry_run:
-            for sleep in orm.Sleep.objects.all():
-                seconds = (sleep.end_time - sleep.start_time).total_seconds()
-                sleep.sleepcyles = seconds//5400
-                sleep.save()
+        for s in SleeperProfile.objects.all():
+            for m in Metric.objects.filter(show_by_default=True):
+                s.metrics.add(m)
+
 
     def backwards(self, orm):
-        # Deleting field 'Sleep.sleepcycles'
-        db.delete_column('sleep_sleep', 'sleepcycles')
-
+        #not much to do
+        pass
 
     models = {
         'auth.group': {
@@ -75,6 +69,36 @@ class Migration(SchemaMigration):
             'requestee': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
             'requestor': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sleep.SleeperProfile']"})
         },
+        'sleep.groupinvite': {
+            'Meta': {'object_name': 'GroupInvite'},
+            'accepted': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sleep.SleeperGroup']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'sleep.grouprequest': {
+            'Meta': {'object_name': 'GroupRequest'},
+            'accepted': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sleep.SleeperGroup']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'sleep.membership': {
+            'Meta': {'object_name': 'Membership'},
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sleep.SleeperGroup']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'privacy': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
+            'role': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'sleep.metric': {
+            'Meta': {'ordering': "['-priority']", 'object_name': 'Metric'},
+            'display_style': ('django.db.models.fields.CharField', [], {'default': "'asHHMM'", 'max_length': '6'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '40'}),
+            'priority': ('django.db.models.fields.IntegerField', [], {'unique': 'True'}),
+            'show_by_default': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
+        },
         'sleep.partialsleep': {
             'Meta': {'object_name': 'PartialSleep'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -89,17 +113,33 @@ class Migration(SchemaMigration):
         },
         'sleep.sleep': {
             'Meta': {'object_name': 'Sleep'},
+            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'comments': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'date': ('django.db.models.fields.DateField', [], {}),
             'end_time': ('django.db.models.fields.DateTimeField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'quality': ('django.db.models.fields.SmallIntegerField', [], {'default': '4'}),
             'sleepcycles': ('django.db.models.fields.SmallIntegerField', [], {}),
             'start_time': ('django.db.models.fields.DateTimeField', [], {}),
             'timezone': ('django.db.models.fields.CharField', [], {'default': "'America/New_York'", 'max_length': '255'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
+        'sleep.sleepergroup': {
+            'Meta': {'object_name': 'SleeperGroup'},
+            'defunctMembers': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'defunct+'", 'blank': 'True', 'to': "orm['auth.User']"}),
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'members': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'sleepergroups'", 'blank': 'True', 'through': "orm['sleep.Membership']", 'to': "orm['auth.User']"}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            'privacy': ('django.db.models.fields.SmallIntegerField', [], {'default': '50'})
+        },
         'sleep.sleeperprofile': {
             'Meta': {'object_name': 'SleeperProfile'},
+            'autoAcceptGroups': ('django.db.models.fields.SmallIntegerField', [], {'default': '50'}),
+            'emailActivated': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'emailSHA1': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
+            'emailSHA1GenerationDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'emailTime': ('django.db.models.fields.TimeField', [], {'default': 'datetime.time(12, 0)'}),
             'emailreminders': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'follows': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'follows+'", 'blank': 'True', 'to': "orm['auth.User']"}),
             'friends': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'friends+'", 'blank': 'True', 'to': "orm['auth.User']"}),
@@ -109,9 +149,13 @@ class Migration(SchemaMigration):
             'idealSleepTimeWeekend': ('django.db.models.fields.TimeField', [], {'default': 'datetime.time(0, 0)'}),
             'idealWakeupWeekday': ('django.db.models.fields.TimeField', [], {'default': 'datetime.time(8, 0)'}),
             'idealWakeupWeekend': ('django.db.models.fields.TimeField', [], {'default': 'datetime.time(9, 0)'}),
+            'metrics': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['sleep.Metric']", 'symmetrical': 'False', 'blank': 'True'}),
+            'mobile': ('django.db.models.fields.SmallIntegerField', [], {'default': '1'}),
+            'moreMetrics': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'privacy': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
             'privacyFriends': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
             'privacyLoggedIn': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
+            'punchInDelay': ('django.db.models.fields.DecimalField', [], {'default': '15', 'max_digits': '4', 'decimal_places': '2'}),
             'requested': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'requests'", 'blank': 'True', 'through': "orm['sleep.FriendRequest']", 'to': "orm['auth.User']"}),
             'timezone': ('django.db.models.fields.CharField', [], {'default': "'America/New_York'", 'max_length': '255'}),
             'use12HourTime': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),

@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, render_to_response
 from django.core import serializers
 from django.db.models import Q
-from django.db import IntegrityError
 from django.core.exceptions import *
 from django.utils.timezone import now
 from django.core.cache import cache
@@ -204,7 +203,7 @@ def inviteMember(request):
         u=us[0]
         rs = GroupRequest.objects.filter(user = u, group = g, accepted=None)
         if rs.count() >= 1: #the user has made a request to join, accept them.
-            r[0].accept()
+            rs[0].accept()
         else:
             g.invite(u,request.user)
         return HttpResponse('')
@@ -286,7 +285,7 @@ def groupJoin(request):
 def processRequest(request):
     if 'id' in request.POST:
         rs = GroupRequest.objects.filter(id=request.POST["id"])
-        if rs.count() != 1: raise 404
+        if rs.count() != 1: raise Http404
         r = rs[0]
         m = Membership.objects.get(group=r.group, user=request.user)
         if m.role < m.ADMIN: raise PermissionDenied
@@ -312,6 +311,7 @@ def manageGroup(request,gid):
             'group':g,
             'isAdmin': (request.user.membership_set.get(group = g).role >= 50),
             }
+    m = request.user.membership_set.get(group = g)
     if request.method == 'POST' and "SleeperSearchForm" in request.POST:
         searchForm=SleeperSearchForm(request.POST)
         if searchForm.is_valid():
@@ -334,8 +334,15 @@ def manageGroup(request,gid):
             context['page'] = 2
     else:
         groupForm = GroupForm(instance=g)
+    if request.method == 'POST' and "MembershipForm" in request.POST:
+        membershipForm = MembershipForm(request.POST, instance=m)
+        if membershipForm.is_valid():
+            membershipForm.save()
+    else:
+        membershipForm = MembershipForm(instance=m)
     context['searchForm']=searchForm
     context['groupForm']=groupForm
+    context['membershipForm'] = membershipForm
     context['members']=g.members.all()
     if context['isAdmin']:
         context['requests'] = g.grouprequest_set.filter(accepted=None)
@@ -343,7 +350,11 @@ def manageGroup(request,gid):
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
 def leaderboard(request,group=None):
-    if 'sort' not in request.GET or request.GET['sort'] not in ['zScore','avg','stDev', 'consistent', 'consistent2']:
+    if request.user.is_authenticated():
+        userMetrics = request.user.sleeperprofile.metrics.all()
+    else:
+        userMetrics = Metric.objects.filter(show_by_default=True)
+    if 'sort' not in request.GET or request.GET['sort'] not in [m.name for m in userMetrics]:
         sortBy='zScore'
     else:
         sortBy=request.GET['sort']
@@ -360,6 +371,7 @@ def leaderboard(request,group=None):
         lbSize=nmembers if nmembers<4 else min(10,nmembers//2)
     ss = Sleeper.objects.sorted_sleepers(sortBy=sortBy,user=request.user,group=group)
     top = [ s for s in ss if s['rank']<=lbSize or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
+    numLeaderboard = len([s for s in ss if s['rank']!='n/a'])
     n = now()
     recentWinner = Sleeper.objects.bestByTime(start=n-datetime.timedelta(3),end=n,user=request.user,group=group)[0]
     if group:
@@ -367,17 +379,15 @@ def leaderboard(request,group=None):
     else:
         allUsers = Sleeper.objects.all()
     number = allUsers.filter(sleep__isnull=False).distinct().count()
-    metricsToDisplay = ['zScore','avg','stDev','consistent','consistent2']
-    metricsDisplayedAsTimes = ['zScore','zPScore','avg','avgSqrt','avgLog','avgRecip','stDev','posStDev','idealDev']
     context = {
             'group' : group,
             'top' : top,
             'recentWinner' : recentWinner,
             'total' : Sleep.objects.totalSleep(group=group),
             'number' : number,
+            'numLeaderboard' : numLeaderboard,
             'leaderboard_valid' : len(ss),
-            'metricsToDisplay' : metricsToDisplay,
-            'metricsDisplayedAsTimes' : metricsDisplayedAsTimes
+            'userMetrics' : userMetrics
             }
     return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
 
@@ -437,7 +447,7 @@ def creep(request,username=None):
             user=Sleeper.objects.get(username=username)
             p = user.sleeperprofile
             if p.user_id == request.user.id and "as" in request.GET:
-                priv = p.getPermissions(request.GET['as'])
+                priv = p.checkPermissions(request.GET['as'])
             else:
                 priv = p.getPermissions(request.user)
             if not(request.user.is_anonymous()) and request.user.pk == user.pk: context["isself"] =True
@@ -493,7 +503,7 @@ def exportSleeps(request):
 @login_required
 def friends(request):
     prof = request.user.sleeperprofile
-    friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username').select_related('sleeperprofile').prefetch_related('sleeperprofile__friends')
+    friendfollow = (prof.friends.all() | prof.follows.all()).distinct().order_by('username').select_related('sleeperprofile').prefetch_related('sleeperprofile__friends','sleeperprofile__follows')
     requests = request.user.requests.filter(friendrequest__accepted=None).order_by('user__username')
     if request.method == 'POST':
         form=SleeperSearchForm(request.POST)
@@ -630,36 +640,24 @@ def createSleep(request):
 
 @login_required
 def createPartialSleep(request):
-    prof = request.user.sleeperprofile
-    timezone = prof.timezone
-    start = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0) + prof.getPunchInDelay()
-    try:
-        p = PartialSleep(user = request.user, start_time = start,timezone = timezone)
-        p.save()
-        if "next" in request.GET: return HttpResponseRedirect(request.GET["next"])
-        return HttpResponseRedirect("/")
-    except IntegrityError:
-        return HttpResponseBadRequest('')
+    created = PartialSleep.create_new_for_user(request.user)
+    if created:
+        if "next" in request.GET:
+            return HttpResponseRedirect(request.GET["next"])
+        else:
+            return HttpResponseRedirect("/")
+    else:
+        return HttpResponseBadRequest("")
 
 @login_required
 def finishPartialSleep(request):
-    timezone = request.user.sleeperprofile.timezone
-    pytztimezone = pytz.timezone(timezone)
     try:
-        p = request.user.partialsleep
-        start = p.start_time.astimezone(pytztimezone)
-        end = now().astimezone(pytz.timezone(timezone)).replace(microsecond = 0)
-        date = end.date()
-        s = Sleep(user = request.user, start_time = start, end_time = end, date = date, timezone = timezone, comments = "")
-        try:
-            s.validate_unique()
-            s.save()
-            p.delete()
-            return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
-        except ValidationError:
-            return HttpResponseRedirect("/sleep/simple/?error=partial")
+        s = PartialSleep.finish_for_user(request.user)
+        return HttpResponseRedirect("/sleep/edit/" + str(s.pk) + "/?from=partial")
+    except ValidationError:
+        return HttpResponseRedirect("/sleep/simple/?error=partial")
     except PartialSleep.DoesNotExist:
-        return HttpResponseBadRequest('')
+        return HttpResponseBadRequest("")
 
 @login_required
 def deletePartialSleep(request):
@@ -708,3 +706,13 @@ def getSleepsJSON(request):
         sleep.end_time=sleep.end_time.astimezone(tz).replace(tzinfo=None)
     data = serializers.serialize('json', sleeps)
     return HttpResponse(data, mimetype='application/json')
+
+@login_required
+def goodOrBad(request):
+    p = request.user.sleeperprofile
+    if request.method=='POST' and 'goodOrBad' in request.POST and 'good' in request.POST['goodOrBad']:
+        p.goodOrBad = True
+    else:
+        p.goodOrBad = False
+    p.save()
+    return HttpResponse('')

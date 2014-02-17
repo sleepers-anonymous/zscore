@@ -15,6 +15,15 @@ def julian(date):
 
     return date.day + (153*m + 2)//5 +365*y +y//4 - y//100 + y//400 - 32045
 
+
+def zephyrDisplay(stats, usermetrics = None):
+    """Takes a table of stats and displays it in a zephyr-friendly pretty way."""
+    if usermetrics == None:
+        usermetrics = stats.keys()
+    else:
+        usermetrics = set([str(m) for m in usermetrics]).intersection(stats.keys())
+    return '\n'.join([(i + ": ").rjust(15) + str(stats[i]) for i in usermetrics])
+
 #------------------------------Regexes for mobile detection ------------------------------
 userAgentsTestMatch = r'^(?:%s)' % '|'.join((
         "w3c ", "acs-", "alav", "alca", "amoi", "audi",
@@ -47,6 +56,8 @@ httpAcceptRegex = re.compile("application/vnd\.wap\.xhtml\+xml", re.IGNORECASE)
 userAgentsTestMatchRegex = re.compile(userAgentsTestMatch, re.IGNORECASE)
 userAgentsTestSearchRegex = re.compile(userAgentsTestSearch, re.IGNORECASE)
 userAgentsExceptionSearchRegex = re.compile(userAgentsException, re.IGNORECASE)
+
+#--------------------------Still broken sunset/sunrise calculator-----------------------
 
 #def sunriseset(date, lat, lon):
 #    """Takes a Gregorian calendar date and calculates the sunrise and sunset times"""

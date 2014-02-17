@@ -4,90 +4,128 @@
 {% load gravatar %}
 {% load cache %}
 <html lang="en">
-  <head>
-    <title>{% block title %}zScore{% endblock %}</title>
-    {% block jquery %}
-    <script src="http://code.jquery.com/jquery-1.9.1.js" type="text/javascript"></script>
-    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
-    <script src="{% static 'jquery/jquery-ui-timepicker-addon.js' %}" type="text/javascript"></script>
-    <script src="{% static 'jquery/jquery.cookie.js' %}" type="text/javascript"></script>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" type="text/css"/>
-    <link rel="stylesheet" href="{% static 'jquery/jquery-ui-timepicker-addon.css' %}" type="text/css"/>
-    {% endblock %}
-    {% block chartjs %}
-    <script src="http://chartjs.org/docs/Chart.js" type="text/javascript"></script>
-    {% endblock %}
-    {% block momentjs %}
-    <script src="/static/moment.min.js" type="text/javascript"></script>
-    {% endblock %}
-    {% block scripts %}
-    <script src="/static/util.js" type="text/javascript"></script>
-    {% endblock %}
-    <!-- Day/Night switching -->
-    <script src="/static/daynight.js" type="text/javascript"></script>
-    <!-- End Day/Night switching -->
-    {% block stylesheets %}
-        <link href="/static/zscore.css" rel="stylesheet">
-    {% endblock %}
-    {% block meta %}
-    <meta name="robots" content="none,noarchive"> <!--Asks search engines not to index us. -->
-    <meta http-equiv="Content=Type" content="text/html; charset=UTF-8">
-    {% endblock %}
-  </head>
-  <body class="daytime" onload="set_style()">
-    <div class="global-wrapper">
-      {% block navbar %}
-      {% cache 86400 header request.user.username %}
-      <div class="navigation-bar">
-          <ul>
-              <li><a href="/"><b>zScore</b></a><sup>[alpha]</sup></li>
-              <li><a href="/mysleep/">my sleep</a>
-              {% if request.user.is_authenticated %}
-              <ul>
-                  <li><a href="/mygraphs/">my graphs</a></li>
-              </ul>
-              {% endif %}
-              </li>
-              <li><a href="/leaderboard/">leaderboard</a>
-              <ul>
-                  <li><a href="/graphs/">graphs</a></li>
-              </ul>
-              </li>
-              <li><a href="/creep/">creep</a></li>
-	          {% if request.user.is_staff %}
+    <head>
+        <title>{% block title %}zScore{% endblock %}</title>
+
+        {% block favicon %}
+            <link rel="SHORTCUT ICON" href="/static/favicon.ico">
+            <link rel="icon" href="/static/favicon.ico" type="image/ico">
+        {% endblock %}
+  
+        {% block jquery %}
+            <script src="//code.jquery.com/jquery-1.9.1.js" type="text/javascript"></script>
+            <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
+            <script src="{% static 'jquery/jquery-ui-timepicker-addon.js' %}" type="text/javascript"></script>
+            <script src="{% static 'jquery/jquery.cookie.js' %}" type="text/javascript"></script>
+            <link rel="stylesheet" href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" type="text/css"/>
+            <link rel="stylesheet" href="{% static 'jquery/jquery-ui-timepicker-addon.css' %}" type="text/css"/>
+        {% endblock %}
+
+        {% block chartjs %}
+            <script src="/static/Chart.js" type="text/javascript"></script>
+        {% endblock %}
+    
+        {% block momentjs %}
+            <script src="/static/moment.min.js" type="text/javascript"></script>
+        {% endblock %}
+    
+        {% block scripts %}
+            <script src="/static/util.js" type="text/javascript"></script>
+        {% endblock %}
+    
+        <!-- Day/Night switching -->
+        <script src="/static/daynight.js" type="text/javascript"></script>
+        <!-- End Day/Night switching -->
+    
+        {% block stylesheets %}
+            <link href="/static/zscore.css" rel="stylesheet">
+        {% endblock %}
+    
+        {% block meta %}
+            <meta name="robots" content="none,noarchive"> <!--Asks search engines not to index us. -->
+            <meta http-equiv="Content=Type" content="text/html; charset=UTF-8">
+        {% endblock %}
+    </head>
+
+    <body class="daytime" onload="set_style()">
+        <div class="global-wrapper">
+
+        {% block navbar %}
+            {% cache 86400 header request.user.username %}
+            <div class="navigation-bar">
+            <ul>
+                <li><a href="/"><b>zScore</b></a><sup>[{% if request.user.sleeperprofile.isPro %}<i><b>pro</b></i>{% elif request.user.is_superuser %}<i>dev</i>{% else %}alpha{% endif %}]</sup></li>
+                <li><a href="/mysleep/">my sleep</a>
+                    {% if request.user.is_authenticated %}
+                    <ul>
+                        <li><a href="/mygraphs/">my graphs</a></li>
+                    </ul>
+                    {% endif %}
+                </li>
+                <li><a href="/leaderboard/">leaderboard</a>
+                    <ul>
+                        <li><a href="/graphs/">graphs</a></li>
+                    </ul>
+                </li>
+                <li><a href="/creep/">creep</a></li>
+	            {% if request.user.is_staff %}
                 <li><a href="/admin/">admin</a></li>
-	          {% endif %}
-              <li><a href="/faq/">FAQ</a></li>
-	          {% if request.user.is_authenticated %}
-              <li><a href="/creep/{{request.user.username}}">logged in as {{request.user.username}}</a>
-                <ul>
-                <li><a href="/editprofile/">edit profile</a></li>
-                <li><a href="/friends/">friends{% displayFriendRequests request.user %}</a></li>
-                <li><a href="/groups/">groups{% displayInvites request.user %}</a></li>
-                <li><a href="/accounts/logout">log out</a></li>
-                </ul>
-              </li>
-	          {% else %}
+	            {% endif %}
+                <li><a href="/faq/">FAQ</a></li>
+	            {% if request.user.is_authenticated %}
+                <li><a href="/creep/{{request.user.username}}">logged in as {{request.user.username}}</a>
+                    <ul>
+                        <li><a href="/editprofile/">edit profile</a></li>
+                        <li><a href="/friends/">friends{% displayFriendRequests request.user %}</a></li>
+                        <li><a href="/groups/">groups{% displayInvites request.user %}</a></li>
+                        <li><a href="/accounts/logout">log out</a></li>
+                    </ul>
+                </li>
+	            {% else %}
                 <li><a href="/accounts/login">log in</a> <a href="/accounts/create">register</a></li>
                 {% endif %}
                 <li class="day" onclick="switch_style('daytime')">D</li>
                 <li class="night" onclick="switch_style('nighttime')">N</li>
-          </ul>
-      </div>
-      {% endcache %}
-      {% endblock %}
-      <div class="content">
-          {% block content %}{% endblock %}
-      </div>
-      
-      {% block footer %}
-      {% cache 864000 footer %}
-      <div class="footer">
-          <p>&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;</p>
-      </div>
-      {% endcache %}
-      {% endblock %}
-  </div>
+            </ul>
+            </div>
+                {% if request.user.is_authenticated and request.user.sleeperprofile.goodOrBad == None %}
+                    <div id="good-or-bad" class="content">
+                        <p>
+                        zScore knows when you are sleeping, we know when you're awake.  Tell us if you've been bad or good!
+                        <br/>
+                        <input id="good-button" type="submit" value="I've been good!"></input>
+                        <input id="bad-button" type="submit" value="I've been bad!"></input>
+                        <script type="text/javascript">
+                            function submitGoodOrBad(goodOrBad) {
+                                $.post("/goodorbad/", {'goodOrBad' : goodOrBad},
+                                        function () {
+                                        $("#good-or-bad").css("display","none");
+                                        $("#good-or-bad-thanks").css("display","");
+                                        });
+                            };
+                            $("#good-button").click(function () { submitGoodOrBad("good") });
+                            $("#bad-button").click(function () { submitGoodOrBad("bad") });
+                        </script>
+                    </div>
+                    <div id="good-or-bad-thanks" class="content" style="display: none;">
+                        Thanks!  Stay tuned for Santa zScore's report.
+                    </div>
+                {% endif %}
+            {% endcache %}
+        {% endblock %}
 
-  </body>
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+
+        {% block footer %}
+            {% cache 864000 footer %}
+            <div class="footer">
+                <p>&bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:zscore-devs@mit.edu">Contact Us</a> &bull; <a href="http://goo.gl/l2Dkb">Feedback</a> &bull;</p>
+            </div>
+            {% endcache %}
+        {% endblock %}
+        </div>
+    </body>
 </html>

@@ -136,6 +136,7 @@ INSTALLED_APPS = (
     'sleep',
     'south',
     'cache',
+    'sheeple',
 )
 
 CACHES = {

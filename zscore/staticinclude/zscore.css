@@ -108,17 +108,28 @@ body.daytime div.navigation-bar> ul> li > a:visited {
 		text-decoration:none;
 }
 
-body.daytime div.navigation-bar> ul> li > a:hover, a:active {
+body.daytime div.navigation-bar> ul> li > a:hover {
 		color: white;
 		background: black;
 		padding: 10px 0px;
 }
+`body.daytime div.navigation-bar> ul> li > a:active {
+		color: white;
+		background: black;
+		padding: 10px 0px;
+}
+
 body.nighttime div.navigation-bar> ul> li > a:link, a:visited {
 		color: white;
 		text-decoration:none;
 }
 
-body.nighttime div.navigation-bar> ul> li > a:hover, a:active {
+body.nighttime div.navigation-bar> ul> li > a:hover {
+		color: white;
+		background: black;
+		padding: 10px 0px;
+}
+body.nighttime div.navigation-bar> ul> li > a:active {
 		color: white;
 		background: black;
 		padding: 10px 0px;
@@ -242,19 +253,23 @@ div.global-wrapper{
 body.daytime div.content a.hidden:link,a.hidden:visited {
 		text-decoration:none;
 		color:black;
+		background:none;
 }
 
 body.daytime div.content a.hidden:hover, a.hidden:active{
 		text-decoration:none;
 		color: #08083C;
+		background:none;
 }
 
 body.daytime div.content a:link,a:visited {
 		color: #08083C;
+		background:none;
 }
 
 body.daytime div.footer a:link, a:visited {
 		color: #08083c;
+		background:none;
 }
 
 body.nighttime a.hidden {
@@ -283,6 +298,8 @@ body.daytime div.content input:not([type=submit]):not([type=file]){
 		color: black;
 		border: 1px solid black;
 		padding: 4px;
+		font-family:serif;
+		font-size:1em;
 }
 
 body.daytime div.content select{
@@ -290,12 +307,16 @@ body.daytime div.content select{
 		color: black;
 		border: 1px solid black;
 		padding:4px;
+		font-family:serif;
+		font-size:1em;
 }
 
 body.daytime div.content textarea{
 		background: white;
 		color: black;
 		border: 1px solid black;
+		font-family:serif;
+		font-size:1em;
 }
 
 body.nighttime div.content input:not([type=submit]):not([type=file]) {
@@ -303,6 +324,8 @@ body.nighttime div.content input:not([type=submit]):not([type=file]) {
 		color: white;
 		border: 1px solid white;
 		padding: 4px;
+		font-family:serif;
+		font-size:1em;
 }
 
 body.nighttime div.content select {
@@ -310,12 +333,16 @@ body.nighttime div.content select {
 		color: white;
 		border: 1px solid white;
 		padding: 4px;
+		font-family:serif;
+		font-size:1em;
 }
 
 body.nighttime div.content textarea {
 		background: black;
 		color: white;
 		border: 1px solid white;
+		font-family:serif;
+		font-size:1em;
 }
 
 div.global-wrapper {
@@ -461,4 +488,24 @@ body.nighttime a.sleep-delete-button:hover {
 
 body.daytime a.sleep-delete-button:hover {
 		color:red;
+}
+
+label {
+		font-family:serif;
+		font-size:1em;
+}
+
+p {
+		font-family: serif;
+		font-size:1em;
+}
+
+a {
+		font-family: serif;
+		font-size:1em;
+}
+
+input, select,  textarea,  button {
+		font-family: serif;
+		font-size:1em;
 }

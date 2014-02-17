@@ -4,27 +4,6 @@
 {% load tz %}
 {% load sleep_tags %}
 {% load datetime_utils %}
-<script type="text/javascript">
-function deleteSleep(id) {
-  $.post("/sleep/delete/", {
-    "id": id
-  }, function() {
-    // Reload the page to show the updated list
-    // TODO: If we AJAX-ify things, this should become
-    // just a javascript update
-    location.reload();
-  });
-};
-
-function deleteAllnighter(id) {
-		$.post("/sleep/delete/allnighter/", {
-						"id":id
-		}, function() {
-		location.reload();
-		});
-};
-</script>
-
 <div class="sleep-list">
 		<h3>My Sleeps ({{numsleeps}} on {{numdates}} days)</h3>
 		<p><a href="/sleep/export/">Export sleeps</a></p>

@@ -4,11 +4,11 @@
 {% load staticfiles %}
 
 {% block stylesheets %}
-{{ block.super }}
 <link rel="stylesheet" type="text/css" href="{% static 'sleep/mysleep.css' %}" />
 {% sleepListView 'css' %}
 {% sleepEntryView 'css' %}
 {% sleepStatsView 'css' %}
+{{ block.super }}
 {% endblock %}
 
 

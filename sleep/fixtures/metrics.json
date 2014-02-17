@@ -1,0 +1,70 @@
+[
+    {"pk": 1, "model": "sleep.metric", "fields":
+        {"priority": 1000,
+         "display_style": "asHHMM",
+         "show_by_default": true,
+         "name": "zScore",
+         "short_description": "average minus standard deviation"}},
+    {"pk": 2, "model": "sleep.metric", "fields":
+        {"priority": 900,
+         "display_style": "asHHMM",
+         "show_by_default": true,
+         "name": "avg",
+         "short_description": "average"}},
+    {"pk": 3, "model": "sleep.metric", "fields":
+        {"priority": 800,
+         "display_style": "asHHMM",
+         "show_by_default": true,
+         "name": "stDev",
+         "short_description": "standard deviation"}},
+    {"pk": 4, "model": "sleep.metric", "fields":
+        {"priority": 700,
+         "display_style": "asInt",
+         "show_by_default": true,
+         "name": "consistent"}},
+    {"pk": 5, "model": "sleep.metric", "fields":
+        {"priority": 600,
+         "display_style": "asInt",
+         "show_by_default": true,
+         "name": "consistent2"}},
+    {"pk": 6, "model": "sleep.metric", "fields":
+        {"priority": 550,
+         "display_style": "asHHMM",
+         "show_by_default": false,
+         "name": "avgSqrt"}},
+    {"pk": 7, "model": "sleep.metric", "fields":
+        {"priority": 540,
+         "display_style": "asHHMM",
+         "show_by_default": false,
+         "name": "avgLog"}},
+    {"pk": 8, "model": "sleep.metric", "fields":
+        {"priority": 530,
+         "display_style": "asHHMM",
+         "show_by_default": false,
+         "name": "avgRecip"}},
+    {"pk": 9, "model": "sleep.metric", "fields":
+        {"priority": 510,
+         "display_style": "asHHMM",
+         "show_by_default": false,
+         "name": "idealDev"}},
+    {"pk": 10, "model": "sleep.metric", "fields":
+        {"priority": 500,
+         "display_style": "asHHMM",
+         "show_by_default": false,
+         "name": "zPScore"}},
+    {"pk": 11, "model": "sleep.metric", "fields":
+        {"priority": 480,
+         "display_style": "asHHMM",
+         "show_by_default": false,
+         "name": "posStDev"}},
+    {"pk": 12, "model": "sleep.metric", "fields":
+        {"priority": 400,
+         "display_style": "asHHMM",
+         "show_by_default": true,
+         "name": "cScore"}},
+    {"pk": 13, "model": "sleep.metric", "fields":
+        {"priority": 380,
+         "display_style": "asHHMM",
+         "show_by_default": true,
+         "name": "cScore1"}}
+]

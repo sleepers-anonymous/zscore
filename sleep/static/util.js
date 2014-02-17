@@ -168,3 +168,21 @@ function rejectRequest(id,link) {
     link.innerHTML="rejected";
   });
 };
+function deleteSleep(id) {
+  $.post("/sleep/delete/", {
+    "id": id
+  }, function() {
+    // Reload the page to show the updated list
+    // TODO: If we AJAX-ify things, this should become
+    // just a javascript update
+    location.reload();
+  });
+};
+
+function deleteAllnighter(id) {
+		$.post("/sleep/delete/allnighter/", {
+						"id":id
+		}, function() {
+		location.reload();
+		});
+};
