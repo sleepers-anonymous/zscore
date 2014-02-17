@@ -76,11 +76,12 @@ def handle_zgram(zgram):
                 msg = random.choice(['meow!', "purrrr", "*barks*"])
             elif 'stats' in zgram.message:
                 try:
+                    sleeper = sleep.models.Sleeper.objects.get(pk = user.pk)
                     msglist = []
                     if 'global' in zgram.message or 'all-time' in zgram.message:
-                        msglist.append("Your All-Time stats\n" + sleep.utils.zephyrDisplay(user.movingStats()))
+                        msglist.append("Your All-Time stats\n" + sleep.utils.zephyrDisplay(sleeper.movingStats()))
                     if 'decaying' in zgram.message or (len(msglist)==0):
-                        msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(user.decayStats()))
+                        msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(sleeper.decayStats()))
                     msg = '\n\n'.join(msglist)
                 except:
                     msg = 'Something went wrong! Zephyr -c zscore for help!'
