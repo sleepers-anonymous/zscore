@@ -71,17 +71,18 @@ def handle_zgram(zgram):
                 except ValidationError as e:
                     msg = e.messages[0]
             elif 'help' in zgram.message:
-                msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning"
+                msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning.\n\nFor stats, message me 'stats'"
             elif 'meow' in zgram.message.lower():
                 msg = random.choice(['meow!', "purrrr", "*barks*"])
             elif 'stats' in zgram.message:
                 try:
                     sleeper = sleep.models.Sleeper.objects.get(pk = user.pk)
+                    usermetrics = sleeper.sleeperprofile.metrics.all()
                     msglist = []
                     if 'global' in zgram.message or 'all-time' in zgram.message:
-                        msglist.append("Your All-Time stats\n" + sleep.utils.zephyrDisplay(sleeper.movingStats()))
+                        msglist.append("Your All-Time stats\n" + sleep.utils.zephyrDisplay(sleeper.movingStats()), usermetrics)
                     if 'decaying' in zgram.message or (len(msglist)==0):
-                        msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(sleeper.decayStats()))
+                        msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(sleeper.decayStats()), usermetrics)
                     msg = '\n\n'.join(msglist)
                 except:
                     msg = 'Something went wrong! Zephyr -c zscore for help!'
