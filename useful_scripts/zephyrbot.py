@@ -88,10 +88,7 @@ def handle_zgram(zgram):
                     print e
                     msg = 'Something went wrong! Zephyr -c zscore for help!'
             elif 'bug' in zgram.message or 'bug' in zgram.instance:
-                msg = """Sorry! daemon/zscore does not accept bug requests
-                or feature reports! Feel free to message us on -c zscore,
-                email us at zscore@mit.edu, or create a new issue at
-                https://github.com/sleepers-anonymous/zscore/issues/new"""
+                msg = """Sorry! daemon/zscore does not accept bug requests\nor feature reports! Feel free to message us on -c zscore,\nemail us at zscore@mit.edu, or create a new issue at\nhttps://github.com/sleepers-anonymous/zscore/issues/new"""
             else:
                 msg = "I'm sorry -- I don't understand. Message me 'help' for more information."
         except LookupError as e:
