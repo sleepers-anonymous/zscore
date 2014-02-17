@@ -80,9 +80,9 @@ def handle_zgram(zgram):
                     usermetrics = sleeper.sleeperprofile.metrics.all()
                     msglist = []
                     if 'global' in zgram.message or 'all-time' in zgram.message:
-                        msglist.append("Your All-Time stats\n" + sleep.utils.zephyrDisplay(sleeper.movingStats()), usermetrics)
+                        msglist.append("Your All-Time stats\n" + sleep.utils.zephyrDisplay(sleeper.movingStats(), usermetrics))
                     if 'decaying' in zgram.message or (len(msglist)==0):
-                        msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(sleeper.decayStats()), usermetrics)
+                        msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(sleeper.decayStats(), usermetrics))
                     msg = '\n\n'.join(msglist)
                 except all as e:
                     print e
