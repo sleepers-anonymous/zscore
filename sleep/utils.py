@@ -21,8 +21,8 @@ def zephyrDisplay(stats, usermetrics = None):
     if usermetrics == None:
         usermetrics = stats.keys()
     else:
-        usermetrics = set([str(m) for m in usermetrics]).intersection(stats.keys())
-    return '\n'.join([(i + ": ").rjust(15) + str(stats[i]) for i in usermetrics])
+        usermetrics = set([str(m) for m in usermetrics]) & stats.viewkeys()
+    return '\n'.join((i + ": ").rjust(15) + str(stats[i]) for i in usermetrics)
 
 #------------------------------Regexes for mobile detection ------------------------------
 userAgentsTestMatch = r'^(?:%s)' % '|'.join((
