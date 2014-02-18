@@ -18,7 +18,7 @@ def julian(date):
 
 def zephyrDisplay(stats, um = None):
     """Takes a table of stats and displays it in a zephyr-friendly pretty way."""
-    usermetrics = stats.keys() if um == None else set(str(m) for m in usermetrics) & stats.viewkeys()
+    usermetrics = stats.keys() if um == None else set(str(m) for m in um) & stats.viewkeys()
     return '\n'.join((i + ": ").rjust(15) + str(stats[i]) for i in usermetrics)
 
 #------------------------------Regexes for mobile detection ------------------------------
