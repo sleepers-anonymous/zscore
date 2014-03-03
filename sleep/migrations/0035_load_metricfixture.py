@@ -7,8 +7,10 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        from django.core.management import call_command
-        call_command('loaddata', 'metrics.json')
+        #deprecated, so don't run anything.
+        pass
+#        from django.core.management import call_command
+#        call_command('loaddata', 'metrics.json')
 
 
     def backwards(self, orm):
