@@ -9,8 +9,8 @@ from sleep.models import Metric
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        for s in SleeperProfile.objects.all():
-            for m in Metric.objects.filter(show_by_default=True):
+        for s in orm.SleeperProfile.objects.all():
+            for m in orm.Metric.objects.filter(show_by_default=True):
                 s.metrics.add(m)
 
 

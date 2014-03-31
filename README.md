@@ -12,15 +12,14 @@ First, install the dependencies:
 - numpy
 - matplotlib
 - django
-- django-south
+- south
 - django-extensions
 - pylibmc
 
 Next, follow the usual steps to installing a Django app:
 
 1. Configure `zscore/local_settings.py`. The easiest way is to just copy over `zscore/local_settings.py.dev`.
-2. Run `./manage.py syncdb`
-3. Run `./manage.py migrate`
+2. Run `./manage.py syncdb --migrate`
 
 If you created an admin account in step 2 above, you'll need to create a `SleeperProfile` for it if you want to log in. Run `./manage.py shell`, and then run:
 
