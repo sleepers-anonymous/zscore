@@ -37,14 +37,14 @@
         <script src="/static/daynight.js" type="text/javascript"></script>
         <!-- End Day/Night switching -->
 
-        {% if request.user.sleeperprofile.partyMode %}
+        {% if not request.user.is_authenticated or request.user.sleeperprofile.partyMode %}
             <!-- PARTY MODE -->
             <script src="/static/party-mode/party-mode.js" type="text/javascript"></script>
         {% endif %}
     
         {% block stylesheets %}
             <link href="/static/zscore.css" rel="stylesheet">
-            {% if request.user.sleeperprofile.partyMode %}
+            {% if not request.user.is_authenticated or request.user.sleeperprofile.partyMode %}
                 <!-- PARTY MODE -->
                 <link href="/static/party-mode/party-mode.css" rel="stylesheet">
             {% endif %}
