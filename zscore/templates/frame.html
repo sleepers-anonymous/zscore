@@ -59,7 +59,9 @@
             {% cache 86400 header request.user.username %}
             <div class="navigation-bar">
             <ul>
-                <li><a href="/"><b>zScore</b></a><sup>[{% if request.user.sleeperprofile.isPro %}<i><b>pro</b></i>{% elif request.user.is_superuser %}<i>dev</i>{% else %}alpha{% endif %}]</sup></li>
+                <li><a href="/"><b>zScore</b></a><sup>[PARTY MODE!&trade;
+                    {% comment %}{% if request.user.sleeperprofile.isPro %}<i><b>pro</b></i>{% elif request.user.is_superuser %}<i>dev</i>{% else %}alpha{% endif %}{% endcomment %}
+                    ]</sup></li>
                 <li><a href="/mysleep/">my sleep</a>
                     {% if request.user.is_authenticated %}
                     <ul>
