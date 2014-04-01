@@ -1,0 +1,25 @@
+{% extends "frame.html" %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+  #party-mode-intro {
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div id="party-mode-intro">
+    <h1> Introducing: PARTY MODE!&trade; </h1>
+    <center><p> Some people complained about having only two boring modes of the website: day and night. We responded by adding PARTY MODE!&trade; PARTY MODE!&trade; gives you the punch of a great party all day, every day. Who needs sleep when you can party, right? </p></center>
+    <center><img src="/static/party-mode/such_party_mode.jpg" /></center>
+    <center><p> <a href="{{ target }}">Continue</a> </p></center>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}
