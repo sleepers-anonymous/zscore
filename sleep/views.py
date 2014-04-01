@@ -326,7 +326,6 @@ def processRequest(request):
     else:
         return HttpResponseBadRequest('')
 
-@partymode
 @login_required
 def manageGroup(request,gid):
     gs=SleeperGroup.objects.filter(id=gid)
@@ -377,7 +376,6 @@ def manageGroup(request,gid):
         if 'page' not in context and context['requests'].count() > 0: context['page'] = 3
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
-@partymode
 def leaderboard(request,group=None):
     if request.user.is_authenticated():
         userMetrics = request.user.sleeperprofile.metrics.all()
@@ -430,7 +428,6 @@ def graphs(request,group=None):
             raise PermissionDenied
     return render_to_response('graphs.html',{'group': group},context_instance=RequestContext(request))
 
-@partymode
 def creep(request,username=None):
     if not username:
         if request.user.is_anonymous():
