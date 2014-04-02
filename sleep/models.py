@@ -387,7 +387,7 @@ class SleeperProfile(models.Model):
     #--------------------------Random stuff----------------------------------------
 
     goodOrBad = models.NullBooleanField()
-    partyMode = models.BooleanField(default = True)
+    partyMode = models.BooleanField(default = False)
 
     def save(self, *args, **kwargs):
         cache.delete('bestByTime:')

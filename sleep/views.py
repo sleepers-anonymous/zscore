@@ -17,31 +17,15 @@ import datetime
 import pytz
 import csv
 
-def partymode(func):
-    def view(request):
-        if request.session.get('visited', False):
-            return func(request)
-        else:
-            request.session['visited'] = True
-            try:
-                return render(request, 'party.html', {'target': reverse(func)})
-            except NoReverseMatch:
-                return render(request, 'party.html', {'target': '/'})
-    return view
-
-@partymode
 def home(request):
     return render(request, 'index.html')
 
-@partymode
 def faq(request):
     return render(request, 'faq.html')
 
-@partymode
 def privacy(request):
     return render(request, 'privacy.html')
 
-@partymode
 @login_required
 def mysleep(request):
     return render_to_response('sleep/mysleep.html',{},context_instance=RequestContext(request))
@@ -155,12 +139,10 @@ def editOrCreateSleep(request,sleep = None,success=False):
     context['form']=form
     return render_to_response('editsleep.html', context, context_instance=RequestContext(request))
 
-@partymode
 @login_required
 def graph(request):
     return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
 
-@partymode
 @login_required
 def groups(request):
     context = {
@@ -178,7 +160,6 @@ def groups(request):
     context["form"] = form
     return render_to_response('groups.html', context, context_instance=RequestContext(request))
 
-@partymode
 @login_required
 def createGroup(request):
     if request.method == 'POST':
@@ -192,7 +173,6 @@ def createGroup(request):
         form=GroupForm()
     return render_to_response('create_group.html', {'form': form}, context_instance=RequestContext(request))
 
-@partymode
 @login_required
 def acceptInvite(request):
     if 'id' in request.POST and 'accepted' in request.POST:
@@ -210,7 +190,6 @@ def acceptInvite(request):
     else:
         return HttpResponseBadRequest('')
 
-@partymode
 @login_required
 def inviteMember(request):
     if 'group' in request.POST and 'user' in request.POST:
@@ -233,7 +212,6 @@ def inviteMember(request):
     else:
         return HttpResponseBadRequest('')
 
-@partymode
 @login_required
 def manageMember(request):
     if 'group' in request.POST and 'user' in request.POST:
@@ -271,7 +249,6 @@ def manageMember(request):
     else:
         return HttpResponseBadRequest('')
 
-@partymode
 @login_required
 def groupRequest(request):
     if 'group' in request.POST:
@@ -292,7 +269,6 @@ def groupRequest(request):
     else:
         return HttpResponseBadRequest('')
 
-@partymode
 @login_required
 def groupJoin(request):
     if 'group' in request.POST:
@@ -307,7 +283,6 @@ def groupJoin(request):
     else:
         return HttpResponseBadRequest('')
 
-@partymode
 @login_required
 def processRequest(request):
     if 'id' in request.POST:
@@ -488,7 +463,6 @@ def creep(request,username=None):
             context["graphs"] = True
         return render_to_response('creep.html',context,context_instance=RequestContext(request))
 
-@partymode
 @login_required
 def editProfile(request):
     p = request.user.sleeperprofile
@@ -528,7 +502,6 @@ def exportSleeps(request):
 
     return response
 
-@partymode
 @login_required
 def friends(request):
     prof = request.user.sleeperprofile
