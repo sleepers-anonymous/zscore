@@ -529,7 +529,7 @@ def friends(request):
             'requests' : requests,
             }
     return render_to_response('friends.html',context,context_instance=RequestContext(request))
-            
+          
 @login_required
 def requestFriend(request):
     if 'id' in request.POST:

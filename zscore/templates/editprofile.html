@@ -33,6 +33,8 @@ $(function() {
             {% if success %}<p>Form successfully saved!</p>{% endif %}
 
             <table>
+                <!-- PARTY MODE! -->
+                <tr><td><label for="id_partyMode">Party mode enabled:</label></td> <td>{{form.partyMode}}</td><td> {{form.partyMode.errors}} </td></tr>
                 <tr><td><label for="id_use12HourTime">Use 12 hour time:</label></td> <td>{{form.use12HourTime}} </td><td> {{form.user12HourTime.errors}}</td></tr>
                 <tr><td><label for="id_timezone">Timezone</label></td><td>{{form.timezone}}</td><td>{{form.timezone.errors}}</td></tr>
 		<tr><td><label for="id_metrics">Metrics to Display</label></td><td>{{form.metrics}}</td><td>{{form.metrics.errors}}</td></tr>

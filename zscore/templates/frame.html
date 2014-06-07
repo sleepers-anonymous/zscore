@@ -36,9 +36,18 @@
         <!-- Day/Night switching -->
         <script src="/static/daynight.js" type="text/javascript"></script>
         <!-- End Day/Night switching -->
+
+        {% if request.user.sleeperprofile.partyMode %}
+            <!-- PARTY MODE -->
+            <script src="/static/party-mode/party-mode.js" type="text/javascript"></script>
+        {% endif %}
     
         {% block stylesheets %}
             <link href="/static/zscore.css" rel="stylesheet">
+            {% if request.user.sleeperprofile.partyMode %}
+                <!-- PARTY MODE -->
+                <link href="/static/party-mode/party-mode.css" rel="stylesheet">
+            {% endif %}
         {% endblock %}
     
         {% block meta %}
@@ -54,7 +63,7 @@
             {% cache 86400 header request.user.username %}
             <div class="navigation-bar">
             <ul>
-                <li><a href="/"><b>zScore</b></a><sup>[{% if request.user.sleeperprofile.isPro %}<i><b>pro</b></i>{% elif request.user.is_superuser %}<i>dev</i>{% else %}alpha{% endif %}]</sup></li>
+                <li><a href="/"><b>zScore</b></a><sup>[{% if request.user.sleeperprofile.isPro %}<i><b>pro</b></i>{% elif request.user.is_superuser %}<i>dev</i>{% elif request.user.sleeperprofile.partyMode %}PARTY MODE!&trade;{% else %}alpha{% endif %}]</sup></li>
                 <li><a href="/mysleep/">my sleep</a>
                     {% if request.user.is_authenticated %}
                     <ul>
@@ -111,6 +120,10 @@
                         Thanks!  Stay tuned for Santa zScore's report.
                     </div>
                 {% endif %}
+            <p
+            style="padding:50px;padding-bottom:0px;padding-top:0px;text-align:center;"><strong>zScore will be
+                down for a day or two this weekend while the server is moved.
+                We apologize for the inconvenience.</strong></p>
             {% endcache %}
         {% endblock %}
 
