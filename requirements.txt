@@ -3,3 +3,4 @@ pylibmc
 django-extensions
 south
 psycopg2
+pytz
