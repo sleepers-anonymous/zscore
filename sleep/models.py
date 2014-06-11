@@ -5,6 +5,7 @@ from django.core.exceptions import *
 from django.utils.timezone import now
 from django.core.mail import EmailMultiAlternatives
 from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
@@ -33,6 +34,10 @@ class Announcement(models.Model):
     def __unicode__(self):
         isActive = ' (Active)' if self.active else ''
         return self.name + ': ' + self.description + isActive
+
+    def save(self, *args, **kwargs):
+        cache.delete_many([make_template_fragment_key('header', (user.username,)) for user in Sleeper.objects.all()])
+        super(Announcement, self).save(*args, **kwargs)
 
 class Metric(models.Model):
     name = models.CharField(max_length=40, unique=True)
@@ -363,7 +368,17 @@ class SleeperProfile(models.Model):
             )
 
     mobile = models.SmallIntegerField(choices=MOBILE_CHOICES, default=DETECT_MOBILE, verbose_name="Use mobile interface?")
-    
+
+    #---------------------------------------Night or Day?----------------------------
+    ALWAYS_DAY = 0
+    AUTODAY_NIGHT = 1
+    ALWAYS_NIGHT = 2
+    DAY_NIGHT_CHOICES = (
+            (ALWAYS_DAY, "Always Day"),
+            (AUTODAY_NIGHT, "Auto"),
+            (ALWAYS_NIGHT, "Always Night"),
+            )
+
     #---------------------------Related to emails ---------------------------
     emailreminders = models.BooleanField(default=False)
     emailSHA1 =  models.CharField(max_length=50, blank=True)
