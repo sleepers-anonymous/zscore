@@ -25,6 +25,15 @@ from cache.utils import authStatus, expireTemplateCache
 
 TIMEZONES = zip(pytz.common_timezones, pytz.common_timezones)
 
+class Announcement(models.Model):
+    name = models.CharField(max_length=40)
+    description = models.TextField(blank=True)
+    active = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        isActive = ' (Active)' if self.active else ''
+        return self.name + ': ' + self.description + isActive
+
 class Metric(models.Model):
     name = models.CharField(max_length=40, unique=True)
     asHHMM, asInt = 'asHHMM', 'asInt'

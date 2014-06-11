@@ -9,6 +9,10 @@ import cmath
 register = template.Library()
 
 # Inclusion tags
+@register.inclusion_tag('inclusion/announcement.html')
+def displayAnnouncements():
+    return {'announcements': Announcement.objects.filter(active=True)}
+
 @register.inclusion_tag('inclusion/partial_sleep.html', takes_context=True)
 def displayPartialButton(context, user, path = "/", size = 1):
     if user.is_authenticated():

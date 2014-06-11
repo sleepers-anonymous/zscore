@@ -1,6 +1,9 @@
 from django.contrib import admin
 from sleep.models import *
 
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'active')
+
 class AllnighterAdmin(admin.ModelAdmin):
     list_display = ('user', 'date', 'comments')
     list_filter = ('user', 'date')
@@ -73,6 +76,7 @@ class MetricAdmin(admin.ModelAdmin):
     ordering = ('-priority',)
     search_fields = ('name',)
 
+admin.site.register(Announcement, AnnouncementAdmin)
 admin.site.register(Allnighter, AllnighterAdmin)
 admin.site.register(PartialSleep, PartialSleepAdmin)
 admin.site.register(Sleep, SleepAdmin)
