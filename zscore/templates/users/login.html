@@ -6,7 +6,7 @@
         <p>Your username and password didn't match. Please try again.</p>
     {% endif %}
 
-    <form method="post" action="{% url django.contrib.auth.views.login %}">
+    <form method='post' action='{% url "django.contrib.auth.views.login" %}'>
         {% csrf_token %}
         <table>
             <tr>
@@ -23,6 +23,6 @@
        <input type="hidden" name="next" value="{{ next }}" />
    </form>
 
-   <p><a href="{% url django.contrib.auth.views.password_reset%}">Forgot password?</a></p>
+   <p><a href='{% url "django.contrib.auth.views.password_reset" %}'>Forgot password?</a></p>
 
 {% endblock %}
