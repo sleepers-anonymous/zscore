@@ -1,0 +1,5 @@
+django==1.6
+pylibmc
+django-extensions
+south
+psycopg2
