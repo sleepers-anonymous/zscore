@@ -1,12 +1,11 @@
-from django.core.cache import cache
-from hashlib import md5
-from django.utils.http import urlquote
+from django.core import cache
 
-#modified from http://djangosnippets.org/snippets/1593/
 def expireTemplateCache(fragment_name, *variables):
-    args = md5(u':'.join([urlquote(unicode(x)) for x in variables]))
-    cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
-    cache.delete(cache_key)
+    # At this point you should probably just call
+    # django.core.cache.utils.make_template_fragment_key directly, but for
+    # compatibility we include the following convenience method.
+    key = cache.utils.make_template_fragment_key(fragment_name, variables)
+    cache.cache.delete(key)
 
 def authStatus(user):
     if 'is_authenticated' in dir(user):
