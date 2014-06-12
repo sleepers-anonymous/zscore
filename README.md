@@ -6,15 +6,7 @@ Sleeping competition app
 Installing
 ----------
 
-First, install the dependencies:
-
-- pytz
-- numpy
-- matplotlib
-- django
-- south
-- django-extensions
-- pylibmc
+First, install the dependencies listed in requirements.txt
 
 Next, follow the usual steps to installing a Django app:
 
