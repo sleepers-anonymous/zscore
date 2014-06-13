@@ -11,6 +11,7 @@ from django.dispatch import receiver
 
 import pytz
 import datetime
+import dateutil.parser
 import math
 import itertools
 import hashlib
@@ -466,6 +467,21 @@ class SleeperProfile(models.Model):
     def getUserTZ(self):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
+
+
+    def setTZ(self, newtz):
+        """Changes time zone if possible. Raises UnknownTimeZoneError if invalid timezone given"""
+        pytz.timezone(newtz)
+        self.timezone = newtz
+        self.save()
+
+    def parseTime(self, timestring):
+        """Attempts to return a datetime localized to the user's timezone"""
+        try:
+            unlocalized = dateutil.parser.parse(timestring)
+        except TypeError:
+            raise ValueError, "That is not a valid timestring."
+        return pytz.timezone(self.timezone).localize(unlocalized)
 
     def today(self):
         """Returns a datetime.date object corresponding to the date the user thinks it is"""
