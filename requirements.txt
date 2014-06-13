@@ -4,5 +4,6 @@ django-extensions
 south
 psycopg2
 pytz
+python-dateutil
 numpy
 matplotlib
