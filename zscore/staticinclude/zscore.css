@@ -509,3 +509,9 @@ input, select,  textarea,  button {
 		font-family: serif;
 		font-size:1em;
 }
+
+ul.checkboxselectmultiple li{
+		display: inline;
+		white-space: nowrap;
+		padding: 20px;
+}
