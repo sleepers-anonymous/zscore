@@ -1,5 +1,6 @@
 from sleeps import *
 from sleepergroups import *
+from static import *
 
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -18,15 +19,6 @@ from sleep.forms import *
 import datetime
 import pytz
 import csv
-
-def home(request):
-    return render(request, 'index.html')
-
-def faq(request):
-    return render(request, 'faq.html')
-
-def privacy(request):
-    return render(request, 'privacy.html')
 
 @login_required
 def graph(request):

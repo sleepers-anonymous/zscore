@@ -19,8 +19,6 @@ import datetime
 import pytz
 import csv
 
-
-
 @login_required
 def groups(request):
     context = {
@@ -37,4 +35,5 @@ def groups(request):
         form = GroupSearchForm()
     context["form"] = form
     return render_to_response('groups.html', context, context_instance=RequestContext(request))
+
 
