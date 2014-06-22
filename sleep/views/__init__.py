@@ -1,4 +1,5 @@
 from sleeps import *
+from sleepergroups import *
 
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -30,23 +31,6 @@ def privacy(request):
 @login_required
 def graph(request):
     return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
-
-@login_required
-def groups(request):
-    context = {
-            'groups' : request.user.sleepergroups.all(),
-            'invites' : request.user.groupinvite_set.filter(accepted=None),
-            }
-    if request.method =="POST":
-        form = GroupSearchForm(request.POST)
-        if form.is_valid():
-            gs=SleeperGroup.objects.filter(name__icontains=form.cleaned_data['group'], privacy__gte=SleeperGroup.REQUEST).exclude(members=request.user)
-            context['results']=gs
-            if gs.count() == 0 : context["noresults"] = True
-    else:
-        form = GroupSearchForm()
-    context["form"] = form
-    return render_to_response('groups.html', context, context_instance=RequestContext(request))
 
 @login_required
 def createGroup(request):
