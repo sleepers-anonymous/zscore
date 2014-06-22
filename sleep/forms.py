@@ -19,7 +19,7 @@ class CheckboxSelectMultipleULAttrs(forms.CheckboxSelectMultiple):
         html = super(CheckboxSelectMultipleULAttrs, self).render(name, value, attrs, choices)
         if not self.ulattrs: return html
         ulattributes = " ".join(i + "='" + self.ulattrs[i] + "'" for i in self.ulattrs)
-        return mark_safe(html.replace('<ul', '<ul ' + ulattributes))
+        return mark_safe(html.replace('<ul', '<ul ' + ulattributes, 1))
 
 class GroupForm(forms.ModelForm):
     delete = forms.BooleanField(required=False)

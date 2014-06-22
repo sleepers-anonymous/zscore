@@ -38,10 +38,14 @@ def editOrCreateAllnighter(request, allNighter = None, success=False):
         context = {"editing": True}
         try:
             a = Allnighter.objects.get(pk=allNighter)
+        except Allnighter.MultipleObjectsReturned:
+            return HttpResponseBadRequest('')
+        except Allnighter.DoesNotExist:
+            raise Http404
+        else:
             if a.user != request.user: raise PermissionDenied
             context['allnighter'] = a
-        except Allnighter.MultipleObjectsReturned: return HttpResponseBadRequest('')
-        except Allnighter.DoesNotExist: raise Http404
+
         if request.method == 'POST':
             form = AllNighterForm(request.user, request.POST, instance = a)
         else:
@@ -87,12 +91,14 @@ def editOrCreateSleep(request,sleep = None,success=False):
     if sleep: # we're editing a sleep
         try:
             s = Sleep.objects.get(pk=sleep)
-            if s.user != request.user: raise PermissionDenied
-            context['sleep'] = s
         except Sleep.MultipleObjectsReturned:
             return HttpResponseBadRequest('')
         except Sleep.DoesNotExist:
             raise Http404
+        else:
+            if s.user != request.user: raise PermissionDenied
+            context['sleep'] = s
+ 
         if request.method == 'POST': form = SleepForm(request.user, fmt, request.POST, instance=s)
         else:
             initial = {
