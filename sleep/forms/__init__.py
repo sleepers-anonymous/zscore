@@ -1,25 +1,12 @@
+#!/usr/bin/python
+from widgets import *
+
 from django import forms
 from sleep.models import *
 from django.core.exceptions import *
-from django.utils.safestring import mark_safe
 
 import pytz
 import datetime
-
-#from https://stackoverflow.com/questions/7852609/django-setting-class-of-ul-instead-of-input-with-checkboxselectmultiple-widg
-class CheckboxSelectMultipleULAttrs(forms.CheckboxSelectMultiple):
-    """
-    Class to allow setting attributes on containing ul in a CheckboxSelectMultiple
-    """
-    def __init__(self, ulattrs=None, attrs=None, choices=()):
-        self.ulattrs = ulattrs
-        super(CheckboxSelectMultipleULAttrs, self).__init__(attrs, choices)
-
-    def render(self, name, value, attrs=None, choices=()):
-        html = super(CheckboxSelectMultipleULAttrs, self).render(name, value, attrs, choices)
-        if not self.ulattrs: return html
-        ulattributes = " ".join(i + "='" + self.ulattrs[i] + "'" for i in self.ulattrs)
-        return mark_safe(html.replace('<ul', '<ul ' + ulattributes, 1))
 
 class GroupForm(forms.ModelForm):
     delete = forms.BooleanField(required=False)
