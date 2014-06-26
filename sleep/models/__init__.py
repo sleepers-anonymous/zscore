@@ -1,3 +1,5 @@
+from basics import *
+
 from django.db import IntegrityError
 from django.db import models
 from django.contrib.auth.models import User
@@ -26,19 +28,6 @@ from cache.decorators import cache_function
 from cache.utils import authStatus, expireTemplateCache
 
 TIMEZONES = zip(pytz.common_timezones, pytz.common_timezones)
-
-class Announcement(models.Model):
-    name = models.CharField(max_length=40)
-    description = models.TextField(blank=True)
-    active = models.BooleanField(default=True)
-
-    def __unicode__(self):
-        isActive = ' (Active)' if self.active else ''
-        return self.name + ': ' + self.description + isActive
-
-    def save(self, *args, **kwargs):
-        cache.delete_many([make_template_fragment_key('header', (user.username,)) for user in Sleeper.objects.all()])
-        super(Announcement, self).save(*args, **kwargs)
 
 class Metric(models.Model):
     name = models.CharField(max_length=40, unique=True)
