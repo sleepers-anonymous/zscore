@@ -571,7 +571,7 @@ def getSleepsJSON(request):
         sleep.start_time=sleep.start_time.astimezone(tz).replace(tzinfo=None)
         sleep.end_time=sleep.end_time.astimezone(tz).replace(tzinfo=None)
     data = serializers.serialize('json', sleeps)
-    return HttpResponse(data, mimetype='application/json')
+    return HttpResponse(data, content_type='application/json')
 
 @login_required
 def goodOrBad(request):
