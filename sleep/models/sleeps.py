@@ -192,6 +192,10 @@ class PartialSleep(models.Model):
         p.delete()
         return s
 
+    class Meta:
+        app_label = "sleep"
+        db_table = "sleep_partialsleep"
+
 class Sleep(models.Model):
     objects = SleepManager()
 
@@ -273,6 +277,10 @@ class Sleep(models.Model):
         cache.delete('sorted_sleepers:')
         cache.delete('totalSleep:')
         super(Sleep, self).delete(*args,**kwargs)
+
+    class Meta:
+        app_label = "sleep"
+        db_table = "sleep_sleep"
 
 class Allnighter(models.Model):
     user = models.ForeignKey(User)
