@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 #For things that don't fit in anywhere else
 
 from django.db import models
@@ -10,6 +8,10 @@ class Announcement(models.Model):
     name = models.CharField(max_length=40)
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
+
+    class Meta:
+        app_name = 'sleep'
+        db_Table = 'sleep_Annoucement'
 
     def __unicode__(self):
         isActive = ' (Active)' if self.active else ''

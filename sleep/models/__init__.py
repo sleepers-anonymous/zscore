@@ -1,4 +1,5 @@
-from basics import *
+from sleep.models.basics import Announcement
+from sleeps import *
 
 from django.db import IntegrityError
 from django.db import models
@@ -28,6 +29,8 @@ from cache.decorators import cache_function
 from cache.utils import authStatus, expireTemplateCache
 
 TIMEZONES = zip(pytz.common_timezones, pytz.common_timezones)
+
+__all__ = ['Annoucement', 'Metric']
 
 class Metric(models.Model):
     name = models.CharField(max_length=40, unique=True)
