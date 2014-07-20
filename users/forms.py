@@ -13,12 +13,18 @@ class Email(forms.EmailField):
         except User.DoesNotExist:
             return value
 
+def hasalphanum(s):
+    """I want to enforce that all users have at least one alphanumeric character in their username."""
+    for i in s:
+        if i.isalnum(): return True
+    return False
+
 class UserEmailCreationForm(UserCreationForm):
     email = Email(label="Email", max_length=64)
 
     def clean(self):
         cleaned_data = super(UserEmailCreationForm, self).clean()
-        if "username" in cleaned_data and cleaned_data["username"] in illegal_usernames:
+        if "username" in cleaned_data and (cleaned_data["username"] in illegal_usernames or (hasalphanum(cleaned_data["username"]) is False)):
             self._errors["username"] = self.error_class(["Illegal username! Please pick another!"])
             del cleaned_data["username"]
         return cleaned_data
