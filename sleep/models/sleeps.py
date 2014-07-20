@@ -58,6 +58,8 @@ class Metric(models.Model):
 
     class Meta:
         ordering = ['-priority']
+        app_label = 'sleep'
+        db_table = 'sleep_metric'
 
 class SleepManager(models.Manager):
     @cache_function(lambda self, user=None, group=None: () if user is None and group is None else None)

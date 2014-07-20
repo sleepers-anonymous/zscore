@@ -9,10 +9,6 @@ class Announcement(models.Model):
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
 
-    class Meta:
-        app_name = 'sleep'
-        db_Table = 'sleep_Annoucement'
-
     def __unicode__(self):
         isActive = ' (Active)' if self.active else ''
         return self.name + ': ' + self.description + isActive
@@ -21,3 +17,6 @@ class Announcement(models.Model):
         cache.delete_many([make_template_fragment_key('header', (user.username,)) for user in Sleeper.objects.all()])
         super(Announcement, self).save(*args, **kwargs)
 
+    class Meta:
+        app_label = 'sleep'
+        db_table = 'sleep_announcement'
