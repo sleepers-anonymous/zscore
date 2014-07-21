@@ -308,3 +308,6 @@ class Allnighter(models.Model):
         cache.delete('sorted_sleepers:')
         super(Allnighter, self).save(*args,**kwargs)
 
+    class Meta:
+        app_label = "sleep"
+        db_table = "sleep_allnighter"
