@@ -1,5 +1,6 @@
 from sleep.models.basics import Announcement
 from sleeps import *
+from sleeperprofile import *
 
 from django.db import IntegrityError
 from django.db import models
@@ -30,10 +31,8 @@ from cache.utils import authStatus, expireTemplateCache
 
 TIMEZONES = zip(pytz.common_timezones, pytz.common_timezones)
 
-__all__ = ['Announcement', 'Metric', 'SleepManager', 'PartialSleep', 'Sleep', 'Allnighter']
-
-class SchoolOrWorkPlace(models.Model):
-    name = models.CharField(max_length=255)
+__all__ = ['Announcement', 'Metric', 'SleepManager', 'PartialSleep', 'Sleep', 'Allnighter'
+        'SchoolOrWorkPlace', 'SleeperProfile']
 
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
