@@ -1,5 +1,5 @@
 /* navbar */
-body.daytime div.navigation-bar {
+div.navigation-bar {
 		width:98%;
 		background: #424242;
 		color: white;
@@ -11,33 +11,13 @@ body.daytime div.navigation-bar {
 		overflow:hidden;
 }
 
-body.nighttime div.navigation-bar {
-		width:98%;
-		background: #424242;
-		color: white;
-		margin:10px auto;
-		-moz-border-radius: 15px;
-		border-radius: 15px;
-		min-height:45px;
-		border: 1px solid white;
-		overflow:hidden;
-}
-
-body.daytime div.navigation-bar a:link{
+div.navigation-bar a:link{
 		color:white;
 }
 
-body.nighttime div.navigation-bar a:link{
+div.navigation-bar a:visited{
 		color:white;
 }
-body.daytime div.navigation-bar a:visited{
-		color:white;
-}
-
-body.nighttime div.navigation-bar a:visited{
-		color:white;
-}
-
 
 div.navigation-bar ul {
 		list-style-type:none;
@@ -98,42 +78,28 @@ div.navigation-bar > ul > li > ul li a:link{
 		padding: 0px 4px;
 }
 
-body.daytime div.navigation-bar> ul> li > a:link {
+div.navigation-bar> ul> li > a:link {
 		color: white;
 		text-decoration:none;
 }
 
-body.daytime div.navigation-bar> ul> li > a:visited {
+div.navigation-bar> ul> li > a:visited {
 		color: white;
 		text-decoration:none;
 }
 
-body.daytime div.navigation-bar> ul> li > a:hover {
-		color: white;
-		background: black;
-		padding: 10px 0px;
-}
-`body.daytime div.navigation-bar> ul> li > a:active {
+div.navigation-bar> ul> li > a:hover {
 		color: white;
 		background: black;
 		padding: 10px 0px;
 }
 
-body.nighttime div.navigation-bar> ul> li > a:link, a:visited {
+div.navigation-bar> ul> li > a:active {
 		color: white;
-		text-decoration:none;
+		background: black;
+		padding: 10px 0px;
 }
 
-body.nighttime div.navigation-bar> ul> li > a:hover {
-		color: white;
-		background: black;
-		padding: 10px 0px;
-}
-body.nighttime div.navigation-bar> ul> li > a:active {
-		color: white;
-		background: black;
-		padding: 10px 0px;
-}
 div.navigation-bar ul ul ul {
 		position: absolute;
 		left:100%;
@@ -230,20 +196,20 @@ table.form ul.errorlist li {
 
 /* body daytime/nighttime */
 
-body.daytime {
-		background: white;
+body {
 		padding:0px;
 		margin:0px;
 		width:100%;
 		min-width:500px;
 }
 
+body.daytime {
+		background: white;
+}
+
 body.nighttime {
 		background: #08083C;
 		color:white;
-		padding:0px;
-		margin:0px;
-		min-width:500px;
 }
 
 div.global-wrapper{

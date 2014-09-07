@@ -3,43 +3,33 @@ div.sleep-entry-view {
     margin: 2%;
     display:block;
 }
-body.daytime div.content div.sleep-stats-view {
-    float: left;
+
+div.content div.sleep-stats-view,
+div.content div.sleep-list-view {
     width: 45%;
-    clear: left;
     margin: 2%;
     min-width:500px;
     padding: 4px;
-    border: 1px solid black;
     display:block;
 }
-body.daytime div.content div.sleep-list-view {
-    float: right;
-    clear:right;
-    width: 45%;
-    margin: 2%;
-    min-width:500px;
-    padding:4px;
-    border: 1px solid black;
-    display:block;
-}
-body.nighttime div.content div.sleep-stats-view {
+
+div.content div.sleep-stats-view {
     float: left;
-    width: 45%;
     clear: left;
-    margin: 2%;
-    min-width:500px;
-    padding: 4px;
-    border: 1px solid white;
-    display:block;
 }
-body.nighttime div.content div.sleep-list-view {
+
+div.content div.sleep-list-view {
     float: right;
-    width: 45%;
     clear:right;
-    margin: 2%;
-    min-width:500px;
-    padding:4px;
-    border: 1px solid white;
-    display:block;
 }
+
+body.daytime div.sleep-stats-view,
+body.daytime div.sleep-list-view {
+    border: 1px solid black;
+}
+
+body.nighttime div.sleep-stats-view,
+body.nighttime div.sleep-list-view {
+    border: 1px solid white;
+}
+
