@@ -1,12 +1,13 @@
 /* navbar */
 div.navigation-bar {
-		width:98%;
+		width:100%;
 		background: #424242;
 		color: white;
-		margin:10px;
 		/* really 15px 15px but to make the hovers happy we put 4px of the vertical in ul > li below. */
 		padding: 11px 15px;
-		border-radius: 15px;
+    margin: 0px;
+    box-sizing: border-box;
+		border-radius: 5px;
 }
 
 body.daytime div.navigation-bar a,
@@ -34,11 +35,12 @@ div.navigation-bar ul > li {
 div.navigation-bar > ul > li > ul {
 		display:none;
 		width: 100%;
-		background: #424242;
+		background: #222222;
 		padding: 11px 15px;
 		padding-top: 8px;
-		border-radius: 0px 0px 15px 15px;
-		border-top: none;
+    margin: 0px;
+    margin-top: 15px;
+		border-radius: 0px 0px 5px 5px;
 		z-index: 100;
 		position: absolute;
 		left: -15px;
@@ -156,8 +158,10 @@ body.nighttime {
 		color:white;
 }
 
-div.global-wrapper{
+div.global-wrapper {
 		min-width:500px;
+		margin: 10px;
+		padding: 10px;
 }
 
 body.daytime div.content a.hidden:link,a.hidden:visited {
@@ -217,16 +221,6 @@ body.nighttime textarea {
 		background: #08082c;
 		color: white;
 		border: 1px solid white;
-}
-
-div.global-wrapper {
-		margin:0;
-		padding:0;
-}
-
-div.content {
-		margin: 10px;
-		padding: 10px;
 }
 
 body.daytime table.leaderboard tr.me {
