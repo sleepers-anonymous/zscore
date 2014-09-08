@@ -40,15 +40,17 @@
     height: 10px;
 }
 
-body.daytime .sleep-box {
+body.daytime .sleep-box,
+body.daytime .sleep-box .start {
     background-color: purple;
 }
 
-body.nighttime .sleep-box {
+body.nighttime .sleep-box,
+body.nighttime .sleep-box .start {
 		background-color:white;
 }
 
-body.daytime .sleep-box .start {
+.sleep-box .start {
     border-radius: 5px;
     padding: 5px;
     margin-left: -5px;
