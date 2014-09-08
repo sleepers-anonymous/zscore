@@ -3,8 +3,7 @@ div.navigation-bar {
 		width:100%;
 		background: #424242;
 		color: white;
-		/* really 15px 15px but to make the hovers happy we put 4px of the vertical in ul > li below. */
-		padding: 11px 15px;
+		padding: 0px 15px;
     margin: 0px;
     box-sizing: border-box;
 		border-radius: 5px;
@@ -26,7 +25,7 @@ div.navigation-bar ul {
 }
 
 div.navigation-bar ul > li {
-		padding: 4px;
+		padding: 15px 4px;
 		margin: 0px;
 		position: relative;
 		display: inline-block;
@@ -62,6 +61,7 @@ div.navigation-bar ul li.day,
 div.navigation-bar ul li.night {
 		text-decoration:none;
 		z-index: 200;
+    padding: 4px;
 }
 
 div.navigation-bar ul li.day:hover,
