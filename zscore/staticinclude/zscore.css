@@ -203,56 +203,20 @@ body.nighttime a:active {
 		color: yellow;
 }
 
-body.daytime div.content input:not([type=submit]):not([type=file]){
+body.daytime input:not([type=file]),
+body.daytime select,
+body.daytime textarea {
 		background: white;
 		color: black;
 		border: 1px solid black;
-		padding: 4px;
-		font-family:serif;
-		font-size:1em;
 }
 
-body.daytime div.content select{
-		background: white;
-		color: black;
-		border: 1px solid black;
-		padding:4px;
-		font-family:serif;
-		font-size:1em;
-}
-
-body.daytime div.content textarea{
-		background: white;
-		color: black;
-		border: 1px solid black;
-		font-family:serif;
-		font-size:1em;
-}
-
-body.nighttime div.content input:not([type=submit]):not([type=file]) {
-		background: black;
+body.nighttime input:not([type=file]),
+body.nighttime select,
+body.nighttime textarea {
+		background: #08082c;
 		color: white;
 		border: 1px solid white;
-		padding: 4px;
-		font-family:serif;
-		font-size:1em;
-}
-
-body.nighttime div.content select {
-		background: black;
-		color: white;
-		border: 1px solid white;
-		padding: 4px;
-		font-family:serif;
-		font-size:1em;
-}
-
-body.nighttime div.content textarea {
-		background: black;
-		color: white;
-		border: 1px solid white;
-		font-family:serif;
-		font-size:1em;
 }
 
 div.global-wrapper {
@@ -415,9 +379,11 @@ a {
 		font-size:1em;
 }
 
-input, select,  textarea,  button {
+div.content input, div.content select,
+div.content textarea, div.content button {
 		font-family: serif;
 		font-size:1em;
+    border-radius: 3px;
 }
 
 ul.checkboxselectmultiple li{
