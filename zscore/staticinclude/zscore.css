@@ -385,3 +385,27 @@ ul.checkboxselectmultiple li{
 		white-space: nowrap;
 		padding: 20px;
 }
+
+
+/* announcements */
+.announcements {
+  padding: 10px;
+  width: 100%;
+}
+
+.announcement-name {
+  display: inline-block;
+  text-align: right;
+  width: 15%;
+  vertical-align: middle;
+  padding: 5px;
+  font-weight: bold;
+}
+
+.announcement-description {
+  display: inline-block;
+  width: 80%;
+  vertical-align: middle;
+  text-align: left;
+  padding: 5px;
+}

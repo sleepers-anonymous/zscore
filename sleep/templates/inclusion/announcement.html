@@ -1,6 +1,8 @@
-<table style="padding:10px" width=100%>
+<div class="announcements">
 {% for announcement in announcements %}
-<tr><th width=50% align=right style="padding:5px">{{announcement.name}}</th><td width=50% align=left style="padding:5px">{% if announcement.description %}{{announcement.description}}{% else %} &nbsp;{% endif %}</td></tr>
+<div class="announcement">
+<span class="announcement-name">{{announcement.name|safe}}</span>
+<span class="announcement-description">{% if announcement.description %}{{announcement.description|safe}}{% else %} &nbsp;{% endif %}</span>
+</div>
 {% endfor %}
-</table>
-
+</div>
