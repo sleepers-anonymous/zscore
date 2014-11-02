@@ -97,29 +97,6 @@
                 <li class="night" onclick="switch_style('nighttime')">N</li>
             </ul>
            </div>
-                {% if request.user.is_authenticated and request.user.sleeperprofile.goodOrBad == None %}
-                    <div id="good-or-bad" class="content">
-                        <p>
-                        zScore knows when you are sleeping, we know when you're awake.  Tell us if you've been bad or good!
-                        <br/>
-                        <input id="good-button" type="submit" value="I've been good!"></input>
-                        <input id="bad-button" type="submit" value="I've been bad!"></input>
-                        <script type="text/javascript">
-                            function submitGoodOrBad(goodOrBad) {
-                                $.post("/goodorbad/", {'goodOrBad' : goodOrBad},
-                                        function () {
-                                        $("#good-or-bad").css("display","none");
-                                        $("#good-or-bad-thanks").css("display","");
-                                        });
-                            };
-                            $("#good-button").click(function () { submitGoodOrBad("good") });
-                            $("#bad-button").click(function () { submitGoodOrBad("bad") });
-                        </script>
-                    </div>
-                    <div id="good-or-bad-thanks" class="content" style="display: none;">
-                        Thanks!  Stay tuned for Santa zScore's report.
-                    </div>
-                {% endif %}
             <div>
                 {% displayAnnouncements %}
             </div>
