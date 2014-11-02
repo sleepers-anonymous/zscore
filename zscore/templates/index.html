@@ -5,13 +5,14 @@
 {% block content %}
 <h1> Welcome to zScore! </h1>
 
+<p class="homepage-text">
+zScore allows you to track and share your sleep.  To see how it works,
+<a href="/accounts/create">create an account</a> or check out the
+<a href="/leaderboard">leaderboard</a>.  It's still very much in alpha and
+written by hosed college students, so expect things to randomly break.  If you
+notice a bug or want a feature, submit
+<a href="http://goo.gl/l2Dkb">feedback</a> or
+<a href="mailto:zscore-devs@mit.edu">email the devs</a>.
+</p>
 
-{% if request.user.is_authenticated %}
-<p>Welcome, {{request.user.username}}! (<a href="/accounts/logout">Log out</a>)</p>
-{% else %}
-<p><a href="/accounts/login">Log in</a></p>
-<p>Don't have an account? <a href="/accounts/create">Register</a></p>
-{% endif %}
-
-<p>zScore allows you to track and share your sleep.  It's still very much in alpha, so expect things to randomly break.  Your zScore is a metric intended to account for both amount and consistency of sleep; we'll be adding more metrics soon.  If you notice a bug or want a feature, submit <a href="http://goo.gl/l2Dkb">feedback</a> or <a href="mailto:zscore-devs@mit.edu">email the devs</a>.  If you want to stay updated on new features in zScore, add yourself to <a href="//mailman.mit.edu/mailman/listinfo/zscore-announce">zscore-announce</a>, or sub to -c zscore on Zephyr.</p>
 {% endblock %}
