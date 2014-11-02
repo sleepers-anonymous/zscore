@@ -409,3 +409,21 @@ ul.checkboxselectmultiple li{
   text-align: left;
   padding: 5px;
 }
+
+/* punch in/out */
+div.navigation-bar a.punch {
+  text-decoration: none;
+  padding: 2px;
+  border-radius: 3px;
+}
+
+body.nighttime div.navigation-bar a.punch {
+  border: 1px solid #aaa;
+  background-color: #08083c;
+  color: #fff;
+}
+body.daytime div.navigation-bar a.punch {
+  border: 1px solid #000;
+  background-color: #ddd;
+  color: #000;
+}

@@ -156,6 +156,14 @@ class PartialSleep(models.Model):
         tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
         return "Partial sleep beginning at %s" % self.start_local_time().strftime(tformat)
 
+    def save(self, *args, **kwargs):
+        expireTemplateCache('header', self.user.username)
+        super(PartialSleep, self).save(*args,**kwargs)
+
+    def delete(self, *args, **kwargs):
+        expireTemplateCache('header', self.user.username)
+        super(PartialSleep, self).delete(*args,**kwargs)
+
     def start_local_time(self):
         tz = pytz.timezone(self.timezone)
         return self.start_time.astimezone(tz)

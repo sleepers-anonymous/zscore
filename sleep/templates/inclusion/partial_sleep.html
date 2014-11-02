@@ -1,7 +1,6 @@
-{% if hasPartial == 1 %}
-<p><a style="text-decoration:None;" href="/sleep/finishPartial/"><input type="submit" value="Waking Up!" style="font-size:{{size}}em;"/></a><br />
-<a style="text-decoration:None;" href="/sleep/deletePartial/?next={{path}}"><input type="submit" value="Never mind! I'm not asleep!" style="font-size:{{size}}em;"/></a>
-</p>
-{% elif hasPartial == 2 %}
-<p><a style="text-decoration:None;" href="/sleep/createPartial/?next={{path}}"><input type="submit" value="Going To Sleep!" style="font-size:{{size}}em;"/></a></p>
+{% if has_partial %}
+  <a class="punch" href="/sleep/finishPartial/">waking up</a>
+  <a class="punch" href="/sleep/deletePartial/?next={{request.path}}">never mind</a>
+{% else %}
+  <a class="punch" href="/sleep/createPartial/?next={{request.path}}">going to sleep</a>
 {% endif %}

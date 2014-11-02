@@ -14,20 +14,13 @@ def displayAnnouncements():
     return {'announcements': Announcement.objects.filter(active=True)}
 
 @register.inclusion_tag('inclusion/partial_sleep.html', takes_context=True)
-def displayPartialButton(context, user, path = "/", size = 1):
-    if user.is_authenticated():
-        try:
-            p = user.partialsleep
-            newcontext = {"hasPartial": 1}
-        except PartialSleep.DoesNotExist:
-            newcontext = {"hasPartial": 2}
-        finally:
-            if user.sleeperprofile.isMobile(context["request"]): size = size*2.25
-    else:
-        newcontext = {}
-    newcontext["path"] = path
-    newcontext["size"] = size
-    return newcontext
+def displayPartialButton(context, user):
+    try:
+        p = user.partialsleep
+        context['has_partial'] = True
+    except PartialSleep.DoesNotExist:
+        context['has_partial'] = False
+    return context
 
 
 @register.inclusion_tag('inclusion/is_asleep.html', takes_context=True)
