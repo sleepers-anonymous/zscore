@@ -63,23 +63,28 @@
             {% cache 86400 header request.user.username %}
             <div class="navigation-bar">
             <ul>
-                <li><a href="/"><b>zScore</b></a><sup>[{% if request.user.sleeperprofile.isPro %}<i><b>pro</b></i>{% elif request.user.is_superuser %}<i>dev</i>{% elif request.user.sleeperprofile.partyMode %}PARTY MODE!&trade;{% else %}alpha{% endif %}]</sup></li>
-                <li><a href="/mysleep/"
-                       title="enter sleep and see your stats">my sleep</a>
-                    {% if request.user.is_authenticated %}
-                    <ul>
-                        <li><a href="/mygraphs/">graphs</a></li>
-                    </ul>
-                    {% endif %}
-                </li>
-                <li><a href="/leaderboard/"
-                       title="see the leaderboard">leaderboard</a>
-                    <ul>
-                        <li><a href="/graphs/">graphs</a></li>
-                    </ul>
-                </li>
-                <li><a href="/creep/"
-                       title="look at other users' sleep">creep</a></li>
+              <li>
+                <a href="/{% if request.user.is_authenticated %}mysleep/{% endif %}">
+                  <b>zScore</b>
+                  <sup>[{% if request.user.sleeperprofile.isPro %}<i><b>pro</b></i>{% elif request.user.is_superuser %}<i>dev</i>{% elif request.user.sleeperprofile.partyMode %}PARTY MODE!&trade;{% else %}alpha{% endif %}]</sup>
+                </a>
+              </li>
+              <li><a href="/mysleep/"
+                     title="enter sleep and see your stats">my sleep</a>
+                  {% if request.user.is_authenticated %}
+                  <ul>
+                      <li><a href="/mygraphs/">graphs</a></li>
+                  </ul>
+                  {% endif %}
+              </li>
+              <li><a href="/leaderboard/"
+                     title="see the leaderboard">leaderboard</a>
+                  <ul>
+                      <li><a href="/graphs/">graphs</a></li>
+                  </ul>
+              </li>
+              <li><a href="/creep/"
+                     title="look at other users' sleep">creep</a></li>
 	            {% if request.user.is_staff %}
                 <li><a href="/admin/">admin</a></li>
 	            {% endif %}

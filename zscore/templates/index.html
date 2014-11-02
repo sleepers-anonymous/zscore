@@ -4,6 +4,8 @@
 
 {% block content %}
 <h1> Welcome to zScore! </h1>
+
+
 {% if request.user.is_authenticated %}
 <p>Welcome, {{request.user.username}}! (<a href="/accounts/logout">Log out</a>)</p>
 {% else %}
@@ -11,13 +13,5 @@
 <p>Don't have an account? <a href="/accounts/create">Register</a></p>
 {% endif %}
 
-<p>
-<a href="/mysleep">Enter sleep and see your stats</a>
-</p>
-<p>
-<a href="/leaderboard">See the leaderboard</a>
-</p>
-    <p>We've moved to a new server, now on <a href="http://zscore.mit.edu/">zscore.mit.edu</a>!  Please update your bookmarks and such.</p>
-<p>
-zScore allows you to track and share your sleep.  It's still very much in alpha, so expect things to randomly break.  Your zScore is a metric intended to account for both amount and consistency of sleep; we'll be adding more metrics soon.  If you notice a bug or want a feature, submit <a href="http://goo.gl/l2Dkb">feedback</a> or <a href="mailto:zscore-devs@mit.edu">email the devs</a>.  If you want to stay updated on new features in zScore, add yourself to <a href="//mailman.mit.edu/mailman/listinfo/zscore-announce">zscore-announce</a>, or sub to -c zscore on Zephyr.</p>
+<p>zScore allows you to track and share your sleep.  It's still very much in alpha, so expect things to randomly break.  Your zScore is a metric intended to account for both amount and consistency of sleep; we'll be adding more metrics soon.  If you notice a bug or want a feature, submit <a href="http://goo.gl/l2Dkb">feedback</a> or <a href="mailto:zscore-devs@mit.edu">email the devs</a>.  If you want to stay updated on new features in zScore, add yourself to <a href="//mailman.mit.edu/mailman/listinfo/zscore-announce">zscore-announce</a>, or sub to -c zscore on Zephyr.</p>
 {% endblock %}

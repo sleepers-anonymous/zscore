@@ -2,9 +2,13 @@
 #This file is for all the static pages
 
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
 
 def home(request):
-    return render(request, 'index.html')
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/mysleep/')
+    else:
+        return render(request, 'index.html')
 
 def faq(request):
     return render(request, 'faq.html')
