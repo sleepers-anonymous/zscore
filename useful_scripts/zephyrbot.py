@@ -71,7 +71,7 @@ def handle_zgram(zgram):
                 except ValidationError as e:
                     msg = e.messages[0]
             elif 'help' in zgram.message:
-                msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning.\n\nFor stats, message me 'stats'"
+                msg = "Hi! I'm the zscore zephyrbot.\n\nMessage me 'gnight' when you want to sleep\nand 'awake' when you wake up in the morning.\n\nFor stats, message me 'stats'.\nFor the leaderboard, message me 'leaderboard'."
             elif 'meow' in zgram.message.lower():
                 msg = random.choice(['meow!', "purrrr", "*barks*"])
             elif 'stats' in zgram.message:
@@ -84,7 +84,17 @@ def handle_zgram(zgram):
                     if 'decaying' in zgram.message or (len(msglist)==0):
                         msglist.append("Your Stats (exponential decay)\n" + sleep.utils.zephyrDisplay(sleeper.decayStats(), usermetrics))
                     msg = '\n\n'.join(msglist)
-                except all as e:
+                except Exception as e:
+                    print e
+                    msg = 'Something went wrong! Zephyr -c zscore for help!'
+            elif 'leaderboard' in zgram.message:
+                try:
+                    sleeper = sleep.models.Sleeper.objects.get(pk = user.pk)
+                    usermetrics = sleeper.sleeperprofile.metrics.all()
+                    ss = sleep.models.Sleeper.objects.sorted_sleepers(user = user)
+                    top = [ s for s in ss if s['rank'] <= 10 or s['user'].pk == user.pk ]
+                    msg = '\n'.join(str(s['rank']).rjust(3) + ' ' + s['user'].username[:12].ljust(12) + ' ' + str(s['zScore']) for s in top)
+                except Exception as e:
                     print e
                     msg = 'Something went wrong! Zephyr -c zscore for help!'
             elif 'bug' in zgram.message or 'bug' in zgram.instance:
