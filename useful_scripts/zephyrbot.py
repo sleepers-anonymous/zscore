@@ -64,8 +64,8 @@ def handle_zgram(zgram):
             elif 'awake' in zgram.message or "mornin'" in zgram.message:
                 try:
                     s = sleep.models.PartialSleep.finish_for_user(user)
-                    tmpl = "Good morning!\nYou slept from %s to %s.\n(That's %s.)"
-                    msg = tmpl % (s.start_time, s.end_time, s.length())
+                    tmpl = "Good morning!\nYou slept from %s to %s.\n(That's %s.)\nEdit: https://zscore.mit.edu/sleep/edit/%s/"
+                    msg = tmpl % (s.start_time, s.end_time, s.length(), s.id)
                 except sleep.models.PartialSleep.DoesNotExist:
                     msg = "Sorry, you don't seem to have been asleep."
                 except ValidationError as e:
