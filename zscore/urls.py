@@ -2,6 +2,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic.base import TemplateView, RedirectView
+from django.contrib.auth.decorators import login_required
 
 import users.views
 import zscore.views
@@ -27,7 +28,7 @@ urlpatterns = [
     url(r'^accounts/logout/$', auth_views.logout, {
             'template_name': 'users/logout.html'
     }),
-    url(r'^accounts/create/$', users.views.create),
+    url(r'^accounts/create/$', users.views.CreateUser.as_view()),
     url(r'^accounts/profile/$', RedirectView.as_view(url='/mysleep')),
     url(r'^accounts/password/reset/$', auth_views.password_reset, {
             'template_name': 'users/password_reset_form.html',
@@ -53,7 +54,8 @@ urlpatterns = [
     url(r'^leaderboard/(\d+)/$', sleep.views.leaderboard),
     url(r'^graphs/$', sleep.views.graphs),
     url(r'^graphs/(\d+)/$', sleep.views.graphs),
-    url(r'^mysleep/$', sleep.views.mysleep),
+    url(r'^mysleep/$', login_required(TemplateView.as_view(
+        template_name='sleep/mysleep.html'))),
     url(r'^sleep/simple/$', sleep.views.editOrCreateSleep),
     url(r'^sleep/simple/success/$', sleep.views.editOrCreateSleep, {'success' : True}),
     url(r'^sleep/allnighter/$', sleep.views.editOrCreateAllnighter),

@@ -1,19 +1,19 @@
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.views.generic import CreateView
 from users.forms import UserEmailCreationForm
-from sleep.models import SleeperProfile
-from sleep.models import Metric
+from sleep.models import SleeperProfile, Sleeper, Metric
 
-def create(request):
-    if request.method == 'POST':
-        form = UserEmailCreationForm(request.POST)
-        if form.is_valid():
-            new_user = form.save()
-            s = SleeperProfile.objects.get_or_create(user=new_user)[0]
-            for m in Metric.objects.filter(show_by_default=True):
-                s.metrics.add(m)
-            s.save()
-            return HttpResponseRedirect("/")
-    else:
-        form = UserEmailCreationForm()
-    return render(request, "users/create.html", {'form': form})
+class CreateUser(CreateView):
+    model = Sleeper
+    template_name = "users/create.html"
+    form_class = UserEmailCreationForm
+    success_url = "/"
+
+    def form_valid(self, form):
+        response = super(CreateUser, self).form_valid(form)
+        s = SleeperProfile.objects.get_or_create(user=form.instance)[0]
+        for m in Metric.objects.filter(show_by_default=True):
+            s.metrics.add(m)
+        s.save()
+        return response

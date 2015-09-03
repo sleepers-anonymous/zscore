@@ -20,10 +20,6 @@ import pytz
 import csv
 
 @login_required
-def mysleep(request):
-    return render_to_response('sleep/mysleep.html',{},context_instance=RequestContext(request))
-
-@login_required
 def editOrCreateAllnighter(request, allNighter = None, success=False):
     context = {'success': success}
     prof = request.user.sleeperprofile
