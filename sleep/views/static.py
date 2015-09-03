@@ -9,10 +9,3 @@ def home(request):
         return HttpResponseRedirect('/mysleep/')
     else:
         return render(request, 'index.html')
-
-def faq(request):
-    return render(request, 'faq.html')
-
-def privacy(request):
-    return render(request, 'privacy.html')
-

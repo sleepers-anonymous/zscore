@@ -17,6 +17,3 @@ def create(request):
     else:
         form = UserEmailCreationForm()
     return render(request, "users/create.html", {'form': form})
-
-def profile(request):
-    return HttpResponseRedirect("/mysleep")

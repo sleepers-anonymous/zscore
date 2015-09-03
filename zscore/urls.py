@@ -1,6 +1,7 @@
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.views.generic.base import TemplateView, RedirectView
 
 import users.views
 import zscore.views
@@ -27,7 +28,7 @@ urlpatterns = [
             'template_name': 'users/logout.html'
     }),
     url(r'^accounts/create/$', users.views.create),
-    url(r'^accounts/profile/$', users.views.profile),
+    url(r'^accounts/profile/$', RedirectView.as_view(url='/mysleep')),
     url(r'^accounts/password/reset/$', auth_views.password_reset, {
             'template_name': 'users/password_reset_form.html',
             'email_template_name': 'users/password_reset_email.html',
@@ -87,8 +88,8 @@ urlpatterns = [
     url(r'^sleep/edit/(?P<sleep>\d+)/', sleep.views.editOrCreateSleep),
     url(r'^sleep/editallnighter/(?P<allNighter>\d+)/', sleep.views.editOrCreateAllnighter),
     url(r'^$', sleep.views.home),
-    url(r'^faq/$', sleep.views.faq),
-    url(r'^privacy/$', sleep.views.privacy),
+    url(r'^faq/$', TemplateView.as_view(template_name='faq.html')),
+    url(r'^privacy/$', TemplateView.as_view(template_name='privacy.html')),
     url(r'^sleep/export/$', sleep.views.exportSleeps),
     url(r'^sheeple/$', sheeple.views.sheeple),
     url(r'^goodorbad/$', sleep.views.goodOrBad),
