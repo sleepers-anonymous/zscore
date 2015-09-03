@@ -94,5 +94,4 @@ urlpatterns = [
     url(r'^privacy/$', TemplateView.as_view(template_name='privacy.html')),
     url(r'^sleep/export/$', sleep.views.exportSleeps),
     url(r'^sheeple/$', sheeple.views.sheeple),
-    url(r'^goodorbad/$', sleep.views.goodOrBad),
 ]

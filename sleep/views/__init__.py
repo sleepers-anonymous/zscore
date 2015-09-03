@@ -579,13 +579,3 @@ def getSleepsJSON(request):
         sleep.end_time=sleep.end_time.astimezone(tz).replace(tzinfo=None)
     data = serializers.serialize('json', sleeps)
     return HttpResponse(data, content_type='application/json')
-
-@login_required
-def goodOrBad(request):
-    p = request.user.sleeperprofile
-    if request.method=='POST' and 'goodOrBad' in request.POST and 'good' in request.POST['goodOrBad']:
-        p.goodOrBad = True
-    else:
-        p.goodOrBad = False
-    p.save()
-    return HttpResponse('')
