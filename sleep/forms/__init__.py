@@ -39,8 +39,8 @@ class SleeperProfileForm(forms.ModelForm):
             try:
                 cleaned_data[k] = datetime.datetime.strptime(cleaned_data[k], self.fmt).time()
             except ValueError:
-                self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.time(23,59,59).strftime(self.fmt)])
-                del cleaned_data[k]
+                self.add_error(k, "The time must be in the format %s" %
+                               datetime.time(23,59,59).strftime(self.fmt))
         return cleaned_data
 
 class MembershipForm(forms.ModelForm):
@@ -98,8 +98,9 @@ class SleepForm(forms.ModelForm):
                     dt = datetime.datetime.strptime(cleaned_data[k],self.fmt)
                     cleaned_data[k]=tz.localize(dt)
                 except ValueError:
-                    self._errors[k] = self.error_class(["The time must be in the format %s" % datetime.datetime(1999, 12, 31, 23, 59, 59).strftime(self.fmt)])
-                    del cleaned_data[k]
+                    self.add_error(k, "The time must be in the format %s" %
+                                   datetime.datetime(1999, 12, 31, 23, 59,
+                                                     59).strftime(self.fmt))
             if len(a) > 0 : raise ValidationError({NON_FIELD_ERRORS: ["You have an allnighter entered for " + str(cleaned_data["date"]) + "!"]})
             if "start_time" in cleaned_data and "end_time" in cleaned_data and cleaned_data["start_time"] >= cleaned_data["end_time"]: raise ValidationError({NON_FIELD_ERRORS: ["End time must be later than start time!"]})
         return cleaned_data

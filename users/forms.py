@@ -25,8 +25,8 @@ class UserEmailCreationForm(UserCreationForm):
     def clean(self):
         cleaned_data = super(UserEmailCreationForm, self).clean()
         if "username" in cleaned_data and (cleaned_data["username"] in illegal_usernames or (hasalphanum(cleaned_data["username"]) is False)):
-            self._errors["username"] = self.error_class(["Illegal username! Please pick another!"])
-            del cleaned_data["username"]
+            self.add_error("username",
+                           "Illegal username! Please pick another!")
         return cleaned_data
 
     def save(self, commit=True):

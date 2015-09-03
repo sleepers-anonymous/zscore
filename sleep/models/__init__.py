@@ -243,11 +243,14 @@ class Sleep(models.Model):
         return datetime.timedelta(seconds=score)
 
     def validate_unique(self, exclude=None):
-        overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user)
-        if self.pk is not None:
-            overlaps = overlaps.exclude(pk = self.pk)
-        if overlaps:
-            raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
+        # If things are missing due to validation errors, we don't need to
+        # worry about validating uniqueness.
+        if self.start_time and self.end_time and self.user:
+            overlaps = Sleep.objects.filter(start_time__lt=self.end_time,end_time__gt=self.start_time,user=self.user)
+            if self.pk is not None:
+                overlaps = overlaps.exclude(pk = self.pk)
+            if overlaps:
+                raise ValidationError({NON_FIELD_ERRORS: ["This sleep overlaps with %s!" % overlaps[0]]})
 
     def start_local_time(self):
         tz = pytz.timezone(self.timezone)
