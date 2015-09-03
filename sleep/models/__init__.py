@@ -391,7 +391,7 @@ class SleeperProfile(models.Model):
     #---------------------------Related to emails ---------------------------
     emailreminders = models.BooleanField(default=False)
     emailSHA1 =  models.CharField(max_length=50, blank=True)
-    emailSHA1GenerationDate = models.DateTimeField(default=now())
+    emailSHA1GenerationDate = models.DateTimeField(default=now)
     emailActivated = models.BooleanField(default=False)
     emailTime = models.TimeField(default = datetime.time(12), verbose_name="Reminder email time")
 
