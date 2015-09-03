@@ -1,4 +1,4 @@
-django==1.8
+django==1.8.4
 pylibmc
 django-extensions
 south
