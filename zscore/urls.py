@@ -29,7 +29,8 @@ urlpatterns = [
             'template_name': 'users/logout.html'
     }),
     url(r'^accounts/create/$', users.views.CreateUser.as_view()),
-    url(r'^accounts/profile/$', RedirectView.as_view(url='/mysleep')),
+    url(r'^accounts/profile/$', RedirectView.as_view(url='/mysleep',
+                                                     permanent=False)),
     url(r'^accounts/password/reset/$', auth_views.password_reset, {
             'template_name': 'users/password_reset_form.html',
             'email_template_name': 'users/password_reset_email.html',
