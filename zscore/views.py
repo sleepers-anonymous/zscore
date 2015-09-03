@@ -6,9 +6,6 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from zscore.forms import *
 
-def css(request):
-    return render(request, 'zscore.css')
-
 @login_required
 def emailConfirm(request, sha):
     return render_to_response('activateEmail.html', {"success": request.user.sleeperprofile.activateEmail(sha)}, context_instance=RequestContext(request))
