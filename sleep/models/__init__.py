@@ -984,6 +984,9 @@ class SleeperGroup(models.Model):
             m.delete()
         super(SleeperGroup, self).delete(args, **kwargs)
 
+    def get_absolute_url(self):
+        return "/groups/manage/%s/" % self.id
+
 class Membership(models.Model):
     user=models.ForeignKey(User)
     group=models.ForeignKey(SleeperGroup)

@@ -11,6 +11,8 @@ from django.core import serializers
 from django.db.models import Q
 from django.core.exceptions import *
 from django.utils.timezone import now
+from django.utils.decorators import method_decorator
+from django.views.generic import CreateView
 from django.core.cache import cache
 
 from sleep.models import *
@@ -24,18 +26,23 @@ import csv
 def graph(request):
     return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
 
-@login_required
-def createGroup(request):
-    if request.method == 'POST':
-        form = GroupForm(request.POST)
-        if form.is_valid():
-            g=form.save()
-            m=Membership(user=request.user,group=g,privacy=request.user.sleeperprofile.privacyLoggedIn, role=Membership.ADMIN)
-            m.save()
-            return HttpResponseRedirect('/groups/manage/%s/' % g.id)
-    else:
-        form=GroupForm()
-    return render_to_response('create_group.html', {'form': form}, context_instance=RequestContext(request))
+class CreateGroup(CreateView):
+    model = SleeperGroup
+    template_name = 'create_group.html'
+    fields = ['name', 'privacy', 'description']
+
+    def form_valid(self, form):
+        response = super(CreateGroup, self).form_valid(form)
+        Membership(
+            user=self.request.user,
+            group=form.instance,
+            privacy=self.request.user.sleeperprofile.privacyLoggedIn,
+            role=Membership.ADMIN).save()
+        return response
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(CreateView, self).dispatch(*args, **kwargs)
 
 @login_required
 def acceptInvite(request):

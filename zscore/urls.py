@@ -63,7 +63,7 @@ urlpatterns = [
     url(r'^creep/$', sleep.views.creep),
     url(r'^creep/([^/]*)/$', sleep.views.creep),
     url(r'^groups/$', sleep.views.groups),
-    url(r'^groups/create/$', sleep.views.createGroup),
+    url(r'^groups/create/$', sleep.views.CreateGroup.as_view()),
     url(r'^groups/invite/$', sleep.views.inviteMember),
     url(r'^groups/accept/$', sleep.views.acceptInvite),
     url(r'^groups/membership/$', sleep.views.manageMember),
