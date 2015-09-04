@@ -515,10 +515,7 @@ def createSleep(request):
 def createPartialSleep(request):
     created = PartialSleep.create_new_for_user(request.user)
     if created:
-        if "next" in request.GET:
-            return HttpResponseRedirect(request.GET["next"])
-        else:
-            return HttpResponseRedirect("/")
+        return HttpResponseRedirect("/mysleep/")
     else:
         return HttpResponseBadRequest("")
 
