@@ -1,6 +1,7 @@
 from django import template
 from sleep.models import *
 from django.utils.timezone import now
+from django.utils.html import format_html
 import datetime
 import datetime_utils
 import pytz
@@ -217,8 +218,10 @@ def sleepViewTable(request, **kwargs):
 
 @register.simple_tag
 def displayUser(username):
-    if username != "[redacted]": return '''<a href="/creep/%s/">%s</a>''' % (username , username)
-    else: return username
+    if username != "[redacted]":
+        return format_html('<a href="/creep/{}/">{}</a>', username, username)
+    else:
+        return username
 
 @register.inclusion_tag('inclusion/display_my_group.html')
 def displayMyGroup(group, amMember = 0):
@@ -247,9 +250,11 @@ def displayInvite(invite):
 
 @register.simple_tag
 def displayInvites(user):
-    gi = user.groupinvite_set.filter(accepted=None)
-    if gi: return " <b>(%s)</b>" % gi.count()
-    else: return ""
+    num_invites = user.groupinvite_set.filter(accepted=None).count()
+    if num_invites:
+        return format_html(" <b>({})</b>", num_invites)
+    else:
+        return ""
 
 @register.inclusion_tag('inclusion/display_friend.html')
 def displayFriend(you,them,requested=False):
@@ -267,9 +272,11 @@ def displayFriend(you,them,requested=False):
 
 @register.simple_tag
 def displayFriendRequests(user):
-    fr = user.friendrequest_set.filter(accepted=None)
-    if fr: return " <b>(%s)</b>" % fr.count()
-    else: return ""
+    num_requests = user.friendrequest_set.filter(accepted=None).count()
+    if num_requests:
+        return format_html(" <b>({})</b>", num_requests)
+    else:
+        return ""
 
 @register.filter
 def getScore(statdict, metric):

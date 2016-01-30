@@ -18,7 +18,7 @@ urlpatterns = [
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Admin panel:
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 
     # Login
     url(r'^accounts/login/submit/$', auth_views.login),
@@ -29,8 +29,7 @@ urlpatterns = [
             'template_name': 'users/logout.html'
     }),
     url(r'^accounts/create/$', users.views.CreateUser.as_view()),
-    url(r'^accounts/profile/$', RedirectView.as_view(url='/mysleep',
-                                                     permanent=False)),
+    url(r'^accounts/profile/$', RedirectView.as_view(url='/mysleep')),
     url(r'^accounts/password/reset/$', auth_views.password_reset, {
             'template_name': 'users/password_reset_form.html',
             'email_template_name': 'users/password_reset_email.html',
