@@ -252,11 +252,12 @@ def leaderboard(request,group_id=None):
 
     ss = Sleeper.objects.sorted_sleepers(sortBy=sort_by,user=request.user,group=group)
     top = [ s for s in ss if s['rank'] <= board_size or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
+
     numLeaderboard = len([s for s in ss if s['rank']!='n/a'])
     n = now()
     
     try:
-        recentWinner = Sleeper.objects.bestByTime(start=n-datetime.timedelta(3),end=n,user=request.user,group=group)[0]
+        recent_winner = Sleeper.objects.bestByTime(start=n-datetime.timedelta(3),end=n,user=request.user,group=group)[0]
     except IndexError:
         return HttpResponseBadRequest("Can't load leaderboard if there are no users")
         
@@ -268,12 +269,12 @@ def leaderboard(request,group_id=None):
     context = {
             'group' : group,
             'top' : top,
-            'recentWinner' : recentWinner,
+            'recentWinner' : recent_winner,
             'total' : Sleep.objects.totalSleep(group=group),
             'number' : number,
             'numLeaderboard' : numLeaderboard,
             'leaderboard_valid' : len(ss),
-            'userMetrics' : userMetrics
+            'userMetrics' : user_metrics
             }
     return render_to_response('leaderboard.html',context,context_instance=RequestContext(request))
 
