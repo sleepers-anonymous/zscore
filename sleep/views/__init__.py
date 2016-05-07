@@ -22,6 +22,8 @@ import datetime
 import pytz
 import csv
 
+MAX_LEADERBOARD_SIZE = 10
+
 @login_required
 def graph(request):
     return render_to_response('graph.html', {"user": request.user, "sleeps": request.user.sleep_set.all().order_by('-end_time')}, context_instance=RequestContext(request))
@@ -222,31 +224,42 @@ def manageGroup(request,gid):
         if 'page' not in context and context['requests'].count() > 0: context['page'] = 3
     return render_to_response('manage_group.html',context,context_instance=RequestContext(request))
 
-def leaderboard(request,group=None):
+def leaderboard(request,group_id=None):
     if request.user.is_authenticated():
-        userMetrics = request.user.sleeperprofile.metrics.all()
+        user_metrics = request.user.sleeperprofile.metrics.all()
     else:
-        userMetrics = Metric.objects.filter(show_by_default=True)
-    if 'sort' not in request.GET or request.GET['sort'] not in [m.name for m in userMetrics]:
-        sortBy='zScore'
+        user_metrics = Metric.objects.filter(show_by_default=True)
+
+    if 'sort' not in request.GET or request.GET['sort'] not in [m.name for m in user_metrics]:
+        sort_by = 'zScore'
     else:
-        sortBy=request.GET['sort']
-    if group is None:
-        lbSize=10
+        sort_by = request.GET['sort']
+    
+    if group_id is None:
+        board_size = MAX_LEADERBOARD_SIZE
+        group = None
     else:
-        gs = SleeperGroup.objects.filter(id=group)
-        if gs.count()!=1:
+        try:
+            group = SleeperGroup.objects.get(id=group_id)
+        except SleeperGroup.DoesNotExist:
             raise Http404
-        group = gs[0]
         if request.user not in group.members.all():
             raise PermissionDenied
-        nmembers = group.members.count()
-        lbSize=nmembers if nmembers<4 else min(10,nmembers//2)
-    ss = Sleeper.objects.sorted_sleepers(sortBy=sortBy,user=request.user,group=group)
-    top = [ s for s in ss if s['rank']<=lbSize or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
+        num_members = group.members.count()
+        # don't show bottom half of leaderboard for sufficiently large groups:
+        # we don't want to encourage bad sleep behavior
+        board_size = num_members if num_members < 4 else min(MAX_LEADERBOARD_SIZE, num_members//2)
+
+    ss = Sleeper.objects.sorted_sleepers(sortBy=sort_by,user=request.user,group=group)
+    top = [ s for s in ss if s['rank'] <= board_size or request.user.is_authenticated() and s['user'].pk==request.user.pk ]
     numLeaderboard = len([s for s in ss if s['rank']!='n/a'])
     n = now()
-    recentWinner = Sleeper.objects.bestByTime(start=n-datetime.timedelta(3),end=n,user=request.user,group=group)[0]
+    
+    try:
+        recentWinner = Sleeper.objects.bestByTime(start=n-datetime.timedelta(3),end=n,user=request.user,group=group)[0]
+    except IndexError:
+        return HttpResponseBadRequest("Can't load leaderboard if there are no users")
+        
     if group:
         allUsers = group.members.all()
     else:
