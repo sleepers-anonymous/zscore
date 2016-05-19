@@ -3,19 +3,23 @@ zscore
 
 Sleeping competition app
 
-Installing
-----------
+Dev setup
+---------
 
-First, install the dependencies listed in requirements.txt
+1. `git clone git@github.com:sleepers-anonymous/zscore.git ; cd zscore`
+2. `make deps`
+3. `./manage.py migrate`
+4. `make serve`, then go to `localhost:8000`
 
-Next, follow the usual steps to installing a Django app:
+Deploying
+---------
 
-1. Configure `zscore/local_settings.py`. The easiest way is to just copy over `zscore/local_settings.py.dev`.
-2. Run `./manage.py migrate`
+1. Ask someone for access to the GCP project.
+2. Create a `zscore/secrets.py` file with a `SECRET_KEY` setting (ask someone for the value).
+3. `make deploy`.
 
-If you created an admin account in step 2 above, you'll need to create a `SleeperProfile` for it if you want to log in. Run `./manage.py shell`, and then run:
+To deploy only static assets, `make gcs_deploy`.  To deploy only dynamic files, `make gae_deploy`.
 
-    from sleep.models import Sleeper
-    Sleeper.objects.get(username='the_username').getOrCreateProfile()
+If you screw something up, head over to the [Google Cloud Console](https://console.cloud.google.com/appengine/versions) and move traffic back to the previous version.
 
-At this point, you should be able to run `./manage.py runserver` successfully.
+To run your dev server against the live site, grab the [Cloud SQL proxy](https://cloud.google.com/sql/docs/sql-proxy) and put it on your path in a file called `cloud_sql_proxy`.  Follow the instructions at that link to create a service account for your dev server, and save the key in `.cloud-sql.key`.  Now run `make proxy` to start the proxy, and `PROD_DB=1 ./manage.py shell_plus` to start a shell.
