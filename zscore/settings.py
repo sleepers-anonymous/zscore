@@ -1,17 +1,20 @@
 # Django settings for zscore project.
-
 import os
-# Get the absolute path of the settings.py file's directory
-PWD = os.path.dirname(os.path.realpath(__file__ ))
 
-DEBUG = True
+from secrets import SECRET_KEY
+
+# Get the absolute path of the settings.py file's directory
+BASE_DIR = os.path.dirname(os.path.realpath(__file__ ))
+
+DEBUG = os.environ.get('DEBUG', 'true').lower() in ('1', 'true')
+PROD_DB = os.environ.get('PROD_DB', '').lower() in ('1', 'true')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
         'DIRS': [
-            os.path.join(PWD, "templates"),
+            os.path.join(BASE_DIR, "templates"),
         ],
         'OPTIONS': {
             'context_processors': [
@@ -28,21 +31,12 @@ TEMPLATES = [
     },
 ]
 
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gurtej+zscore',
-        'OPTIONS': {
-            'read_default_file' : os.path.expanduser('~/.my.cnf'),
-        },
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
+ADMINS = os.environ.get('ADMINS', '').split(',')
+MANAGERS = ADMINS
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.4/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['zscoresleep.appspot.com']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -78,18 +72,21 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PWD, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+if DEBUG:
+    STATIC_URL = '/static/'
+else:
+    STATIC_URL = 'https://zscore-static.storage.googleapis.com/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PWD,'staticinclude'),
+    os.path.join(BASE_DIR, 'staticinclude'),
 )
 
 # List of finder classes that know how to find static files in
@@ -99,10 +96,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'fzo&amp;bmsxh4ocm1xld(pe=po#@%xjqnw93_fo3v8h^9q6xt)ko('
-
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -152,10 +145,13 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.redirects.RedirectsPanel',
 )
 
+CACHE_HOST = '%s:%s' % (
+    os.environ.get('MEMCACHE_PORT_11211_TCP_ADDR', 'localhost'),
+    os.environ.get('MEMCACHE_PORT_11211_TCP_PORT', '11211'))
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-        'LOCATION': '127.0.0.1:11211',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': CACHE_HOST,
         'KEY_PREFIX': 'zscore:',
         'TIMEOUT': 86400,
     }
@@ -190,8 +186,28 @@ LOGGING = {
     }
 }
 
-try:
-    from local_settings import *
-except ImportError:
-    pass
 
+# STOPSHIP
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
+if DEBUG and not PROD_DB:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'zscore.sqlite'
+        }
+    }
+else:
+    SQL_ID = 'zscoresleep:us-east1:zscore-sql-1'
+    if DEBUG:
+        socket = '/tmp/cloudsql/%s' % SQL_ID
+    else:
+        socket = '/cloudsql/%s' % SQL_ID
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'zscore',
+            'USER': 'zscore',
+            'HOST': socket,
+        }
+    }

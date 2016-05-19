@@ -1,8 +1,10 @@
 django==1.9.1
-pylibmc
 django-extensions
-psycopg2
-pytz
-numpy
 django-debug-toolbar
 django-debug-toolbar-template-timings
+gunicorn
+ipython
+mysqlclient
+numpy
+python-memcached
+pytz

@@ -1,0 +1,11 @@
+.dockerignore
+Dockerfile
+.git
+.hg
+.svn
+env
+zscore/staticinclude
+zscore/static
+sleep/static
+zscore.sqlite
+.cloud-sql.key
