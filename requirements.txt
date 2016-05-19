@@ -3,8 +3,6 @@ pylibmc
 django-extensions
 psycopg2
 pytz
-python-dateutil
 numpy
-matplotlib
 django-debug-toolbar
 django-debug-toolbar-template-timings

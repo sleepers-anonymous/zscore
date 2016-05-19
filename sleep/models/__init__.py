@@ -11,12 +11,10 @@ from django.dispatch import receiver
 
 import pytz
 import datetime
-import dateutil.parser
 import math
 import itertools
 import hashlib
 import random
-import time
 from operator import add
 import numpy as np
 
@@ -485,14 +483,6 @@ class SleeperProfile(models.Model):
         pytz.timezone(newtz)
         self.timezone = newtz
         self.save()
-
-    def parseTime(self, timestring):
-        """Attempts to return a datetime localized to the user's timezone"""
-        try:
-            unlocalized = dateutil.parser.parse(timestring)
-        except TypeError:
-            raise ValueError, "That is not a valid timestring."
-        return pytz.timezone(self.timezone).localize(unlocalized)
 
     def today(self):
         """Returns a datetime.date object corresponding to the date the user thinks it is"""
