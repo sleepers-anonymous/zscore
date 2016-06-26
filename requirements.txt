@@ -8,3 +8,4 @@ mysqlclient
 numpy
 python-memcached
 pytz
+werkzeug

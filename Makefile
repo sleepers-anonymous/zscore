@@ -12,6 +12,7 @@ proxy:
 
 dev_deps:
 	# TODO(benkraft): separate dev and prod requirements files
+	# TODO(benkraft): ensure we're in a venv
 	pip install -r requirements.txt
 
 deploy_deps:
