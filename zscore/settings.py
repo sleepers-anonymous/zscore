@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [
     'zscore.benkraft.org',
     'zscore.mit.edu',
     'zscoresleep.appspot.com',
+    '127.0.0.1', # App Engine internal stuff uses this
 ]
 
 # Local time zone for this installation. Choices can be found here:
