@@ -8,6 +8,7 @@ deps: dev_deps deploy_deps ;
 proxy:
 	if ! type gcloud >/dev/null ; then \
 		echo "Please install the Cloud SQL proxy from https://cloud.google.com/sql/docs/sql-proxy" ; exit 1 ; fi
+	mkdir -p /tmp/cloudsql
 	cloud_sql_proxy -dir /tmp/cloudsql -instances=zscoresleep:us-east1:zscore-sql-1 -credential_file .cloud-sql.key
 
 dev_deps:
