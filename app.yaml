@@ -1,0 +1,17 @@
+vm: true
+runtime: python
+entrypoint: gunicorn -b :$PORT zscore.wsgi:application
+
+manual_scaling:
+  instances: 1
+
+beta_settings:
+  cloud_sql_instances: zscoresleep:us-east1:zscore-sql-1
+
+env_variables:
+  DEBUG: "false"
+  ADMINS: "zscore-owner@mit.edu"
+
+handlers:
+- url: /.*
+  script: [ignored]

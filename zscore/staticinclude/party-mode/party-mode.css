@@ -1,6 +1,6 @@
 @font-face {
     font-family: "LDFComicSans";
-    src: url('/static/party-mode/LDFComicSans.ttf');
+    src: url('LDFComicSans.ttf');
 }
 
 body, p, a {

@@ -1,17 +1,20 @@
 # Django settings for zscore project.
-
 import os
-# Get the absolute path of the settings.py file's directory
-PWD = os.path.dirname(os.path.realpath(__file__ ))
 
-DEBUG = True
+from secrets import SECRET_KEY
+
+# Get the absolute path of the settings.py file's directory
+BASE_DIR = os.path.dirname(os.path.realpath(__file__ ))
+
+DEBUG = os.environ.get('DEBUG', 'true').lower() in ('1', 'true')
+PROD_DB = os.environ.get('PROD_DB', '').lower() in ('1', 'true')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
         'DIRS': [
-            os.path.join(PWD, "templates"),
+            os.path.join(BASE_DIR, "templates"),
         ],
         'OPTIONS': {
             'context_processors': [
@@ -28,21 +31,17 @@ TEMPLATES = [
     },
 ]
 
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gurtej+zscore',
-        'OPTIONS': {
-            'read_default_file' : os.path.expanduser('~/.my.cnf'),
-        },
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
+ADMINS = os.environ.get('ADMINS', '').split(',')
+MANAGERS = ADMINS
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.4/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = [
+    'zscore.benkraft.org',
+    'zscore.mit.edu',
+    'zscoresleep.appspot.com',
+    '127.0.0.1', # App Engine internal stuff uses this
+]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -53,8 +52,6 @@ TIME_ZONE = 'America/New_York'
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
-
-SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -80,18 +77,21 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PWD, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+if DEBUG:
+    STATIC_URL = '/static/'
+else:
+    STATIC_URL = 'https://zscore-static.storage.googleapis.com/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PWD,'staticinclude'),
+    os.path.join(BASE_DIR, 'staticinclude'),
 )
 
 # List of finder classes that know how to find static files in
@@ -101,10 +101,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'fzo&amp;bmsxh4ocm1xld(pe=po#@%xjqnw93_fo3v8h^9q6xt)ko('
-
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -127,7 +123,6 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
@@ -155,10 +150,13 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.redirects.RedirectsPanel',
 )
 
+CACHE_HOST = '%s:%s' % (
+    os.environ.get('MEMCACHE_PORT_11211_TCP_ADDR', 'localhost'),
+    os.environ.get('MEMCACHE_PORT_11211_TCP_PORT', '11211'))
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-        'LOCATION': '127.0.0.1:11211',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': CACHE_HOST,
         'KEY_PREFIX': 'zscore:',
         'TIMEOUT': 86400,
     }
@@ -171,7 +169,7 @@ CACHES = {
 # more details on how to customize your logging configuration.
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -182,19 +180,44 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console': {
+            'level': 'INFO',
+            'filters': [],
+            'class': 'logging.StreamHandler'
+        },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+        'django': {
+            'handlers': ['mail_admins', 'console'],
+            'level': 'INFO',
             'propagate': True,
         },
-    }
+    },
 }
 
-try:
-    from local_settings import *
-except ImportError:
-    pass
 
+# STOPSHIP
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
+if DEBUG and not PROD_DB:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'zscore.sqlite'
+        }
+    }
+else:
+    SQL_ID = 'zscoresleep:us-east1:zscore-sql-1'
+    if DEBUG:
+        socket = '/tmp/cloudsql/%s' % SQL_ID
+    else:
+        socket = '/cloudsql/%s' % SQL_ID
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'zscore',
+            'USER': 'zscore',
+            'HOST': socket,
+        }
+    }
