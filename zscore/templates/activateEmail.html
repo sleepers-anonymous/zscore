@@ -1,9 +1,0 @@
-{% extends "frame.html" %}
-
-{% block content %}
-{% if success %}
-<p>Your email has been activated. Welcome to the borg.</p>
-{% else %}
-<p>Hum. Something strange appears to have happened. Try <a href="/accounts/editemail/">sending another activation email?</a></p>
-{% endif %}
-{% endblock %}

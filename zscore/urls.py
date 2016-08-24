@@ -45,9 +45,6 @@ urlpatterns = [
     url(r'^accounts/password/done/$', auth_views.password_reset_complete, {
             'template_name': 'users/password_reset_complete.html'
     }),
-    url(r'^accounts/emailconfirm/([0-9A-Za-z]+)/', zscore.views.emailConfirm),
-    url(r'^accounts/editemail/', zscore.views.editEmail),
-    url(r'^accounts/editemail/success/', zscore.views.editEmail, {'success': True}),
 
     # Pages
     url(r'^leaderboard/$', sleep.views.leaderboard),

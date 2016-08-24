@@ -33,7 +33,6 @@ class SleeperProfileAdmin(admin.ModelAdmin):
         ('Privacy Settings', {'fields' : [ 'privacy', 'privacyLoggedIn', 'privacyFriends', 'autoAcceptGroups']}),
         ('Customizations', {'fields' : ['punchInDelay','useGravatar','use12HourTime']}),
         ('Ideal Settings', {'fields' : ['idealSleep','idealSleepTimeWeekday', 'idealSleepTimeWeekend','idealWakeupWeekday','idealWakeupWeekend']}),
-        ('Email Settings', {'fields' : ['emailreminders','emailTime','emailActivated']})
         ]
     list_display = ['user']
     ordering = ('user',)

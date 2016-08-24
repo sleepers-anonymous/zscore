@@ -351,13 +351,6 @@ class SleeperProfile(models.Model):
     #----------------------------------------Metrics to show--------------------------
     metrics = models.ManyToManyField(Metric, blank=True)
 
-    #---------------------------Related to emails ---------------------------
-    emailreminders = models.BooleanField(default=False)
-    emailSHA1 =  models.CharField(max_length=50, blank=True)
-    emailSHA1GenerationDate = models.DateTimeField(default=now)
-    emailActivated = models.BooleanField(default=False)
-    emailTime = models.TimeField(default = datetime.time(12), verbose_name="Reminder email time")
-
     #---------------------------User customification -------------------------
     useGravatar = models.BooleanField(default=True)
     isPro = models.BooleanField(default=False)
@@ -390,37 +383,6 @@ class SleeperProfile(models.Model):
         cache.delete('getPermissions:')
         expireTemplateCache('header',self.user.username)
         super(SleeperProfile, self).save(*args,**kwargs)
-
-    def activateEmail(self, sha):
-        """Activates the user's email address. Returns True on success and False on failure"""
-        if now() - self.emailSHA1GenerationDate < datetime.timedelta(7): #if I generated this key less than a week ago....
-            if sha == self.emailSHA1:
-                self.emailActivated = True
-                self.emailSHA1 = ''
-                self.save()
-                return True
-        return False
-
-    def genEmailSha(self, newemail = None, overrideTimeConstraint = False):
-        """Generates a new email SHA and emails it to the user. Returns True on success and False on failure"""
-        if not(overrideTimeConstraint) and (now() - self.emailSHA1GenerationDate < datetime.timedelta(hours=1)): return False
-        user_hash = hashlib.sha1(self.user.username).hexdigest()[:10]
-        random_salt = hashlib.sha1(str(random.random())).hexdigest()
-        sha = hashlib.sha1(random_salt + user_hash).hexdigest()
-        self.emailSHA1 = sha
-        self.emailSHA1GenerationDate = now()
-        self.emailActivated = False
-        self.save()
-        if newemail != None:
-            self.user.email = newemail
-            self.user.save()
-        text = "<html> Hi " + self.user.username + "! <br /><br />"
-        text += "Click on the following link in order to activate your email! <br /><br />"
-        text += "<a href='http://zscore.mit.edu/accounts/emailconfirm/" + sha + "/'>http://zscore.mit.edu/accounts/emailconfirm/" + sha +"</a></html>"
-        msg = EmailMultiAlternatives("zScore email activation", "", "zscore.noreply@gmail.com", [self.user.email])
-        msg.attach_alternative(text, "text/html")
-        msg.send()
-        return True
 
     def getFloatIdealSleep(self):
         """Retunes idealSleep as a float"""
