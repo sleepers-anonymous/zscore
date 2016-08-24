@@ -31,7 +31,7 @@ class SleeperProfileAdmin(admin.ModelAdmin):
         (None, {'fields' : ['user','timezone','metrics']}),
         ('Friends', {'fields' : ['friends','follows']}),
         ('Privacy Settings', {'fields' : [ 'privacy', 'privacyLoggedIn', 'privacyFriends', 'autoAcceptGroups']}),
-        ('Customizations', {'fields' : ['punchInDelay','useGravatar','moreMetrics', 'use12HourTime', 'mobile']}),
+        ('Customizations', {'fields' : ['punchInDelay','useGravatar','use12HourTime']}),
         ('Ideal Settings', {'fields' : ['idealSleep','idealSleepTimeWeekday', 'idealSleepTimeWeekend','idealWakeupWeekday','idealWakeupWeekend']}),
         ('Email Settings', {'fields' : ['emailreminders','emailTime','emailActivated']})
         ]

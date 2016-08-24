@@ -166,11 +166,6 @@ class PartialSleep(models.Model):
         tz = pytz.timezone(self.timezone)
         return self.start_time.astimezone(tz)
 
-    def gen_potential_wakeup(self):
-        d = self.user.sleeperprofile.getPunchInDelay()
-        s = self.start_local_time()
-        return [s + d + (i*datetime.timedelta(hours=1.5)) for i in xrange(1,6)]
-
     @classmethod
     def create_new_for_user(cls, user):
         prof = user.sleeperprofile
@@ -261,14 +256,6 @@ class Sleep(models.Model):
     def getSleepTZ(self):
         """Returns the timezone as a timezone object"""
         return pytz.timezone(self.timezone)
-
-    def updateTZ(self,tzname):
-        """Updates the timezone while keeping the local time the same.  Intended for use from the shell; use at your own risk."""
-        newtz = pytz.timezone(tzname)
-        self.start_time = newtz.localize(self.start_local_time().replace(tzinfo=None))
-        self.end_time = newtz.localize(self.end_local_time().replace(tzinfo=None))
-        self.timezone = tzname #we have to make sure to do this last!
-        self.save()
 
     def getTZShortName(self):
         """Gets the short of a time zone"""
@@ -364,28 +351,6 @@ class SleeperProfile(models.Model):
     #----------------------------------------Metrics to show--------------------------
     metrics = models.ManyToManyField(Metric, blank=True)
 
-    #----------------------------------------Mobile settings--------------------------
-    FORCE_MOBILE = 2
-    DETECT_MOBILE = 1
-    FORCE_NONMOBILE = 0
-    MOBILE_CHOICES = (
-            (FORCE_NONMOBILE, "Force Nonmobile"),
-            (DETECT_MOBILE, "Detect Mobile"),
-            (FORCE_MOBILE, "Force Mobile"),
-            )
-
-    mobile = models.SmallIntegerField(choices=MOBILE_CHOICES, default=DETECT_MOBILE, verbose_name="Use mobile interface?")
-
-    #---------------------------------------Night or Day?----------------------------
-    ALWAYS_DAY = 0
-    AUTODAY_NIGHT = 1
-    ALWAYS_NIGHT = 2
-    DAY_NIGHT_CHOICES = (
-            (ALWAYS_DAY, "Always Day"),
-            (AUTODAY_NIGHT, "Auto"),
-            (ALWAYS_NIGHT, "Always Night"),
-            )
-
     #---------------------------Related to emails ---------------------------
     emailreminders = models.BooleanField(default=False)
     emailSHA1 =  models.CharField(max_length=50, blank=True)
@@ -395,7 +360,6 @@ class SleeperProfile(models.Model):
 
     #---------------------------User customification -------------------------
     useGravatar = models.BooleanField(default=True)
-    moreMetrics = models.BooleanField(default=True)
     isPro = models.BooleanField(default=False)
 
     #---------------------------Timezones------------------------------------
@@ -458,10 +422,6 @@ class SleeperProfile(models.Model):
         msg.send()
         return True
 
-    def getIdealSleep(self):
-        """Returns idealSleep as a timedelta"""
-        return datetime.timedelta(hours=float(self.idealSleep))
-
     def getFloatIdealSleep(self):
         """Retunes idealSleep as a float"""
         return float(self.idealSleep)
@@ -473,13 +433,6 @@ class SleeperProfile(models.Model):
     def getUserTZ(self):
         """Returns user timezone as a timezone object"""
         return pytz.timezone(self.timezone)
-
-
-    def setTZ(self, newtz):
-        """Changes time zone if possible. Raises UnknownTimeZoneError if invalid timezone given"""
-        pytz.timezone(newtz)
-        self.timezone = newtz
-        self.save()
 
     def today(self):
         """Returns a datetime.date object corresponding to the date the user thinks it is"""
@@ -503,27 +456,6 @@ class SleeperProfile(models.Model):
         if today_interval[0] <= n <= today_interval[1]: return True
         tomorrow_interval = self.getIdealSleepInterval(today + datetime.timedelta(1))
         if tomorrow_interval[0] <= n <= tomorrow_interval[1]: return True
-        return False
-
-    def isMobile(self, request):
-        """Returns whether or not we should be assuming mobile or not"""
-        if self.mobile == 2: return True
-        if self.mobile == 0: return False
-
-        #Mostly taken from https://github.com/gregmuellegger/django-mobile/blob/master/django_mobile/middleware.py
-        #I didn't just use that code b/c I didn't want it to be middleware
-
-        if request.META.has_key('HTTP_USER_AGENT'):
-            userAgent = request.META["HTTP_USER_AGENT"]
-            #Test for common mobile values first:
-            if utils.userAgentsTestSearchRegex.search(userAgent) and not utils.userAgentsExceptionSearchRegex.search(userAgent): return True
-            #Nokia is apparently a special snowflake, according to the folks who developed django-mobile
-            if request.META.has_key('HTTP_ACCEPT'):
-                httpAccept = request.META["HTTP_ACCEPT"]
-                if utils.httpAcceptRegex.search(httpAccept): return True
-            #Now test from the larger list
-            if utils.userAgentsTestMatchRegex.match(userAgent): return True
-
         return False
 
     def getSimplePermissions(self, otherUser):
@@ -683,10 +615,6 @@ class Sleeper(User):
 
     objects = SleeperManager()
 
-    def getOrCreateProfile(self):
-        print "You probably don't actually want this method, User.sleeperprofile should work just fine."
-        return SleeperProfile.objects.get_or_create(user=self)[0]
-
     def timeSleptByDate(self,start=datetime.date.min,end=datetime.date.max):
         sleeps = self.sleep_set.filter(date__gte=start,date__lte=end)
         return sum([s.end_time-s.start_time for s in sleeps],datetime.timedelta(0))
@@ -803,14 +731,8 @@ class Sleeper(User):
         else:
             return None
 
-    def goToSleepTime(self, date=datetime.date.today(), stdev = False):
-        return self.sleepWakeTime('start',date,date, stdev=stdev)
-
     def avgGoToSleepTime(self, start = datetime.date.min, end=datetime.date.max, stdev = False):
         return self.sleepWakeTime('start',start,end, stdev = stdev)
-
-    def wakeUpTime(self, date=datetime.date.today(), stdev = False):
-        return self.sleepWakeTime('end',date,date, stdev = stdev)
 
     def avgWakeUpTime(self, start = datetime.date.min, end=datetime.date.max, stdev = False):
         return self.sleepWakeTime('end',start,end, stdev = stdev)

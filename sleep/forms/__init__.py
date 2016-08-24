@@ -25,7 +25,7 @@ class SleeperProfileForm(forms.ModelForm):
     class Meta:
         model = SleeperProfile
         fields = ['privacy','privacyLoggedIn','privacyFriends', 'partyMode', 'use12HourTime', 'idealSleep', 'timezone', 'useGravatar', 'autoAcceptGroups',
-                'idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekday', 'idealSleepTimeWeekend', 'mobile', 'punchInDelay', 'metrics']
+                'idealWakeupWeekend', 'idealWakeupWeekday', 'idealSleepTimeWeekday', 'idealSleepTimeWeekend', 'punchInDelay', 'metrics']
 
         widgets = {'metrics': CheckboxSelectMultipleULAttrs(ulattrs={'class':'checkboxselectmultiple'})}
 
