@@ -129,7 +129,6 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'sleep',
     'cache',
-    'sheeple',
     'django_extensions',
     'debug_toolbar',
     'template_timings_panel',

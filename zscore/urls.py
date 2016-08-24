@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 import users.views
 import zscore.views
 import sleep.views
-import sheeple.views
 
 urlpatterns = [
     # Examples:
@@ -90,5 +89,4 @@ urlpatterns = [
     url(r'^faq/$', TemplateView.as_view(template_name='faq.html')),
     url(r'^privacy/$', TemplateView.as_view(template_name='privacy.html')),
     url(r'^sleep/export/$', sleep.views.exportSleeps),
-    url(r'^sheeple/$', sheeple.views.sheeple),
 ]
