@@ -3,18 +3,11 @@
   <link rel="stylesheet" type="text/css" href="{% static 'sleep/sleep_entry.css' %}" />
   <link rel="stylesheet" type="text/css" href="{% static 'util/common.css' %}" />
 {% else %}
-<script type="text/javascript">
-	// Set some parameters on the server side
-	// (Nothing here for now)
-</script>
-
 <script type="text/javascript" src={% static 'sleep/sleep_entry.js' %}></script>
 
 
 <div class="sleep-grid">
     <p>Highlight the times you slept in the grid below to fill in your sleeps. Use the popup that follows to tweak times or modify the day you want to associate your sleep with. This feature is still in development, and is likely somewhat buggy right now.  Alternately, try the <strike>boring</strike> <a href="/sleep/simple/">simple</a> version.  To enter an all-nighter, click on the date in the grid.  If you do not enter data, it will not be counted against you.</p>
-
-    <p>We've moved to a new server, now on <a href="http://zscore.mit.edu/">zscore.mit.edu</a>!  Please update your bookmarks and such.</p>
 </div>
 
 <div id="confirm-sleep-entry" style="display:none" title="Confirm Sleep Entry">
