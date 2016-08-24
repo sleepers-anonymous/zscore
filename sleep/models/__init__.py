@@ -319,9 +319,6 @@ class Allnighter(models.Model):
         cache.delete('sorted_sleepers:')
         super(Allnighter, self).save(*args,**kwargs)
 
-class SchoolOrWorkPlace(models.Model):
-    name = models.CharField(max_length=255)
-
 class SleeperProfile(models.Model):
     user = models.OneToOneField(User)
     # all other fields should have a default
