@@ -11,7 +11,6 @@
 		{% if wakeup %}  In the last week, you woke up at {{wakeup}} on average{% if wakeup_dev %} (stdev {{wakeup_dev|printHHMM}}){% endif %}{% if sleeptime %} and went to sleep at {{sleeptime}}{% if sleeptime_dev %} (stdev {{sleeptime_dev|printHHMM}}){% endif %}.{%endif%}<br />
 		{%else%} {%if sleeptime %} In the last week, you went to sleep at {{sleeptime}} on average{% if sleeptime_dev %} (stdev {{sleeptime_dev|printHHMM}}){%endif%}{%endif%}{% endif  %}</p>
     {% sleepStatsTable request.user %}
-    {% fourierStats request.user 30 %}
     <br/>
     {% graphPerDay request.user 14 %}
     <br/>

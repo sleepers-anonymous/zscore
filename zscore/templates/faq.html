@@ -27,7 +27,4 @@ Another way of accounting for consistent sleep is to have some sort of diminishi
 
 <a name="time"></a><p><i>Q: Over what time period are the stats computed?  And what's this exponentially decaying thing?</i></p>
 <p>A: The exponentially decaying average is a weighted average over all time, where the sleep from <i>n</i> days ago has a weight of 2<sup>-<i>n</i>/4</sup>, i.e., the weights have a half-life of 4 days.  This counts all sleep, but counts recent sleep (the last week or so) for the most.  We also compute averages over all time ("global") and over the last 7 days ("weekly").  The leaderboard uses the exponentially decaying average.</p>
-
-<a name="fourier"></a><p><i>Q: What's this Fourier business?</i></p>
-<p>A: It measures the periodic components of your sleep.  For example, if your highest Fourier mode has a period of 2 and a weight of 3:00, that means that the biggest periodic component of your sleep is, approximately, that you alternate between sleeping 3 hours more than average and sleeping 3 hours less than average.  Similarly, if you see lots of Fourier modes at around 7 days, that means you have weekly patterns in your sleep.  Note: there's some slightly sketchy math here; blame <a href="/creep/face/">face</a> if you think it's wrong, or send us a better formula.</p>
 {% endblock %}

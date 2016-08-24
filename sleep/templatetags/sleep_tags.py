@@ -73,44 +73,6 @@ def sleepStatsTable(user):
     }
     return context
 
-@register.inclusion_tag('inclusion/fourier_stats.html')
-def fourierStats(user,length=None):
-    sleeper = Sleeper.objects.get(pk=user.pk)
-    no = now()
-    if length is None:
-        start=datetime.date.min
-        end=datetime.date.max
-        sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
-        sleepPerDayAlways = sleepPerDay
-    else:
-        start=no-datetime.timedelta(length)
-        end=no
-        sleepPerDay = sleeper.sleepPerDay(start=start,end=end,includeMissing=True)
-        sleepPerDayAlways = sleeper.sleepPerDay(start=datetime.datetime.min,end=datetime.datetime.max,includeMissing=True)
-    # weights = [2**(-n/4.0) for n in range(-len(sleepPerDay)+1,1)]
-    n = len(sleepPerDay)
-    if n>3:
-        sleepPerDayNoMissing = [x for x in sleepPerDay if x is not None]
-        avg = sum(sleepPerDayNoMissing)/len(sleepPerDayNoMissing)
-        # ft = [datetime.timedelta(0,abs(sum(cmath.exp(2j*math.pi*i/period)*w*s for (i,w,s) in zip(range(len(sleepPerDay)),weights,sleepPerDay)))/sum(weights)) for period in range(2,len(sleepPerDay)+1)]
-        # ft = [datetime.timedelta(0,abs(m)/len(sleepPerDay)) for m in rfft(sleepPerDay)]
-        deviations = [s-avg if s is not None else 0 for s in sleepPerDay]
-        deviationsAlways = [s-avg if s is not None else 0 for s in sleepPerDayAlways]
-        autocorrel = numpy.correlate(deviationsAlways,deviations,"full")
-        # now remove the 0-day and 1-day modes, and normalize by the 0-day correlation
-        autocorrel = [a/autocorrel[-n] for i, a in enumerate(autocorrel[-n+2:-n*0.2])]
-        topModes = reversed(list(numpy.argsort(autocorrel)))
-        # topModesPacked = [{'length' : len(sleepPerDay)/(i+1.), 'size': ft[i+1]} for i in topModes]
-        # note: indices should start at 2
-        topModesPacked = [{'length' : i+2, 'size': autocorrel[i]} for i in topModes]
-        context = {
-                'ft' : autocorrel,
-                'topModes' : topModesPacked,
-                }
-    else:
-        context = {}
-    return context
-
 @register.inclusion_tag('inclusion/sleep_list.html', takes_context=True)
 def sleepListView(context, renderContent='html'):
     user = context['request'].user
