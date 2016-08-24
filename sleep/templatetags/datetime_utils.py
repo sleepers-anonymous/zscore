@@ -33,11 +33,6 @@ def printDHHMM(value):
         return "%s%d days, %d:%02d" % (sign,d,h,m)
     return "%s%d:%02d" % (sign,h,m)
 
-@register.filter(name='printDHM')
-def printDHM(value):
-    '''takes a datetime.timedelta and prints it as D day(s), H hour(s), and M minute(s)'''
-    return printYDHM(value,False)
-
 @register.filter(name='printYDHM')
 def printYDHM(value,useYear=True):
     '''takes a datetime.timedelta and prints it as Y year(s), D day(s), H hour(s), and M minute(s)'''
