@@ -49,7 +49,7 @@ class MembershipInline(admin.TabularInline):
     model = Membership
 
 class SleeperGroupAdmin(admin.ModelAdmin):
-    fields = ['name', 'description', 'privacy', 'defunctMembers']
+    fields = ['name', 'description', 'privacy']
     list_display = ('name', 'description','privacy')
     inlines = [MembershipInline]
     search_fields = ['name','description']
