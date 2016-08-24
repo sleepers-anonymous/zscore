@@ -211,7 +211,6 @@ class Sleep(models.Model):
     comments = models.TextField(blank=True)
     date = models.DateField()
     timezone = models.CharField(max_length=255, choices = TIMEZONES, default=settings.TIME_ZONE)
-    sleepcycles = models.SmallIntegerField()
 
     quality = models.SmallIntegerField(choices=((0,"0 - awful"), (1,"1"),(2,"2"),(3,"3 - meh"),(4,"4"),(5,"5 - awesome")),default=4)
 
@@ -262,8 +261,6 @@ class Sleep(models.Model):
         return self.end_local_time().tzname()
 
     def save(self, *args, **kwargs):
-        seconds = self.length().total_seconds()
-        self.sleepcycles = seconds//5400
         cache.delete('movingStats:%s' % self.user_id)
         cache.delete('decayStats:%s' % self.user_id)
         cache.delete('bestByTime:')

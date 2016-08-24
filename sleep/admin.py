@@ -19,7 +19,7 @@ class SleepAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields' : ['user']}),
         ('Date/Time info', {'fields' : ['date', 'start_time', 'end_time','timezone']}),
-        ('Other', {'fields' : ['comments','quality','sleepcycles']})
+        ('Other', {'fields' : ['comments','quality']})
          ]
     list_display = ('user', 'start_local_time', 'end_local_time','comments')
     list_filter = ('user','end_time')
