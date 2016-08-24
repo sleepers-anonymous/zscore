@@ -14,12 +14,9 @@ import datetime
 import math
 import itertools
 import hashlib
-import random
-from operator import add
 import numpy as np
 
 from zscore import settings
-from sleep import utils
 from cache.decorators import cache_function
 from cache.utils import authStatus, expireTemplateCache
 
@@ -91,7 +88,6 @@ class SleepManager(models.Manager):
             raise ValueError, "Can't compute sleepTimes with both a user and a group."
         atTime = [0] * (24 * 60 / res)
         for sleep in sleeps:
-            tz = pytz.timezone(sleep.timezone)
             startLocal = sleep.start_local_time()
             endLocal = sleep.end_local_time()
             startDate = startLocal.date()
@@ -214,25 +210,12 @@ class Sleep(models.Model):
 
     quality = models.SmallIntegerField(choices=((0,"0 - awful"), (1,"1"),(2,"2"),(3,"3 - meh"),(4,"4"),(5,"5 - awesome")),default=4)
 
-    active = models.BooleanField(default=True)
-
     def __unicode__(self):
         tformat = "%I:%M %p %x" if self.user.sleeperprofile.use12HourTime else "%H:%M %x"
         return "Sleep from %s to %s (%s)" % (self.start_local_time().strftime(tformat),self.end_local_time().strftime(tformat), self.getTZShortName())
 
     def length(self):
         return self.end_time - self.start_time
-
-    def score(self, nightValue = 1.0):
-        p = self.user.sleeperprofile
-        length = self.length().total_seconds()
-        tz = self.getSleepTZ()
-        idealToday = p.getIdealSleepInterval(self.date, tz)
-        idealYesterday = p.getIdealSleepInterval(self.date - datetime.timedelta(1), tz)
-        idealTomorrow = p.getIdealSleepInterval(self.date + datetime.timedelta(1), tz)
-        inIdeal = reduce(add, [utils.overlap((self.start_time, self.end_time), i) for i in [idealToday, idealYesterday, idealTomorrow]], datetime.timedelta(0)).total_seconds()
-        score = nightValue*inIdeal + length - inIdeal
-        return datetime.timedelta(seconds=score)
 
     def validate_unique(self, exclude=None):
         # If things are missing due to validation errors, we don't need to
