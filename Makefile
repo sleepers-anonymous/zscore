@@ -31,4 +31,4 @@ gae_deploy: deploy_deps
 	# TODO(benkraft): actually check that it has the right values.
 	if ! [ -f zscore/secrets.py ] ; then \
 		echo "Please create a zscore/secrets.py with a SECRET_KEY setting." ; exit 1 ; fi
-	gcloud preview app deploy --promote --stop-previous-version --project zscoresleep
+	gcloud app deploy --promote --stop-previous-version --project zscoresleep
