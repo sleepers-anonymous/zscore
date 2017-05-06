@@ -19,7 +19,7 @@ dev_deps:
 deploy_deps:
 	if ! type gcloud >/dev/null ; then \
 		echo "Please install gcloud from https://cloud.google.com/sdk/" ; exit 1 ; fi
-	if ! gcloud components update 2>/dev/null ; then \
+	if ! yes | gcloud components update 2>/dev/null ; then \
 		echo "updates failed, try running 'gcloud components update' manually" ; exit 1 ; fi
 	type gsutil >/dev/null || gcloud components install gsutil
 

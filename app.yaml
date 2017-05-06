@@ -5,6 +5,11 @@ entrypoint: gunicorn -b :$PORT zscore.wsgi:application
 manual_scaling:
   instances: 1
 
+resources:
+  cpu: .5
+  memory_gb: .18
+  disk_size_gb: 10
+
 beta_settings:
   cloud_sql_instances: zscoresleep:us-east1:zscore-sql-1
 
