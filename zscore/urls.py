@@ -5,7 +5,6 @@ from django.views.generic.base import TemplateView, RedirectView
 from django.contrib.auth.decorators import login_required
 
 import users.views
-import zscore.views
 import sleep.views
 
 urlpatterns = [
