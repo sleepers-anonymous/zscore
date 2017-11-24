@@ -2,10 +2,4 @@ django==1.9.1
 django-extensions
 django-debug-toolbar
 django-debug-toolbar-template-timings
-gunicorn
-ipython
-mysqlclient
-numpy
-python-memcached
 pytz
-werkzeug

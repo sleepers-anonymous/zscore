@@ -14,7 +14,7 @@ proxy:
 dev_deps:
 	# TODO(benkraft): separate dev and prod requirements files
 	# TODO(benkraft): ensure we're in a venv
-	pip install -r requirements.txt
+	pip install -r requirements.txt -r requirements.dev.txt
 
 deploy_deps:
 	if ! type gcloud >/dev/null ; then \
@@ -31,4 +31,5 @@ gae_deploy: deploy_deps
 	# TODO(benkraft): actually check that it has the right values.
 	if ! [ -f zscore/secrets.py ] ; then \
 		echo "Please create a zscore/secrets.py with a SECRET_KEY setting." ; exit 1 ; fi
+	pip install -t lib -r requirements.txt
 	gcloud app deploy --promote --stop-previous-version --project zscoresleep

@@ -13,15 +13,12 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
-import os,sys
+import os, sys
 
 path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if path not in sys.path:
-    sys.path.append(path)
-
-path = '/usr/share/myapplication'
-if path not in sys.path:
-    sys.path.append(path)
+sys.path.insert(0, path)
+path = os.path.join(path, 'lib')
+sys.path.insert(0, path)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "zscore.settings")
 

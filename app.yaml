@@ -1,17 +1,18 @@
-vm: true
-runtime: python
-entrypoint: gunicorn -b :$PORT zscore.wsgi:application
+runtime: python27
+api_version: 1
+threadsafe: true
 
 manual_scaling:
   instances: 1
 
-resources:
-  cpu: .5
-  memory_gb: .18
-  disk_size_gb: 10
-
 beta_settings:
   cloud_sql_instances: zscoresleep:us-east1:zscore-sql-1
+
+libraries:
+- name: MySQLdb
+  version: "1.2.5"
+- name: numpy
+  version: "1.6.1"
 
 env_variables:
   DEBUG: "false"
@@ -19,4 +20,4 @@ env_variables:
 
 handlers:
 - url: /.*
-  script: [ignored]
+  script: zscore.wsgi.application

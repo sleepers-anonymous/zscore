@@ -3,6 +3,7 @@
 *.pyc
 *~
 env/
+lib/
 /zscore/static
 zscore.sqlite
 .cloud-sql.key

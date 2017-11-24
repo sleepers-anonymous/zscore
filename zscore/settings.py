@@ -36,12 +36,9 @@ MANAGERS = ADMINS
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.4/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = [
-    'zscore.benkraft.org',
-    'zscore.mit.edu',
-    'zscoresleep.appspot.com',
-    '127.0.0.1', # App Engine internal stuff uses this
-]
+# Disabled because app engine covers us here, and sends many different
+# potential hostnames, which are lies anyway.
+ALLOWED_HOSTS = ['*']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -149,17 +146,14 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.redirects.RedirectsPanel',
 )
 
-CACHE_HOST = '%s:%s' % (
-    os.environ.get('MEMCACHE_PORT_11211_TCP_ADDR', 'localhost'),
-    os.environ.get('MEMCACHE_PORT_11211_TCP_PORT', '11211'))
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': CACHE_HOST,
-        'KEY_PREFIX': 'zscore:',
-        'TIMEOUT': 86400,
+if not DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'util.memcache_backend.GAEMemcacheBackend',
+            'KEY_PREFIX': 'zscore:',
+            'TIMEOUT': 86400,
+        }
     }
-}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -196,7 +190,7 @@ LOGGING = {
 }
 
 
-# STOPSHIP
+# TODO(benkraft): make email work
 EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 if DEBUG and not PROD_DB:
@@ -217,6 +211,7 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'zscore',
             'USER': 'zscore',
+            # TODO(benkraft): Do we need a password?
             'HOST': socket,
         }
     }

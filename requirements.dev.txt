@@ -1,0 +1,4 @@
+ipython
+mysql-python==1.2.5
+numpy==1.6.1
+werkzeug
