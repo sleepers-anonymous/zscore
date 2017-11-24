@@ -1,7 +1,7 @@
 zscore
 ======
 
-A sleeping competition app, at [zscore.mit.edu](https://zscore.mit.edu).
+A sleeping competition app, at [zscore.benkraft.org](https://zscore.benkraft.org).
 
 Dev setup
 ---------
