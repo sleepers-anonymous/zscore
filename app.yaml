@@ -21,3 +21,4 @@ env_variables:
 handlers:
 - url: /.*
   script: zscore.wsgi.application
+  secure: always
