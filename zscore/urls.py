@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic.base import TemplateView, RedirectView
@@ -31,7 +32,8 @@ urlpatterns = [
     url(r'^accounts/password/reset/$', auth_views.password_reset, {
             'template_name': 'users/password_reset_form.html',
             'email_template_name': 'users/password_reset_email.html',
-            'post_reset_redirect': '/accounts/password/reset/done/'
+            'post_reset_redirect': '/accounts/password/reset/done/',
+            'from_email': settings.SERVER_EMAIL,
     }),
     url(r'^accounts/password/reset/done/$', auth_views.password_reset_done, {
             'template_name': 'users/password_reset_done.html',

@@ -190,8 +190,11 @@ LOGGING = {
 }
 
 
-# TODO(benkraft): make email work
-EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+SERVER_EMAIL = 'noreply@zscoresleep.appspotmail.com'
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'util.mail_backend.GAEMailBackend'
 
 if DEBUG and not PROD_DB:
     DATABASES = {
