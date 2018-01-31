@@ -2,9 +2,6 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
-manual_scaling:
-  instances: 1
-
 beta_settings:
   cloud_sql_instances: zscoresleep:us-east1:zscore-sql-1
 
